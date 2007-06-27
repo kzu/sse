@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6634F9B2-94CB-4D65-8AD7-E38D6F503057}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Mvp.Xml.Synchronization.Tests</RootNamespace>
-    <AssemblyName>Mvp.Xml.Synchronization.Tests</AssemblyName>
+    <RootNamespace>SimpleSharing.Tests</RootNamespace>
+    <AssemblyName>SimpleSharing.Tests</AssemblyName>
     <WarningLevel>4</WarningLevel>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <SccProjectName>SAK</SccProjectName>
