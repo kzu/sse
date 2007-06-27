@@ -7,8 +7,8 @@
     <ProjectGuid>{5A747B6C-D230-4D59-9321-83B48C4553CF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mvp.Xml.Synchronization</RootNamespace>
-    <AssemblyName>Mvp.Xml.Synchronization</AssemblyName>
+    <RootNamespace>SimpleSharing</RootNamespace>
+    <AssemblyName>SimpleSharing</AssemblyName>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
