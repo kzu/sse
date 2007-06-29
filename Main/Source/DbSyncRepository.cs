@@ -5,36 +5,45 @@ using System.Data.Common;
 using System.Data;
 using System.IO;
 using System.Xml;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 
 namespace SimpleSharing
 {
-	public class DbSyncRepository : ISyncRepository
+	public class DbSyncRepository : DbRepository, ISyncRepository
 	{
-		string repositoryId;
-		string connectionString;
-		DbProviderFactory factory;
+		string repositoryId = String.Empty;
+		string tableNameFormat;
+		Database database;
 
-		public DbSyncRepository(DbProviderFactory factory, string repositoryId, string connectionString)
+		public DbSyncRepository(Database database)
+			: this(database, null)
 		{
-			Guard.ArgumentNotNull(repositoryId, "repositoryId");
-			Guard.ArgumentNotNull(connectionString, "connectionString");
-			Guard.ArgumentNotNull(factory, "factory");
+		}
 
-			this.repositoryId = repositoryId;
-			this.connectionString = connectionString;
-			this.factory = factory;
+		public DbSyncRepository(Database database, string repositoryId)
+			: base(database, FormatMainTableName(repositoryId, "Sync"))
+		{
+			Guard.ArgumentNotNull(database, "database");
 
-			InitializeSchema();
+			if (!String.IsNullOrEmpty(repositoryId))
+			{
+				this.repositoryId = repositoryId;
+				tableNameFormat = "SSE_" + repositoryId + "_";
+			}
+			else
+			{
+				tableNameFormat = "SSE_";
+			}
 		}
 
 		public Sync Get(string id)
 		{
 			using (DbConnection cn = OpenConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = GetSql("SELECT * FROM [{0}] WHERE Id = @id");
-				AddParameter(cmd, "@id", DbType.String, id);
+				cmd.CommandText = FormatSql("SELECT * FROM [{0}Sync] WHERE Id = @id");
+				base.Database.AddInParameter(cmd, "@id", DbType.String, id);
 
 				DbDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
@@ -60,21 +69,21 @@ namespace SimpleSharing
 					new RssFeedWriter(xw).Write(sync);
 				}
 
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = GetSql(@"
-					UPDATE [{0}] 
+				cmd.CommandText = FormatSql(@"
+					UPDATE [{0}Sync] 
 					SET Sync = @sync, ItemTimestamp = @timestamp
 					WHERE Id = @id");
-				AddParameter(cmd, "@id", DbType.String, sync.Id);
-				AddParameter(cmd, "@sync", DbType.String, sw.ToString());
-				AddParameter(cmd, "@timestamp", DbType.DateTime, sync.ItemTimestamp);
-				
+				base.Database.AddInParameter(cmd, "@id", DbType.String, sync.Id);
+				base.Database.AddInParameter(cmd, "@sync", DbType.String, sw.ToString());
+				base.Database.AddInParameter(cmd, "@timestamp", DbType.DateTime, sync.ItemTimestamp);
+
 				int count = cmd.ExecuteNonQuery();
 				if (count == 0)
 				{
-					cmd.CommandText = GetSql(@"
-						INSERT INTO [{0}] 
+					cmd.CommandText = FormatSql(@"
+						INSERT INTO [{0}Sync] 
 						(Id, Sync, ItemTimestamp)
 						VALUES 
 						(@id, @sync, @timestamp)");
@@ -88,10 +97,10 @@ namespace SimpleSharing
 		{
 			using (DbConnection cn = OpenConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = GetSql("SELECT LastSync FROM [{0}_LastSync] WHERE Feed = @feed");
-				AddParameter(cmd, "@feed", DbType.String, feed);
+				cmd.CommandText = FormatSql("SELECT LastSync FROM [{0}LastSync] WHERE Feed = @feed");
+				base.Database.AddInParameter(cmd, "@feed", DbType.String, feed);
 
 				DbDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
@@ -109,20 +118,20 @@ namespace SimpleSharing
 		{
 			using (DbConnection cn = OpenConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = GetSql(@"
-					UPDATE [{0}_LastSync] 
+				cmd.CommandText = FormatSql(@"
+					UPDATE [{0}LastSync] 
 					SET LastSync = @lastSync
 					WHERE Feed = @feed");
-				AddParameter(cmd, "@feed", DbType.String, feed);
-				AddParameter(cmd, "@lastSync", DbType.DateTime, date);
+				base.Database.AddInParameter(cmd, "@feed", DbType.String, feed);
+				base.Database.AddInParameter(cmd, "@lastSync", DbType.DateTime, date);
 
 				int count = cmd.ExecuteNonQuery();
 				if (count == 0)
 				{
-					cmd.CommandText = GetSql(@"
-						INSERT INTO [{0}_LastSync] 
+					cmd.CommandText = FormatSql(@"
+						INSERT INTO [{0}LastSync] 
 						(Feed, LastSync)
 						VALUES 
 						(@feed, @lastSync)");
@@ -136,9 +145,9 @@ namespace SimpleSharing
 		{
 			using (DbConnection cn = OpenConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = GetSql("SELECT * FROM [{0}]");
+				cmd.CommandText = FormatSql("SELECT * FROM [{0}Sync]");
 
 				DbDataReader reader = cmd.ExecuteReader();
 				while (reader.Read())
@@ -171,62 +180,42 @@ namespace SimpleSharing
 			return sync;
 		}
 
-		private void AddParameter(DbCommand cmd, string name, DbType type, object value)
+		protected override void InitializeSchema(DbConnection cn)
 		{
-			DbParameter prm = cmd.CreateParameter();
-			prm.DbType = type;
-			prm.Direction = ParameterDirection.Input;
-			prm.ParameterName = name;
-			prm.Value = value;
-
-			cmd.Parameters.Add(prm);
-		}
-
-		private DbConnection OpenConnection()
-		{
-			DbConnection cn = factory.CreateConnection();
-			cn.ConnectionString = connectionString;
-			cn.Open();
-
-			return cn;
-		}
-
-		private void InitializeSchema()
-		{
-			using (DbConnection cn = OpenConnection())
-			{
-				DbCommand cmd = factory.CreateCommand();
-				cmd.CommandText = GetSql(@"
-					SELECT	COUNT(*) 
-					FROM	[INFORMATION_SCHEMA].[TABLES] 
-					WHERE	[TABLE_NAME] = '{0}'");
-				cmd.Connection = cn;
-
-				int count = Convert.ToInt32(cmd.ExecuteScalar());
-
-				if (count == 0)
-				{
-					cmd.CommandText = GetSql(@"
-						CREATE TABLE [{0}](
+			DbCommand cmd = cn.CreateCommand();
+			cmd.CommandType = CommandType.Text;
+			cmd.Connection = cn;
+			cmd.CommandText = FormatSql(@"
+						CREATE TABLE [{0}Sync](
 							[Id] NVARCHAR(300) NOT NULL PRIMARY KEY,
 							[Sync] [NTEXT] NULL, 
 							[ItemTimestamp] datetime NOT NULL
 						)");
-					cmd.ExecuteNonQuery();
+			cmd.ExecuteNonQuery();
 
-					cmd.CommandText = GetSql(@"
-						CREATE TABLE [{0}_LastSync](
+			cmd.CommandText = FormatSql(@"
+						CREATE TABLE [{0}LastSync](
 							[Feed] NVARCHAR(1000) NOT NULL PRIMARY KEY,
 							[LastSync] [datetime] NOT NULL
 						)");
-					cmd.ExecuteNonQuery();
-				}
+			cmd.ExecuteNonQuery();
+		}
+
+		private static string FormatMainTableName(string repositoryId, string tableName)
+		{
+			if (!String.IsNullOrEmpty(repositoryId))
+			{
+				return "SSE_" + repositoryId + "_" + tableName;
+			}
+			else
+			{
+				return "SSE_" + tableName;
 			}
 		}
 
-		private string GetSql(string sql)
+		private string FormatSql(string value)
 		{
-			return String.Format(sql, "SSE_" + repositoryId);
+			return String.Format(value, tableNameFormat);
 		}
 	}
 }
