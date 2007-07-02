@@ -29,7 +29,6 @@ namespace SimpleSharing
 			get { return this.xmlItem; }
 		}
 
-		// TODO: test this method!
 		public bool IsSubsumedBy(Item item)
 		{
 			History Hx = this.sync.LastUpdate;

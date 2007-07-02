@@ -19,13 +19,16 @@ namespace SimpleSharing.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
         
@@ -99,6 +102,15 @@ namespace SimpleSharing.Properties {
         internal static string Arg_SequenceMustBeGreaterThanZero {
             get {
                 return ResourceManager.GetString("Arg_SequenceMustBeGreaterThanZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted on {0} by {1}..
+        /// </summary>
+        internal static string DeletedTitle {
+            get {
+                return ResourceManager.GetString("DeletedTitle", resourceCulture);
             }
         }
         

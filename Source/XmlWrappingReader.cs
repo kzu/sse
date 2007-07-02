@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using System.Diagnostics;
 
 namespace SimpleSharing
 {
@@ -59,6 +60,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="XmlReader.Dispose"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		protected override void Dispose(bool disposing)
 		{
 			if (this.ReadState != ReadState.Closed)
@@ -77,66 +79,79 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="XmlReader.Close"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override void Close() { baseReader.Close(); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.GetAttribute(int)"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override string GetAttribute(int i) { return baseReader.GetAttribute(i); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.GetAttribute(string)"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override string GetAttribute(string name) { return baseReader.GetAttribute(name); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.GetAttribute(string, string)"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override string GetAttribute(string localName, string namespaceURI) { { return baseReader.GetAttribute(localName, namespaceURI); } }
 
 		/// <summary>
 		/// See <see cref="XmlReader.LookupNamespace"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override string LookupNamespace(string prefix) { return baseReader.LookupNamespace(prefix); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.MoveToAttribute(int)"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override void MoveToAttribute(int i) { baseReader.MoveToAttribute(i); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.MoveToAttribute(string)"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override bool MoveToAttribute(string name) { return baseReader.MoveToAttribute(name); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.MoveToAttribute(string, string)"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override bool MoveToAttribute(string localName, string namespaceURI) { return baseReader.MoveToAttribute(localName, namespaceURI); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.MoveToElement"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override bool MoveToElement() { return baseReader.MoveToElement(); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.MoveToFirstAttribute"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override bool MoveToFirstAttribute() { return baseReader.MoveToFirstAttribute(); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.MoveToNextAttribute"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override bool MoveToNextAttribute() { return baseReader.MoveToNextAttribute(); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.ReadAttributeValue"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override bool ReadAttributeValue() { return baseReader.ReadAttributeValue(); }
 
 		/// <summary>
 		/// See <see cref="XmlReader.ResolveEntity"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override void ResolveEntity() { baseReader.ResolveEntity(); }
 
 		/// <summary>
@@ -247,6 +262,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="XmlReader.ReadValueChunk"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public override int ReadValueChunk(char[] buffer, int index, int count) { return baseReader.ReadValueChunk(buffer, index, count); }
 
 		#region IXmlLineInfo Members
@@ -254,6 +270,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IXmlLineInfo.HasLineInfo"/>.
 		/// </summary>
+		[DebuggerStepThrough]
 		public bool HasLineInfo()
 		{
 			IXmlLineInfo info = baseReader as IXmlLineInfo;
