@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using System.Globalization;
 
 namespace SimpleSharing
 {
@@ -25,6 +26,14 @@ namespace SimpleSharing
 				writer.WriteElementString("title", item.XmlItem.Title);
 				writer.WriteElementString("description", item.XmlItem.Description);
 				writer.WriteNode(new XmlNodeReader(item.XmlItem.Payload), false);
+			}
+			else
+			{
+				writer.WriteElementString("title", String.Format(
+					CultureInfo.CurrentCulture, 
+					Properties.Resources.DeletedTitle, 
+					item.Sync.LastUpdate.When.Value.ToShortDateString(), 
+					item.Sync.LastUpdate.By));
 			}
 		}
 	}

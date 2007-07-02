@@ -66,7 +66,7 @@ namespace SimpleSharing
 				StringWriter sw = new StringWriter();
 				using (XmlWriter xw = XmlWriter.Create(sw))
 				{
-					new RssFeedWriter(xw).Write(sync);
+					new RssFeedWriter(xw).WriteSync(sync);
 				}
 
 				DbCommand cmd = cn.CreateCommand();
@@ -170,11 +170,10 @@ namespace SimpleSharing
 		private Sync Read(DbDataReader reader)
 		{
 			string xml = (string)reader["Sync"];
-			// TODO: are we cheating here?
 			XmlReader xr = XmlReader.Create(new StringReader(xml));
 			xr.MoveToContent();
 
-			Sync sync = new RssFeedReader(xr).ReadSync();
+			Sync sync = new FeedReader.SyncXmlReader(xr, new RssFeedReader(xr)).ReadSync();
 			sync.ItemTimestamp = (DateTime)reader["ItemTimestamp"];
 
 			return sync;

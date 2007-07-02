@@ -231,7 +231,7 @@ namespace SimpleSharing
 
 		// TODO: Optimize subscribe when caller doesn't care about 
 		// retrieving the conflicts.
-		public IList<Item> Subscribe(IFeedReader reader)
+		public IList<Item> Subscribe(FeedReader reader)
 		{
 			Feed feed;
 			IEnumerable<Item> items;

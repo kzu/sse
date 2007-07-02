@@ -62,6 +62,7 @@
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DeviceAuthor.cs" />
     <Compile Include="DynamicXmlItem.cs" />
+    <Compile Include="FeedReader.cs" />
     <Compile Include="FeedWriter.cs" />
     <Compile Include="Guard.cs" />
     <Compile Include="HttpSync.cs" />
