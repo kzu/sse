@@ -19,7 +19,7 @@ namespace SimpleSharing
 
 		public void Write(Feed feed, params Item[] items)
 		{
-			Write(feed, items);
+			Write(feed, (IEnumerable<Item>)items);
 		}
 
 		public void Write(Feed feed, IEnumerable<Item> items)

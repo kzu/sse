@@ -16,6 +16,25 @@ namespace SimpleSharing.Tests
 	public class RssWriterFixture : TestFixtureBase
 	{
 		[TestMethod]
+		public void ShouldWriteEmptyItemPayload()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+			feed.Sharing.Expires = new DateTime(2007, 6, 7);
+			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete, "Complete feed"));
+
+			FeedWriter writer = new RssFeedWriter(xw);
+
+			writer.Write(feed, new Item(new NullXmlItem("1", null), new Sync("1"))); 
+
+			xw.Flush();
+		}
+
+		[TestMethod]
 		public void ShouldWriteCompleteFeed()
 		{
 			MockSyncRepository syncRepo = new MockSyncRepository();

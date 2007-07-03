@@ -13,6 +13,7 @@ namespace SimpleSharing
 
 		public Item(IXmlItem xmlItem, Sync sync)
 		{
+			Guard.ArgumentNotNull(xmlItem, "xmlItem");
 			Guard.ArgumentNotNull(sync, "sync");
 
 			this.xmlItem = xmlItem;
