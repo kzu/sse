@@ -827,16 +827,25 @@ namespace SimpleSharing.Tests
 				base.ItemWritten += delegate { Items++; };
 			}
 
-			protected override void WriteFeed(Feed feed, XmlWriter writer)
+			protected override void WriteStartFeed(Feed feed, XmlWriter writer)
 			{
 				writer.WriteStartElement("feed");
 			}
 
-			protected override void WriteItem(Item item, XmlWriter writer)
+			protected override void WriteEndFeed(Feed feed, XmlWriter writer)
+			{
+				writer.WriteEndElement();
+			}
+
+			protected override void WriteStartItem(Item item, XmlWriter writer)
 			{
 				writer.WriteStartElement("item");
 			}
 
+			protected override void WriteEndItem(Item item, XmlWriter writer)
+			{
+				writer.WriteEndElement();
+			}
 			
 		}
 

@@ -10,15 +10,23 @@ namespace SimpleSharing
 	{
 		public RssFeedWriter(XmlWriter writer) : base(writer) { }
 
-		protected override void WriteFeed(Feed feed, XmlWriter writer)
+		protected override void WriteStartFeed(Feed feed, XmlWriter writer)
 		{
-			writer.WriteStartElement("feed");
+			writer.WriteStartElement("rss");
+			writer.WriteAttributeString("version", "2.0");
+			writer.WriteStartElement("channel");
 			writer.WriteElementString("title", feed.Title);
-			writer.WriteElementString("link", feed.Link);
 			writer.WriteElementString("description", feed.Description);
+			writer.WriteElementString("link", feed.Link);
 		}
 
-		protected override void WriteItem(Item item, XmlWriter writer)
+		protected override void WriteEndFeed(Feed feed, XmlWriter writer)
+		{
+			writer.WriteEndElement();
+			writer.WriteEndElement();
+		}
+
+		protected override void WriteStartItem(Item item, XmlWriter writer)
 		{
 			writer.WriteStartElement("item");
 			if (!item.Sync.Deleted)
@@ -35,6 +43,11 @@ namespace SimpleSharing
 					item.Sync.LastUpdate.When.Value.ToShortDateString(), 
 					item.Sync.LastUpdate.By));
 			}
+		}
+
+		protected override void WriteEndItem(Item item, XmlWriter writer)
+		{
+			writer.WriteEndElement();
 		}
 	}
 }

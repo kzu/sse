@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SimpleSharing</RootNamespace>
-    <AssemblyName>SimpleSharing</AssemblyName>
+    <AssemblyName>SimpleSharing.CF</AssemblyName>
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
@@ -67,7 +67,6 @@
     <Compile Include="Guard.cs" />
     <Compile Include="HttpSync.cs" />
     <Compile Include="ICloneable.cs" />
-    <Compile Include="IFeedReader.cs" />
     <Compile Include="ISyncRepository.cs" />
     <Compile Include="ItemMergeResult.cs" />
     <Compile Include="IXmlItem.cs" />

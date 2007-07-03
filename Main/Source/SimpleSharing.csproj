@@ -60,10 +60,10 @@
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbRepository.cs" />
     <Compile Include="DbSyncRepository.cs" />
-    <Compile Include="HttpSync.cs" />
-    <Compile Include="IFeedReader.cs">
+    <Compile Include="FeedReader.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="HttpSync.cs" />
     <Compile Include="Model\ComparableStack.cs" />
     <Compile Include="NullXmlItem.cs" />
     <Compile Include="ObjectDumper.cs" />
