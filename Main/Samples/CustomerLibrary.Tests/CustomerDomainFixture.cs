@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.IO;
 using System.Data.SqlServerCe;
+using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
 
 namespace CustomerLibrary.Tests
 {
@@ -35,7 +36,7 @@ namespace CustomerLibrary.Tests
 			c.LastName = "Cazzulino";
 			c.Birthday = new DateTime(1974, 4, 9);
 
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			dac.Add(c);
 			dac.Add(c);
 			dac.Add(c);
@@ -53,7 +54,7 @@ namespace CustomerLibrary.Tests
 			c.Birthday = new DateTime(1974, 4, 9);
 			c.Id = 100;
 
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			dac.Add(c);
 
 			Assert.AreNotEqual(100, c.Id);
@@ -68,7 +69,7 @@ namespace CustomerLibrary.Tests
 			c.LastName = "Cazzulino";
 			c.Birthday = new DateTime(1974, 4, 9);
 
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			int id = dac.Add(c);
 
 			Assert.AreNotEqual(0, id);
@@ -87,7 +88,7 @@ namespace CustomerLibrary.Tests
 			c.LastName = "Cazzulino";
 			c.Birthday = new DateTime(1974, 4, 9);
 
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			int id = dac.Add(c);
 
 			Assert.AreNotEqual(0, id);
@@ -106,7 +107,7 @@ namespace CustomerLibrary.Tests
 			c.LastName = "Cazzulino";
 			c.Birthday = new DateTime(1974, 4, 9);
 
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			int id = dac.Add(c);
 
 			DateTime? insertUpdate = c.Timestamp;
@@ -123,7 +124,7 @@ namespace CustomerLibrary.Tests
 		[TestMethod]
 		public void GetByNonExistentIdReturnsNull()
 		{
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			Customer c = dac.GetById(5);
 			
 			Assert.IsNull(c);

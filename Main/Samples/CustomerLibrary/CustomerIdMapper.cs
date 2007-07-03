@@ -4,6 +4,8 @@ using System.Text;
 using System.Data.Common;
 using System.Data;
 using System.IO;
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using SimpleSharing;
 
 namespace CustomerLibrary
 {
@@ -11,20 +13,20 @@ namespace CustomerLibrary
 	{
 		const string RepositoryId = "Customers";
 		const string RepositoryMapping = RepositoryId + "IdMapping";
-		DbProviderFactory factory;
-		private string connectionString;
+		Database database;
 
-		public CustomerIdMapper(DbProviderFactory providerFactory, string connectionString)
+		public CustomerIdMapper(Database database)
 		{
-			this.factory = providerFactory;
-			this.connectionString = connectionString;
+			Guard.ArgumentNotNull(database, "database");
+
+			this.database = database;
 		}
 
 		public int Map(string id)
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				using (DbCommand cmd = factory.CreateCommand())
+				using (DbCommand cmd = cn.CreateCommand())
 				{
 					cmd.Connection = cn;
 					cmd.CommandText = GetSql("SELECT Id FROM {0} WHERE Guid = @guid");
@@ -49,7 +51,7 @@ namespace CustomerLibrary
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				using (DbCommand cmd = factory.CreateCommand())
+				using (DbCommand cmd = cn.CreateCommand())
 				{
 					cmd.Connection = cn;
 					cmd.CommandText = GetSql("SELECT Guid FROM {0} WHERE Id = @id");
@@ -81,7 +83,7 @@ namespace CustomerLibrary
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				using (DbCommand cmd = factory.CreateCommand())
+				using (DbCommand cmd = cn.CreateCommand())
 				{
 					cmd.Connection = cn;
 					cmd.CommandText = GetSql("SELECT Id FROM {0} WHERE Guid = @guid");
@@ -119,8 +121,7 @@ namespace CustomerLibrary
 
 		private DbConnection GetConnection()
 		{
-			DbConnection cn = factory.CreateConnection();
-			cn.ConnectionString = connectionString;
+			DbConnection cn = database.CreateConnection();
 
 			// Detect if schema exists.
 			DbCommand cmd = cn.CreateCommand();
@@ -144,7 +145,7 @@ namespace CustomerLibrary
 		{
 			if (cn.State != ConnectionState.Open) cn.Open();
 
-			DbCommand cmd = factory.CreateCommand();
+			DbCommand cmd = cn.CreateCommand();
 			cmd.CommandText = GetSql(@"
 CREATE TABLE [{0}](
 	[Guid] NVARCHAR(300) NOT NULL,

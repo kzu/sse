@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.Data;
 using CustomerLibrary;
 using SimpleSharing;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 
 namespace CustomerLibrary
 {
@@ -17,10 +18,10 @@ namespace CustomerLibrary
 		CustomerConverter converter;
 		CustomerIdMapper mapper;
 
-		public CustomerRepository(DbProviderFactory providerFactory, string connectionString)
+		public CustomerRepository(Database database)
 		{
-			dac = new CustomerDataAccess(providerFactory, connectionString);
-			mapper = new CustomerIdMapper(providerFactory, connectionString);
+			dac = new CustomerDataAccess(database);
+			mapper = new CustomerIdMapper(database);
 			converter = new CustomerConverter(mapper);
 		}
 

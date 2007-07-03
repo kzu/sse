@@ -11,6 +11,7 @@ using System.Web.UI.HtmlControls;
 using SimpleSharing;
 using CustomerLibrary;
 using System.Data.Common;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 
 namespace CustomerSite
 {
@@ -23,11 +24,8 @@ namespace CustomerSite
 
 		void customerSource_ObjectCreating(object sender, ObjectDataSourceEventArgs e)
 		{
-			ConnectionStringSettings cn = ConfigurationManager.ConnectionStrings["CustomerDB"];
-			DbProviderFactory factory = DbProviderFactories.GetFactory(cn.ProviderName);
-
 			CustomerDataAccess dac = new CustomerDataAccess(
-				factory, cn.ConnectionString);
+				DatabaseFactory.CreateDatabase("CustomerDB"));
 			e.ObjectInstance = dac;
 		}
 	}

@@ -11,6 +11,7 @@ using CustomerLibrary;
 using System.IO;
 using System.Data.Common;
 using System.Configuration;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 
 namespace CustomerSite
 {
@@ -23,15 +24,8 @@ namespace CustomerSite
 
 		public Synchronization()
 		{
-			ConnectionStringSettings cn = ConfigurationManager.ConnectionStrings["CustomerDB"];
-			DbProviderFactory factory = DbProviderFactories.GetFactory(cn.ProviderName);
-
-			xmlRepo = new CustomerRepository(factory, cn.ConnectionString);
-
-			cn = ConfigurationManager.ConnectionStrings["SyncDB"];
-			factory = DbProviderFactories.GetFactory(cn.ProviderName);
-
-			syncRepo = new DbSyncRepository(factory, "Customer", cn.ConnectionString);
+			xmlRepo = new CustomerRepository(DatabaseFactory.CreateDatabase("CustomerDB"));
+			syncRepo = new DbSyncRepository(DatabaseFactory.CreateDatabase("SyncDB"), "Customer");
 		}
 
 		public void ProcessRequest(HttpContext context)
