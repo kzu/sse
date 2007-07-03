@@ -17,6 +17,29 @@ namespace SimpleSharing.Tests
 	{
 		[Ignore]
 		[TestMethod]
+		public void ShouldUploadEmptyItems()
+		{
+			ISyncRepository syncRepo = new MockSyncRepository();
+			IXmlRepository xmlRepo = new MockXmlRepository();
+			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+
+			WebRequest req = WebRequest.Create("http://sse.mslivelabs.com/feed.sse?i=293578659bbf40bfb8aa0b9102c36766&c=1&alt=RSS");
+			req.Timeout = -1;
+			req.Method = "PUT";
+
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.CloseOutput = true;
+			Feed feed = new Feed("Client feed", "http://client/feed", "Client feed description");
+			using (XmlWriter w = XmlWriter.Create(req.GetRequestStream(), set))
+			{
+				engine.Publish(feed, new RssFeedWriter(w));
+			}
+
+			req.GetResponse();
+		}
+
+		[Ignore]
+		[TestMethod]
 		public void ShouldSyncItems()
 		{
 			ISyncRepository syncRepo = new MockSyncRepository();
