@@ -80,55 +80,5 @@ namespace CustomerLibrary
 				}
 			}
 		}
-
-		public DateTime GetFirstUpdated()
-		{
-			DateTime first = DateTime.MaxValue;
-			// Implementation unoptimized for the 
-			// given store.
-			foreach (Customer c in dac.GetAll())
-			{
-				if (c.Timestamp < first)
-				{
-					first = c.Timestamp;
-				}
-			}
-
-			// If there were no items, return min date.
-			if (first == DateTime.MaxValue) return DateTime.MinValue;
-
-			return first;
-		}
-
-		public DateTime GetFirstUpdated(DateTime since)
-		{
-			DateTime first = DateTime.MaxValue;
-			// Another unoptimized implementation.
-			foreach (Customer c in dac.GetAll())
-			{
-				if (c.Timestamp < first && c.Timestamp > since)
-					first = c.Timestamp;
-			}
-
-			// If there were no items, return min date.
-			if (first == DateTime.MaxValue) return DateTime.MinValue;
-
-			return first;
-		}
-
-		public DateTime GetLastUpdated()
-		{
-			DateTime last = DateTime.MinValue;
-
-			foreach (Customer c in dac.GetAll())
-			{
-				if (c.Timestamp > last)
-					last = c.Timestamp;
-			}
-
-			if (last == DateTime.MinValue) return DateTime.Now;
-
-			return last;
-		}
 	}
 }

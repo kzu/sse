@@ -99,7 +99,7 @@ namespace SimpleSharing
 			}
 		}
 
-		public IList<Item> Import(string feed, IEnumerable<ItemMergeResult> items)
+		public IList<Item> Import(string feedUrl, IEnumerable<ItemMergeResult> items)
 		{
 			// Straight import of data in merged results. 
 			// Conflicting items are saved and also 
@@ -165,19 +165,19 @@ namespace SimpleSharing
 			}
 
 			if (updateSync)
-				syncRepo.SetLastSync(feed, DateTime.Now);
+				syncRepo.SetLastSync(feedUrl, DateTime.Now);
 
 			return conflicts;
 		}
 
-		public IList<Item> Import(string feed, IEnumerable<Item> items)
+		public IList<Item> Import(string feedUrl, IEnumerable<Item> items)
 		{
-			return Import(feed, PreviewImport(items));
+			return Import(feedUrl, PreviewImport(items));
 		}
 
-		public IList<Item> Import(string feed, params Item[] items)
+		public IList<Item> Import(string feedUrl, params Item[] items)
 		{
-			return Import(feed, PreviewImport(items));
+			return Import(feedUrl, PreviewImport(items));
 		}
 
 		/// <summary>
@@ -218,10 +218,7 @@ namespace SimpleSharing
 
 		public void Publish(Feed feed, FeedWriter writer)
 		{
-			// Update Feed.Sharing
-			feed.Sharing.Since = Timestamp.ToString(xmlRepo.GetFirstUpdated());
-			feed.Sharing.Until = Timestamp.ToString(xmlRepo.GetLastUpdated());
-
+			// Since and Until are optional. We don't use them.
 			IEnumerable<Item> items = Export();
 			writer.Write(feed, items);
 		}
@@ -230,10 +227,6 @@ namespace SimpleSharing
 		public void Publish(Feed feed, FeedWriter writer, int lastDays)
 		{
 			DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(lastDays));
-
-			// Update Feed.Sharing
-			feed.Sharing.Since = Timestamp.ToString(xmlRepo.GetFirstUpdated(since));
-			feed.Sharing.Until = Timestamp.ToString(xmlRepo.GetLastUpdated());
 
 			IEnumerable<Item> items = Export(lastDays);
 			writer.Write(feed, items);

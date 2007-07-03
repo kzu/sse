@@ -126,50 +126,5 @@ namespace CustomerLibrary.Tests
 					yield return item.Clone();
 			}
 		}
-
-		public DateTime GetFirstUpdated()
-		{
-			if (items.Count == 0) return DateTime.MinValue;
-
-			DateTime first = DateTime.MaxValue;
-
-			foreach (IXmlItem item in items.Values)
-			{
-				if (item.Timestamp < first)
-					first = item.Timestamp;
-			}
-
-			return first;
-		}
-
-		public DateTime GetFirstUpdated(DateTime since)
-		{
-			if (items.Count == 0) return since;
-
-			DateTime first = DateTime.MaxValue;
-
-			foreach (IXmlItem item in items.Values)
-			{
-				if (item.Timestamp < first && item.Timestamp > since)
-					first = item.Timestamp;
-			}
-
-			return first;
-		}
-
-		public DateTime GetLastUpdated()
-		{
-			if (items.Count == 0) return DateTime.Now;
-
-			DateTime last = DateTime.MinValue;
-
-			foreach (IXmlItem item in items.Values)
-			{
-				if (item.Timestamp > last)
-					last = item.Timestamp;
-			}
-
-			return last;
-		}
 	}
 }

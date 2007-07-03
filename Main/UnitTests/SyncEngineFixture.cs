@@ -883,21 +883,6 @@ namespace SimpleSharing.Tests
 		//        throw new Exception("The method or operation is not implemented.");
 		//    }
 
-		//    public DateTime GetFirstUpdated()
-		//    {
-		//        throw new Exception("The method or operation is not implemented.");
-		//    }
-
-		//    public DateTime GetFirstUpdated(DateTime since)
-		//    {
-		//        throw new Exception("The method or operation is not implemented.");
-		//    }
-
-		//    public DateTime GetLastUpdated()
-		//    {
-		//        throw new Exception("The method or operation is not implemented.");
-		//    }
-
 		//    #endregion
 		//}
 	}

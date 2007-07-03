@@ -21,8 +21,5 @@ namespace SimpleSharing
 		DateTime Update(IXmlItem item);
 		IEnumerable<IXmlItem> GetAll();
 		IEnumerable<IXmlItem> GetAllSince(DateTime date);
-		DateTime GetFirstUpdated();
-		DateTime GetFirstUpdated(DateTime since);
-		DateTime GetLastUpdated();
 	}
 }
