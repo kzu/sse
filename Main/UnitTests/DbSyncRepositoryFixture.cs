@@ -11,49 +11,63 @@ using System.Xml.XPath;
 using System.Data.SqlServerCe;
 using System.IO;
 using System.Data.Common;
+using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
+using Microsoft.Practices.EnterpriseLibrary.Data.Sql;
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using System.Data;
 
 namespace SimpleSharing.Tests
 {
 	[TestClass]
 	public class DbSyncRepositoryFixture : TestFixtureBase
 	{
-		const string ConnectionString = "Data Source=SyncDb.sdf";
+		protected Database database;
 
 		[TestInitialize]
-		public void Initialize()
+		public virtual void Initialize()
 		{
 			if (File.Exists("SyncDb.sdf"))
 				File.Delete("SyncDb.sdf");
 
-			new SqlCeEngine(ConnectionString).CreateDatabase();
+			new SqlCeEngine("Data Source=SyncDb.sdf").CreateDatabase();
+			this.database = new SqlCeDatabase("Data Source=SyncDb.sdf");
+		}
+
+		[TestCleanup]
+		public virtual void Cleanup()
+		{
+			((SqlCeDatabase)database).CloseSharedConnection();
+		}
+
+		protected virtual ISyncRepository CreateRepository(Database database, string repositoryId)
+		{
+			return new DbSyncRepository(database, repositoryId);
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ShouldThrowIfNullRepositoryId()
+		public void ShouldAllowNullRepositoryId()
 		{
-			new DbSyncRepository(new SqlCeProviderFactory(), null, ConnectionString);
+			CreateRepository(database, null);
+		}
+
+		[TestMethod]
+		public void ShouldAllowEmptyRepositoryId()
+		{
+			CreateRepository(database, "");
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
-		public void ShouldThrowIfNullConnectionString()
+		public void ShouldThrowIfNullDatabase()
 		{
-			new DbSyncRepository(new SqlCeProviderFactory(), "Foo", null);
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void ShouldThrowIfNullFactory()
-		{
-			new DbSyncRepository(null, "Foo", ConnectionString);
+			CreateRepository(null, "Foo");
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
 		public void ShouldThrowIfNullItemTimestamp()
 		{
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 			Sync s = new Sync(Guid.NewGuid().ToString());
 
 			repo.Save(s);
@@ -62,7 +76,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldAddSync()
 		{
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
 			s.ItemTimestamp = DateTime.Now;
 
@@ -75,7 +89,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetAllSync()
 		{
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
 			s.ItemTimestamp = DateTime.Now;
 
@@ -87,10 +101,29 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, Count(repo.GetAll()));
 		}
 
+		[Ignore]
+		[TestMethod]
+		public void ShouldGetAllSqlEverywhereSync()
+		{
+			// Ignored as it requires a local database to exist.
+			ISyncRepository repo = CreateRepository(
+				new SqlDatabase("Data Source=.\\SQLEXPRESS;Database=Northwind;Integrated Security=true"),
+				"Foo");
+			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
+			s.ItemTimestamp = DateTime.Now;
+
+			repo.Save(s);
+			s = new Sync(Guid.NewGuid().ToString());
+			s.ItemTimestamp = DateTime.Now;
+			repo.Save(s);
+
+			Assert.IsTrue(Count(repo.GetAll()) > 0);
+		}
+
 		[TestMethod]
 		public void ShouldGetConflictSync()
 		{
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
 			s.ItemTimestamp = DateTime.Now;
 
@@ -107,7 +140,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetNullItemIfMissing()
 		{
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 			Sync s = repo.Get(Guid.NewGuid().ToString());
 
 			Assert.IsNull(s);
@@ -116,7 +149,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetNullLastSync()
 		{
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 
 			Assert.IsNull(repo.GetLastSync("foo"));
 		}
@@ -124,9 +157,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldSaveLastSync()
 		{
-			DateTime now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 
-				DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-			ISyncRepository repo = new DbSyncRepository(new SqlCeProviderFactory(), "Foo", ConnectionString);
+			DateTime now = Timestamp.Normalize(DateTime.Now);
+			ISyncRepository repo = CreateRepository(database, "Foo");
 
 			repo.SetLastSync("foo", now);
 
