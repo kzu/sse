@@ -41,8 +41,8 @@ namespace SimpleSharing
 			{
 				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = FormatSql("SELECT * FROM [{0}Sync] WHERE Id = @id");
-				base.Database.AddInParameter(cmd, "@id", DbType.String, id);
+				cmd.CommandText = FormatSql("SELECT * FROM [{0}Sync] WHERE Id = ?");
+				AddInParameter(cmd, DbType.String, id);
 
 				DbDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
@@ -72,20 +72,20 @@ namespace SimpleSharing
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
 					UPDATE [{0}Sync] 
-					SET Sync = @sync, ItemTimestamp = @timestamp
-					WHERE Id = @id");
-				base.Database.AddInParameter(cmd, "@id", DbType.String, sync.Id);
-				base.Database.AddInParameter(cmd, "@sync", DbType.String, sw.ToString());
-				base.Database.AddInParameter(cmd, "@timestamp", DbType.DateTime, sync.ItemTimestamp);
+					SET Sync = ?, ItemTimestamp = ?
+					WHERE Id = ?");
+				AddInParameter(cmd, DbType.String, sw.ToString());
+				AddInParameter(cmd, DbType.DateTime, sync.ItemTimestamp);
+				AddInParameter(cmd, DbType.String, sync.Id);
 
 				int count = cmd.ExecuteNonQuery();
 				if (count == 0)
 				{
 					cmd.CommandText = FormatSql(@"
 						INSERT INTO [{0}Sync] 
-						(Id, Sync, ItemTimestamp)
+						(Sync, ItemTimestamp, Id)
 						VALUES 
-						(@id, @sync, @timestamp)");
+						(?, ?, ?)");
 
 					cmd.ExecuteNonQuery();
 				}
@@ -98,8 +98,8 @@ namespace SimpleSharing
 			{
 				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
-				cmd.CommandText = FormatSql("SELECT LastSync FROM [{0}LastSync] WHERE Feed = @feed");
-				base.Database.AddInParameter(cmd, "@feed", DbType.String, feed);
+				cmd.CommandText = FormatSql("SELECT LastSync FROM [{0}LastSync] WHERE Feed = ?");
+				AddInParameter(cmd, DbType.String, feed);
 
 				DbDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
@@ -121,19 +121,19 @@ namespace SimpleSharing
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
 					UPDATE [{0}LastSync] 
-					SET LastSync = @lastSync
-					WHERE Feed = @feed");
-				base.Database.AddInParameter(cmd, "@feed", DbType.String, feed);
-				base.Database.AddInParameter(cmd, "@lastSync", DbType.DateTime, date);
+					SET LastSync = ?
+					WHERE Feed = ?");
+				AddInParameter(cmd, DbType.DateTime, date);
+				AddInParameter(cmd, DbType.String, feed);
 
 				int count = cmd.ExecuteNonQuery();
 				if (count == 0)
 				{
 					cmd.CommandText = FormatSql(@"
 						INSERT INTO [{0}LastSync] 
-						(Feed, LastSync)
+						(LastSync, Feed)
 						VALUES 
-						(@feed, @lastSync)");
+						(?, ?)");
 
 					cmd.ExecuteNonQuery();
 				}
@@ -180,7 +180,7 @@ namespace SimpleSharing
 
 		protected override void InitializeSchema(DbConnection cn)
 		{
-			if (!TableExists(cn, FormatMainTableName(repositoryId, "Sync")))
+			if (!TableExists(cn, FormatTableName(repositoryId, "Sync")))
 			{
 				DbCommand cmd = cn.CreateCommand();
 				cmd.CommandType = CommandType.Text;
@@ -194,7 +194,7 @@ namespace SimpleSharing
 				cmd.ExecuteNonQuery();
 			}
 
-			if (!TableExists(cn, FormatMainTableName(repositoryId, "LastSync")))
+			if (!TableExists(cn, FormatTableName(repositoryId, "LastSync")))
 			{
 				DbCommand cmd = cn.CreateCommand();
 				cmd.CommandType = CommandType.Text;
@@ -208,7 +208,15 @@ namespace SimpleSharing
 			}
 		}
 
-		private static string FormatMainTableName(string repositoryId, string tableName)
+		private void AddInParameter(DbCommand command, DbType dbType, object value)
+		{
+			DbParameter param = command.CreateParameter();
+			param.DbType = dbType;
+			param.Value = value;
+			command.Parameters.Add(param);
+		}
+
+		private static string FormatTableName(string repositoryId, string tableName)
 		{
 			if (!String.IsNullOrEmpty(repositoryId))
 			{
