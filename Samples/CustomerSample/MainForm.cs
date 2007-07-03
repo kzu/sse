@@ -9,6 +9,7 @@ using CustomerLibrary;
 using System.Xml;
 using SimpleSharing;
 using System.Data.SqlServerCe;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 
 namespace CustomerSample
 {
@@ -25,7 +26,7 @@ namespace CustomerSample
 		private void LoadData()
 		{
 			CustomerDataAccess dac = new CustomerDataAccess(
-				new SqlCeProviderFactory(), Properties.Settings.Default.DB);
+				DatabaseFactory.CreateDatabase("CustomerDB"));
 			dataSource = new CustomerSource(dac.GetAll());
 			customerSource.DataSource = dataSource;
 		}
@@ -37,7 +38,7 @@ namespace CustomerSample
 				customerGrid.IsCurrentRowDirty)
 			{
 				CustomerDataAccess dac = new CustomerDataAccess(
-					new SqlCeProviderFactory(), Properties.Settings.Default.DB);
+					DatabaseFactory.CreateDatabase("CustomerDB"));
 				Customer c = (Customer)customerGrid.CurrentRow.DataBoundItem;
 				try
 				{
@@ -67,10 +68,9 @@ namespace CustomerSample
 				using (XmlWriter writer = XmlWriter.Create(exportDlg.FeedFileName, set))
 				{
 					IXmlRepository xmlRepo = new CustomerRepository(
-						new SqlCeProviderFactory(), Properties.Settings.Default.DB);
+						DatabaseFactory.CreateDatabase("CustomerDB"));
 					ISyncRepository syncRepo = new DbSyncRepository(
-						new SqlCeProviderFactory(), "Customer",
-						Properties.Settings.Default.SyncDB);
+						DatabaseFactory.CreateDatabase("SyncDB"));
 					SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 					engine.Publish(exportDlg.FeedInformation, new RssFeedWriter(writer));
@@ -95,10 +95,9 @@ namespace CustomerSample
 				using (XmlReader reader = XmlReader.Create(openDlg.FileName, set))
 				{
 					IXmlRepository xmlRepo = new CustomerRepository(
-						new SqlCeProviderFactory(), Properties.Settings.Default.DB);
+						DatabaseFactory.CreateDatabase("CustomerDB"));
 					ISyncRepository syncRepo = new DbSyncRepository(
-						new SqlCeProviderFactory(), "Customer", 
-						Properties.Settings.Default.SyncDB);
+						DatabaseFactory.CreateDatabase("SyncDB"));
 					SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 					engine.Subscribe(new RssFeedReader(reader));
@@ -115,10 +114,9 @@ namespace CustomerSample
 			if (syncDlg.ShowDialog(this) == DialogResult.OK)
 			{
 				IXmlRepository xmlRepo = new CustomerRepository(
-					new SqlCeProviderFactory(), Properties.Settings.Default.DB);
+					DatabaseFactory.CreateDatabase("CustomerDB"));
 				ISyncRepository syncRepo = new DbSyncRepository(
-					new SqlCeProviderFactory(), "Customer", 
-					Properties.Settings.Default.SyncDB);
+					DatabaseFactory.CreateDatabase("SyncDB"));
 				SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 				HttpSync sync = new HttpSync(engine);
@@ -156,7 +154,7 @@ namespace CustomerSample
 			{
 				Customer c = this[index];
 				CustomerDataAccess dac = new CustomerDataAccess(
-					new SqlCeProviderFactory(), Properties.Settings.Default.DB);
+					DatabaseFactory.CreateDatabase("CustomerDB"));
 				dac.Delete(c.Id);
 
 				base.RemoveItem(index);

@@ -11,6 +11,7 @@ using System.IO;
 using System.Threading;
 using SimpleSharing;
 using System.Data.SqlServerCe;
+using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
 
 namespace CustomerLibrary.Tests
 {
@@ -28,7 +29,7 @@ namespace CustomerLibrary.Tests
 			SqlCeEngine engine = new SqlCeEngine(ConnectionString);
 			engine.CreateDatabase();
 
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			dac.Add(new Customer("Daniel", "Cazzulino", new DateTime(1974, 4, 9)));
 			dac.Add(new Customer("Victor", "Garcia Aprea", new DateTime(1975, 2, 21)));
 		}
@@ -37,7 +38,7 @@ namespace CustomerLibrary.Tests
 		public void CanExport()
 		{
 			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeProviderFactory(), ConnectionString);
+			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeDatabase(ConnectionString));
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 			IEnumerable<Item> items = engine.Export();
@@ -49,7 +50,7 @@ namespace CustomerLibrary.Tests
 		public void CanExportImportToAnotherRepository()
 		{
 			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeProviderFactory(), ConnectionString);
+			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeDatabase(ConnectionString));
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 			IEnumerable<Item> items = engine.Export();
@@ -67,7 +68,7 @@ namespace CustomerLibrary.Tests
 		public void CanImportFromAnotherCustomerRepository()
 		{
 			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeProviderFactory(), ConnectionString);
+			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeDatabase(ConnectionString));
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 			IEnumerable<Item> items = engine.Export();
@@ -79,7 +80,7 @@ namespace CustomerLibrary.Tests
 			SqlCeEngine ceEngine = new SqlCeEngine("Data Source=CustomerDb2.sdf");
 			ceEngine.CreateDatabase();
 
-			IXmlRepository xmlRepo2 = new CustomerRepository(new SqlCeProviderFactory(), "Data Source=CustomerDb2.sdf");
+			IXmlRepository xmlRepo2 = new CustomerRepository(new SqlCeDatabase("Data Source=CustomerDb2.sdf"));
 			SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
 
 			engine2.Import("customers", items);
@@ -90,9 +91,9 @@ namespace CustomerLibrary.Tests
 		[TestMethod]
 		public void CanEditCustomerAndPropagateUpdate()
 		{
-			new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString).Delete(2);
+			new CustomerDataAccess(new SqlCeDatabase(ConnectionString)).Delete(2);
 			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeProviderFactory(), ConnectionString);
+			IXmlRepository xmlRepo = new CustomerRepository(new SqlCeDatabase(ConnectionString));
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
 			ISyncRepository syncRepo2 = new MockSyncRepository();
@@ -102,7 +103,7 @@ namespace CustomerLibrary.Tests
 			SqlCeEngine ceEngine = new SqlCeEngine("Data Source=Temp.sdf");
 			ceEngine.CreateDatabase();
 
-			IXmlRepository xmlRepo2 = new CustomerRepository(new SqlCeProviderFactory(), "Data Source=Temp.sdf");
+			IXmlRepository xmlRepo2 = new CustomerRepository(new SqlCeDatabase("Data Source=Temp.sdf"));
 			SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
 
 			engine2.Import("customers", engine.Export());
@@ -110,7 +111,7 @@ namespace CustomerLibrary.Tests
 			// both repositories are in sync now.
 
 			// update customer on one repository.
-			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeProviderFactory(), ConnectionString);
+			CustomerDataAccess dac = new CustomerDataAccess(new SqlCeDatabase(ConnectionString));
 			int id = 0;
 			foreach (Customer c in dac.GetAll())
 			{
@@ -126,7 +127,7 @@ namespace CustomerLibrary.Tests
 			IList<Item> conflicts = engine2.Import("customers", exported);
 			Assert.AreEqual(0, conflicts.Count);
 
-			CustomerDataAccess dac2 = new CustomerDataAccess(new SqlCeProviderFactory(), "Data Source=Temp.sdf");
+			CustomerDataAccess dac2 = new CustomerDataAccess(new SqlCeDatabase("Data Source=Temp.sdf"));
 			Customer c2 = dac2.GetById(1);
 
 			Assert.IsNotNull(c2);

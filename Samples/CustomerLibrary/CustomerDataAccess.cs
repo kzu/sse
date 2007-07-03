@@ -5,21 +5,19 @@ using System.Data.Common;
 using System.Data;
 using System.IO;
 using SimpleSharing;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 
 namespace CustomerLibrary
 {
 	public class CustomerDataAccess
 	{
-		DbProviderFactory factory;
-		string connectionString;
+		Database database;
 
-		public CustomerDataAccess(DbProviderFactory providerFactory, string connectionString)
+		public CustomerDataAccess(Database database)
 		{
-			Guard.ArgumentNotNull(providerFactory, "providerFactory");
-			Guard.ArgumentNotNullOrEmptyString(connectionString, "connectionString");
+			Guard.ArgumentNotNull(database, "database");
 
-			this.factory = providerFactory;
-			this.connectionString = connectionString;
+			this.database = database;
 		}
 
 		public int Add(Customer customer)
@@ -28,7 +26,7 @@ namespace CustomerLibrary
 
 			using (DbConnection cn = GetConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
 				cmd.CommandText = @"
 					INSERT INTO Customer
@@ -61,7 +59,7 @@ namespace CustomerLibrary
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
 				cmd.CommandText = "SELECT Id FROM Customer WHERE Id = @id";
 				AddParameter(cmd, "@id", DbType.Int32, id);
@@ -82,7 +80,7 @@ namespace CustomerLibrary
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
 				cmd.CommandText = "DELETE FROM Customer WHERE Id=@id";
 				AddParameter(cmd, "@id", DbType.Int32, id);
@@ -96,7 +94,7 @@ namespace CustomerLibrary
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
 				cmd.CommandText = "SELECT * FROM Customer WHERE Id = @id";
 				AddParameter(cmd, "@id", DbType.Int32, id);
@@ -118,7 +116,7 @@ namespace CustomerLibrary
 		{
 			using (DbConnection cn = GetConnection())
 			{
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
 				cmd.CommandText = "SELECT * FROM Customer";
 
@@ -138,7 +136,7 @@ namespace CustomerLibrary
 			using (DbConnection cn = GetConnection())
 			{
 				DateTime now = DateTime.Now;
-				DbCommand cmd = factory.CreateCommand();
+				DbCommand cmd = cn.CreateCommand();
 				cmd.Connection = cn;
 				cmd.CommandText = @"
 					UPDATE Customer 
@@ -193,8 +191,7 @@ namespace CustomerLibrary
 
 		private DbConnection GetConnection()
 		{
-			DbConnection cn = factory.CreateConnection();
-			cn.ConnectionString = connectionString;
+			DbConnection cn = database.CreateConnection();
 
 			// Detect if schema exists.
 			DbCommand cmd = cn.CreateCommand();
@@ -218,7 +215,7 @@ namespace CustomerLibrary
 		{
 			if (cn.State != ConnectionState.Open) cn.Open();
 
-			DbCommand cmd = factory.CreateCommand();
+			DbCommand cmd = cn.CreateCommand();
 			cmd.CommandText = @"
 CREATE TABLE [Customer](
 	[Id] [int] IDENTITY(1,1) NOT NULL CONSTRAINT Customer_PK PRIMARY KEY,

@@ -5,6 +5,8 @@ using System.IO;
 using System.Data.SqlServerCe;
 using System.Threading;
 using System.Security.Principal;
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using System.Data.Common;
 
 namespace CustomerSample
 {
@@ -19,12 +21,13 @@ namespace CustomerSample
 			AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
 
 			// Initialize SyncDB
-			SqlCeConnection cn = new SqlCeConnection(Properties.Settings.Default.SyncDB);
+			DbConnection cn = DatabaseFactory.CreateDatabase("SyncDB").CreateConnection();
 			if (!File.Exists(cn.Database))
-				new SqlCeEngine(Properties.Settings.Default.SyncDB).CreateDatabase();
-			cn = new SqlCeConnection(Properties.Settings.Default.DB);
+				new SqlCeEngine(cn.ConnectionString).CreateDatabase();
+
+			cn = DatabaseFactory.CreateDatabase("CustomerDB").CreateConnection();
 			if (!File.Exists(cn.Database))
-				new SqlCeEngine(Properties.Settings.Default.DB).CreateDatabase();
+				new SqlCeEngine(cn.ConnectionString).CreateDatabase();
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
