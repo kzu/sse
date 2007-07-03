@@ -33,7 +33,10 @@ namespace SimpleSharing
 			{
 				writer.WriteElementString("title", item.XmlItem.Title);
 				writer.WriteElementString("description", item.XmlItem.Description);
-				writer.WriteNode(new XmlNodeReader(item.XmlItem.Payload), false);
+				foreach (XmlNode child in item.XmlItem.Payload.ChildNodes)
+				{
+					writer.WriteNode(new XmlNodeReader(child), false);
+				}
 			}
 			else
 			{

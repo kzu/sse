@@ -10,12 +10,15 @@ namespace SimpleSharing
 	{
 		private string id;
 		private DateTime lastUpdated = DateTime.Now;
+		private XmlElement emptyPayload;
 
 		public NullXmlItem(string id, DateTime? lastUpdated)
 		{
 			this.id = id;
 			if (lastUpdated.HasValue)
 				this.lastUpdated = lastUpdated.Value;
+
+			emptyPayload = new XmlDocument().CreateElement("payload");
 		}
 
 		public string Id
@@ -44,7 +47,7 @@ namespace SimpleSharing
 
 		public XmlElement Payload
 		{
-			get { return null; }
+			get { return emptyPayload; }
 			set { }
 		}
 
