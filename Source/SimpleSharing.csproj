@@ -57,6 +57,7 @@
     <Compile Include="Behaviors\MergeBehavior.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AccessSyncRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbRepository.cs" />
     <Compile Include="DbSyncRepository.cs" />

@@ -187,13 +187,13 @@ namespace SimpleSharing
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
 						CREATE TABLE [{0}Sync](
-							[Id] NVARCHAR(300) NOT NULL PRIMARY KEY,
-							[Sync] [NTEXT] NULL, 
-							[ItemTimestamp] datetime NOT NULL
+							[Id] NVARCHAR(254) NOT NULL PRIMARY KEY,
+							[Sync] NTEXT NULL, 
+							[ItemTimestamp] DATETIME NOT NULL
 						)");
 				cmd.ExecuteNonQuery();
 			}
-
+			
 			if (!TableExists(cn, FormatTableName(repositoryId, "LastSync")))
 			{
 				DbCommand cmd = cn.CreateCommand();
@@ -202,18 +202,23 @@ namespace SimpleSharing
 				cmd.CommandText = FormatSql(@"
 						CREATE TABLE [{0}LastSync](
 							[Feed] NVARCHAR(1000) NOT NULL PRIMARY KEY,
-							[LastSync] [datetime] NOT NULL
+							[LastSync] DATETIME NOT NULL
 						)");
 				cmd.ExecuteNonQuery();
 			}
 		}
 
-		private void AddInParameter(DbCommand command, DbType dbType, object value)
+		protected virtual void AddInParameter(DbCommand command, DbType dbType, object value)
 		{
 			DbParameter param = command.CreateParameter();
 			param.DbType = dbType;
 			param.Value = value;
 			command.Parameters.Add(param);
+		}
+
+		protected string FormatTableName(string tableName)
+		{
+			return FormatTableName(repositoryId, tableName);
 		}
 
 		private static string FormatTableName(string repositoryId, string tableName)
@@ -228,7 +233,7 @@ namespace SimpleSharing
 			}
 		}
 
-		private string FormatSql(string value)
+		protected string FormatSql(string value)
 		{
 			return String.Format(value, tableNameFormat);
 		}

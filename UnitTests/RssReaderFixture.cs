@@ -15,6 +15,98 @@ namespace SimpleSharing.Tests
 	public class RssReaderFixture : TestFixtureBase
 	{
 		[TestMethod]
+		public void ShouldReadItemWithSharing()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <sx:sharing version='0.93' since='2005-02-13T18:30:02Z'
+    until='2005-05-23T18:30:02Z' >
+   <sx:related link='http://y.net/B.xml' type='aggregated' 
+    title='To Do List (Jacks Copy)' />
+  </sx:sharing>
+  <item>
+   <title>Buy groceries</title>
+   <sx:sync id='0a7903db47fb0fff' updates='1'>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>
+  </item>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			Assert.AreEqual("To Do List", feed.Title);
+			Assert.AreEqual("A list of items to do", feed.Description);
+			Assert.AreEqual("http://somefakeurl.com/partial.xml", feed.Link);
+			Assert.AreEqual(1, feed.Sharing.Related.Count);
+			List<Item> items = new List<Item>(i);
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual("Buy groceries", items[0].XmlItem.Title);
+			Assert.AreEqual(1, items[0].Sync.Updates);
+			Assert.AreEqual("REO1750", items[0].Sync.LastUpdate.By);
+		}
+
+		[TestMethod]
+		public void ShouldReadItemWithConflict()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <item>
+   <title>Buy groceries</title>
+   <sx:sync id='0a7903db47fb0fff' updates='2'>
+    <sx:history sequence='2' by='REO1750'/>
+    <sx:history sequence='1' by='REO1750'/>
+	<sx:conflicts>
+	  <item>
+	   <title>Buy icecream</title>
+	   <customer id='1' />
+	   <sx:sync id='0a7903db47fb0fff' updates='2'>
+		 <sx:history sequence='2' by='JEO2000'/>
+		 <sx:history sequence='1' by='REO1750'/>
+	   </sx:sync>
+	  </item>
+	</sx:conflicts>
+   </sx:sync>
+  </item>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			Assert.AreEqual("To Do List", feed.Title);
+			Assert.AreEqual("A list of items to do", feed.Description);
+			Assert.AreEqual("http://somefakeurl.com/partial.xml", feed.Link);
+			List<Item> items = new List<Item>(i);
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual("Buy groceries", items[0].XmlItem.Title);
+			Assert.AreEqual(2, items[0].Sync.Updates);
+			Assert.AreEqual("0a7903db47fb0fff", items[0].Sync.Id);
+			Assert.AreEqual("0a7903db47fb0fff", items[0].XmlItem.Id);
+			Assert.AreEqual("REO1750", items[0].Sync.LastUpdate.By);
+			Assert.AreEqual(1, items[0].Sync.Conflicts.Count);
+			Assert.AreEqual("Buy icecream", items[0].Sync.Conflicts[0].XmlItem.Title);
+			Assert.AreEqual("JEO2000", items[0].Sync.Conflicts[0].Sync.LastUpdate.By);
+		}
+
+		[TestMethod]
 		public void ShouldReadItems()
 		{
 			string xml = @"
@@ -54,7 +146,7 @@ namespace SimpleSharing.Tests
  </channel>
 </rss>";
 
-			IFeedReader reader = new RssFeedReader(GetReader(xml));
+			FeedReader reader = new RssFeedReader(GetReader(xml));
 
 			Feed feed;
 			IEnumerable<Item> i;
@@ -79,6 +171,28 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(@"<payload>
   <customer id=""1"" />
 </payload>", ReadToEnd(new XmlNodeReader(items[0].XmlItem.Payload)));
+		}
+
+		[TestMethod]
+		public void ShouldReadItemsLiveFeed()
+		{
+			using (XmlReader xr = XmlReader.Create("feed.sse"))
+			{
+				FeedReader reader = new RssFeedReader(xr);
+
+				Feed feed;
+				IEnumerable<Item> i;
+
+				reader.Read(out feed, out i);
+
+				List<Item> items = new List<Item>(i);
+
+				Assert.AreEqual("SimpleSharing", feed.Title);
+				Assert.AreEqual("http://sse.mslivelabs.com/", feed.Link);
+				Assert.AreEqual(2, items.Count);
+				Assert.AreEqual(2, items[0].Sync.Updates);
+				Assert.AreEqual(2, items[1].Sync.Updates);
+			}
 		}
 
 		[TestMethod]
@@ -117,7 +231,7 @@ namespace SimpleSharing.Tests
  </channel>
 </rss>";
 
-			IFeedReader reader = new RssFeedReader(GetReader(xml));
+			FeedReader reader = new RssFeedReader(GetReader(xml));
 
 			Feed feed;
 			IEnumerable<Item> i;
@@ -153,7 +267,7 @@ namespace SimpleSharing.Tests
  </channel>
 </rss>";
 
-			IFeedReader reader = new RssFeedReader(GetReader(xml));
+			FeedReader reader = new RssFeedReader(GetReader(xml));
 
 			Feed feed;
 			IEnumerable<Item> i;
