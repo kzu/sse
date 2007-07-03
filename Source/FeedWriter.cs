@@ -17,6 +17,11 @@ namespace SimpleSharing
 			this.writer = new XmlSharingWriter(writer);
 		}
 
+		public void Write(Feed feed, params Item[] items)
+		{
+			Write(feed, items);
+		}
+
 		public void Write(Feed feed, IEnumerable<Item> items)
 		{
 			// write feed root element: rss | atom
