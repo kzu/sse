@@ -9,68 +9,45 @@ using System.IO;
 
 namespace SimpleSharing
 {
-	public class RssFeedReader : IFeedReader
+	public class RssFeedReader : FeedReader
 	{
-		XmlReader reader;
-		public event EventHandler ItemRead;
-
 		public RssFeedReader(XmlReader reader)
+			: base(reader)
 		{
-			this.reader = reader;
 		}
 
-		public void Read(out Feed feed, out IEnumerable<Item> items)
+		protected override XmlQualifiedName ItemName
 		{
-			feed = ReadFeed();
-			items = ReadItems();
+			get { return new XmlQualifiedName("item"); }
 		}
 
-		private Feed ReadFeed()
+		protected override Feed ReadFeed(XmlReader reader)
 		{
 			string title = null;
 			string link = null;
 			string description = null;
-			Sharing sharing = null;
 
-			while (reader.Read() && !IsItemElement(reader))
+			while (reader.Read() && !IsItemElement(reader, XmlNodeType.Element))
 			{
 				if (reader.NodeType == XmlNodeType.Element)
 				{
-					if (reader.LocalName == "title")
+					if (reader.LocalName == "title" && reader.NamespaceURI.Length == 0)
 						title = ReadElementValue(reader);
-					else if (reader.LocalName == "link")
+					else if (reader.LocalName == "link" && reader.NamespaceURI.Length == 0)
 						link = ReadElementValue(reader);
-					else if (reader.LocalName == "description")
+					else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
 						description = ReadElementValue(reader);
-					else if (IsSseElement(reader, Schema.ElementNames.Sharing))
-						sharing = ReadSharing();
 				}
 			}
 
-			Feed feed = new Feed(title, link, description);
-			if (sharing != null)
-				feed.Sharing = sharing;
-
-			return feed;
+			return new Feed(title, link, description);
 		}
 
-		private IEnumerable<Item> ReadItems()
-		{
-			do
-			{
-				if (IsItemElement(reader) && reader.NodeType == XmlNodeType.Element)
-				{
-					yield return ReadItem(reader);
-				}
-			}
-			while (reader.Read());
-		}
-
-		private Item ReadItem(XmlReader reader)
+		protected override IXmlItem ReadItem(XmlReader reader)
 		{
 			if (reader.ReadState == ReadState.Initial)
 				reader.MoveToContent();
-			if (!IsItemElement(reader))
+			if (!IsItemElement(reader, XmlNodeType.Element))
 				throw new InvalidOperationException();
 
 			DateTime lastUpdated = DateTime.MinValue;
@@ -81,26 +58,21 @@ namespace SimpleSharing
 			XmlWriter writer = XmlWriter.Create(mem);
 			writer.WriteStartElement("payload");
 
-			Sync sync = null;
-
 			while (reader.Read())
 			{
 				if (reader.NodeType == XmlNodeType.Element)
 				{
-					if (reader.LocalName == "title")
+					if (reader.LocalName == "title" && reader.NamespaceURI.Length == 0)
 						title = ReadElementValue(reader);
-					else if (reader.LocalName == "pubDate")
+					else if (reader.LocalName == "pubDate" && reader.NamespaceURI.Length == 0)
 						lastUpdated = RssDateTime.Parse(ReadElementValue(reader)).LocalTime;
-					else if (reader.LocalName == "description")
+					else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
 						description = ReadElementValue(reader);
-					else if (IsSseElement(reader, Schema.ElementNames.Sync))
-						sync = ReadSync();
-					// Anything that is unknown is payload.
+					// Anything that is unknown to us is payload.
 					else
 						writer.WriteNode(reader.ReadSubtree(), false);
 				}
-				else if (reader.NodeType == XmlNodeType.EndElement &&
-					IsItemElement(reader))
+				else if (IsItemElement(reader, XmlNodeType.EndElement))
 					break;
 			}
 
@@ -108,170 +80,11 @@ namespace SimpleSharing
 			writer.Close();
 			mem.Position = 0;
 
-			Item item;
+			XmlDocument doc = new XmlDocument();
+			doc.Load(mem);
+			XmlElement payload = doc.DocumentElement;
 
-			if (!sync.Deleted)
-			{
-				XmlDocument doc = new XmlDocument();
-				doc.Load(mem);
-				XmlElement payload = doc.DocumentElement;
-
-				item = new Item(
-					new XmlItem(title, description, lastUpdated, payload),
-					sync);
-				item.XmlItem.Id = sync.Id;
-			}
-			else
-			{
-				item = new Item(
-					new NullXmlItem(sync.Id, sync.LastUpdate.When),
-					sync);
-			}
-
-			if (ItemRead != null)
-				ItemRead(this, EventArgs.Empty);
-
-			return item;
+			return new XmlItem(title, description, lastUpdated, payload);
 		}
-
-		private Sharing ReadSharing()
-		{
-			if (!IsSseElement(reader, Schema.ElementNames.Sharing))
-				throw new InvalidOperationException();
-
-			Sharing sharing = new Sharing();
-			if (reader.MoveToAttribute(Schema.AttributeNames.Since))
-				sharing.Since = reader.Value;
-			if (reader.MoveToAttribute(Schema.AttributeNames.Until))
-				sharing.Until = reader.Value;
-			if (reader.MoveToAttribute(Schema.AttributeNames.Expires))
-				sharing.Expires = DateTime.Parse(reader.Value);
-
-			if (reader.NodeType == XmlNodeType.Attribute)
-				reader.MoveToElement();
-
-			if (!reader.IsEmptyElement)
-			{
-				while (reader.Read() &&
-					!(IsSseElement(reader, Schema.ElementNames.Sharing) &&
-					reader.NodeType == XmlNodeType.EndElement))
-				{
-					if (IsSseElement(reader, Schema.ElementNames.Related) &&
-						reader.NodeType == XmlNodeType.Element)
-					{
-						sharing.Related.Add(new Related(
-							reader.GetAttribute(Schema.AttributeNames.Link),
-							(RelatedType)Enum.Parse(
-								typeof(RelatedType),
-								CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
-									reader.GetAttribute(Schema.AttributeNames.Type)), 
-									false),
-							reader.GetAttribute(Schema.AttributeNames.Title)));
-					}
-				}
-			}
-
-			return sharing;
-		}
-
-		internal Sync ReadSync()
-		{
-			if (!IsSseElement(reader, Schema.ElementNames.Sync))
-				throw new InvalidOperationException();
-
-			Sync newSync = null;
-
-			reader.MoveToAttribute(Schema.AttributeNames.Id);
-			string id = reader.Value;
-			reader.MoveToAttribute(Schema.AttributeNames.Updates);
-			int updates = XmlConvert.ToInt32(reader.Value);
-
-			newSync = new Sync(id, updates);
-
-			if (reader.MoveToAttribute(Schema.AttributeNames.Deleted))
-			{
-				newSync.Deleted = XmlConvert.ToBoolean(reader.Value);
-			}
-			if (reader.MoveToAttribute(Schema.AttributeNames.NoConflicts))
-			{
-				newSync.NoConflicts = XmlConvert.ToBoolean(reader.Value);
-			}
-
-			reader.MoveToElement();
-
-			List<History> historyUpdates = new List<History>();
-
-			while (reader.Read() && 
-				!(reader.NodeType == XmlNodeType.EndElement &&
-					IsSseElement(reader, Schema.ElementNames.Sync)))
-			{
-				if (reader.NodeType == XmlNodeType.Element)
-				{
-					if (IsSseElement(reader, Schema.ElementNames.History))
-					{
-						reader.MoveToAttribute(Schema.AttributeNames.Sequence);
-						int sequence = XmlConvert.ToInt32(reader.Value);
-						string by = null;
-						DateTime? when = null;
-
-						if (reader.MoveToAttribute(Schema.AttributeNames.When))
-							when = DateTime.Parse(reader.Value);
-						if (reader.MoveToAttribute(Schema.AttributeNames.By))
-							by = reader.Value;
-
-						historyUpdates.Add(new History(by, when, sequence));
-					}
-					else if (IsSseElement(reader, Schema.ElementNames.Conflicts))
-					{
-						while (reader.Read() &&
-							!(IsSseElement(reader, Schema.ElementNames.Conflicts)
-							&& reader.NodeType == XmlNodeType.EndElement))
-						{
-							if (IsItemElement(reader))
-							{
-								newSync.Conflicts.Add(ReadItem(reader.ReadSubtree()));
-							}
-						}
-					}
-				}
-			}
-
-			if (historyUpdates.Count != 0)
-			{
-				historyUpdates.Reverse();
-				foreach (History history in historyUpdates)
-				{
-					newSync.AddHistory(history);
-				} 
-			}
-
-			return newSync;
-		}
-
-		private bool IsSseElement(XmlReader reader, string elementName)
-		{
-			return reader.LocalName == elementName &&
-				reader.NamespaceURI == Schema.Namespace;
-		}
-
-		private bool IsItemElement(XmlReader reader)
-		{
-			return reader.LocalName == "item" &&
-				reader.NamespaceURI == String.Empty;
-		}
-
-		private string ReadElementValue(XmlReader reader)
-		{
-			if (reader.NodeType == XmlNodeType.Element)
-			{
-				if (reader.IsEmptyElement)
-					return null;
-				else
-					reader.Read();
-			}
-
-			return reader.Value;
-		}
-
 	}
 }

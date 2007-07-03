@@ -20,7 +20,7 @@ namespace SimpleSharing
 		public void Write(Feed feed, IEnumerable<Item> items)
 		{
 			// write feed root element: rss | atom
-			WriteFeed(feed, writer);
+			WriteStartFeed(feed, writer);
 			WriteSharing(feed.Sharing);
 
 			foreach (Item item in items)
@@ -31,19 +31,19 @@ namespace SimpleSharing
 			}
 
 			// close feed root
-			writer.WriteEndElement();
+			WriteEndFeed(feed, writer);
 		}
 
-		internal void Write(Item item)
+		private void Write(Item item)
 		{
 			// <item>
-			WriteItem(item, writer);
-			Write(item.Sync);
+			WriteStartItem(item, writer);
+			WriteSync(item.Sync);
 			// </item>
-			writer.WriteEndElement();
+			WriteEndItem(item, writer);
 		}
 
-		internal void Write(Sync sync)
+		internal void WriteSync(Sync sync)
 		{
 			// <sx:sync>
 			writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Sync, Schema.Namespace);
@@ -120,7 +120,9 @@ namespace SimpleSharing
 			}
 		}
 
-		protected abstract void WriteFeed(Feed feed, XmlWriter writer);
-		protected abstract void WriteItem(Item item, XmlWriter writer);
+		protected abstract void WriteStartFeed(Feed feed, XmlWriter writer);
+		protected abstract void WriteEndFeed(Feed feed, XmlWriter writer);
+		protected abstract void WriteStartItem(Item item, XmlWriter writer);
+		protected abstract void WriteEndItem(Item item, XmlWriter writer);
 	}
 }

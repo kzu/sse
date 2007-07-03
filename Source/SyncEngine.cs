@@ -138,12 +138,22 @@ namespace SimpleSharing
 						break;
 					case MergeOperation.Deleted:
 						xmlRepo.Remove(result.Proposed.XmlItem.Id);
+						result.Proposed.Sync.ItemTimestamp = DateTime.Now;
 						syncRepo.Save(result.Proposed.Sync);
 						updateSync = true;
 						break;
 					case MergeOperation.Updated:
 					case MergeOperation.Conflict:
-						result.Proposed.Sync.ItemTimestamp = xmlRepo.Update(result.Proposed.XmlItem);
+						// TODO: if there's a conflict but the winner is a 
+						// delete, should we delete from the xmlRepo?
+						if (!result.Proposed.Sync.Deleted)
+						{
+							result.Proposed.Sync.ItemTimestamp = xmlRepo.Update(result.Proposed.XmlItem);
+						}
+						else
+						{
+							result.Proposed.Sync.ItemTimestamp = DateTime.Now;
+						}
 						syncRepo.Save(result.Proposed.Sync);
 						updateSync = true;
 						break;

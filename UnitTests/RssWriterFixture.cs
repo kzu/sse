@@ -39,15 +39,15 @@ namespace SimpleSharing.Tests
 
 			XmlElement output = GetElement(sw.ToString());
 
-			Assert.AreEqual(1, EvaluateCount(output, "/feed"));
-			Assert.AreEqual(1, EvaluateCount(output, "/feed/sx:sharing"));
-			Assert.AreEqual(Timestamp.ToString(feed.Sharing.Expires.Value), EvaluateString(output, "/feed/sx:sharing/@expires"));
-			Assert.AreEqual("http://kzu/full", EvaluateString(output, "/feed/sx:sharing/sx:related/@link"));
-			Assert.AreEqual("Complete feed", EvaluateString(output, "/feed/sx:sharing/sx:related/@title"));
-			Assert.AreEqual(3, EvaluateCount(output, "/feed/item"));
-			Assert.AreEqual(3, EvaluateCount(output, "/feed/item/sx:sync"));
-			Assert.AreEqual(3, EvaluateCount(output, "/feed/item/sx:sync/sx:history"));
-			Assert.AreEqual(3, EvaluateCount(output, "/feed/item/sx:sync/sx:history[@sequence=1]"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel/sx:sharing"));
+			Assert.AreEqual(Timestamp.ToString(feed.Sharing.Expires.Value), EvaluateString(output, "/rss/channel/sx:sharing/@expires"));
+			Assert.AreEqual("http://kzu/full", EvaluateString(output, "/rss/channel/sx:sharing/sx:related/@link"));
+			Assert.AreEqual("Complete feed", EvaluateString(output, "/rss/channel/sx:sharing/sx:related/@title"));
+			Assert.AreEqual(3, EvaluateCount(output, "/rss/channel/item"));
+			Assert.AreEqual(3, EvaluateCount(output, "/rss/channel/item/sx:sync"));
+			Assert.AreEqual(3, EvaluateCount(output, "/rss/channel/item/sx:sync/sx:history"));
+			Assert.AreEqual(3, EvaluateCount(output, "/rss/channel/item/sx:sync/sx:history[@sequence=1]"));
 		}
 
 		[TestMethod]
@@ -73,16 +73,16 @@ namespace SimpleSharing.Tests
 
 			XmlNode output = GetElement(sw.ToString());
 
-			Assert.AreEqual(1, EvaluateCount(output, "/feed"));
-			Assert.AreEqual(1, EvaluateCount(output, "/feed/sx:sharing"));
-			Assert.AreEqual("http://kzu/full", EvaluateString(output, "/feed/sx:sharing/sx:related/@link"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel/sx:sharing"));
+			Assert.AreEqual("http://kzu/full", EvaluateString(output, "/rss/channel/sx:sharing/sx:related/@link"));
 			// We get two items, as the one which was created for yesterday, 
 			// would be in the middle of the day, while the "last N days" logic 
 			// is since the starting of yesterday.
-			Assert.AreEqual(2, EvaluateCount(output, "/feed/item"));
-			Assert.AreEqual(2, EvaluateCount(output, "/feed/item/sx:sync"));
-			Assert.AreEqual(2, EvaluateCount(output, "/feed/item/sx:sync/sx:history"));
-			Assert.AreEqual(2, EvaluateCount(output, "/feed/item/sx:sync/sx:history[@sequence=1]"));
+			Assert.AreEqual(2, EvaluateCount(output, "/rss/channel/item"));
+			Assert.AreEqual(2, EvaluateCount(output, "/rss/channel/item/sx:sync"));
+			Assert.AreEqual(2, EvaluateCount(output, "/rss/channel/item/sx:sync/sx:history"));
+			Assert.AreEqual(2, EvaluateCount(output, "/rss/channel/item/sx:sync/sx:history[@sequence=1]"));
 		}
 
 		[TestMethod]
@@ -111,12 +111,12 @@ namespace SimpleSharing.Tests
 
 			XmlNode output = GetElement(sw.ToString());
 
-			Assert.AreEqual(1, EvaluateCount(output, "/feed"));
-			Assert.AreEqual(1, EvaluateCount(output, "/feed/sx:sharing"));
-			Assert.AreEqual("http://kzu/full", EvaluateString(output, "/feed/sx:sharing/sx:related/@link"));
-			Assert.AreEqual(1, EvaluateCount(output, "/feed/item"));
-			Assert.AreEqual(1, EvaluateCount(output, "/feed/item/sx:sync"));
-			Assert.AreEqual(true, XmlConvert.ToBoolean(EvaluateString(output, "/feed/item/sx:sync/@deleted")));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel/sx:sharing"));
+			Assert.AreEqual("http://kzu/full", EvaluateString(output, "/rss/channel/sx:sharing/sx:related/@link"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel/item"));
+			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel/item/sx:sync"));
+			Assert.AreEqual(true, XmlConvert.ToBoolean(EvaluateString(output, "/rss/channel/item/sx:sync/@deleted")));
 		}
 	}
 }

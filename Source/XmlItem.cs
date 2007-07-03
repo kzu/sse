@@ -26,7 +26,6 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
 			Guard.ArgumentNotNullOrEmptyString(title, "title");
-			Guard.ArgumentNotNullOrEmptyString(description, "description");
 			Guard.ArgumentNotNull(payload, "payload");
 
 			this.id = id;

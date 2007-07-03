@@ -13,7 +13,6 @@ namespace SimpleSharing
 	{
 		string repositoryId = String.Empty;
 		string tableNameFormat;
-		Database database;
 
 		public DbSyncRepository(Database database)
 			: this(database, null)
@@ -21,7 +20,7 @@ namespace SimpleSharing
 		}
 
 		public DbSyncRepository(Database database, string repositoryId)
-			: base(database, FormatMainTableName(repositoryId, "Sync"))
+			: base(database)
 		{
 			Guard.ArgumentNotNull(database, "database");
 
@@ -181,23 +180,32 @@ namespace SimpleSharing
 
 		protected override void InitializeSchema(DbConnection cn)
 		{
-			DbCommand cmd = cn.CreateCommand();
-			cmd.CommandType = CommandType.Text;
-			cmd.Connection = cn;
-			cmd.CommandText = FormatSql(@"
+			if (!TableExists(cn, FormatMainTableName(repositoryId, "Sync")))
+			{
+				DbCommand cmd = cn.CreateCommand();
+				cmd.CommandType = CommandType.Text;
+				cmd.Connection = cn;
+				cmd.CommandText = FormatSql(@"
 						CREATE TABLE [{0}Sync](
 							[Id] NVARCHAR(300) NOT NULL PRIMARY KEY,
 							[Sync] [NTEXT] NULL, 
 							[ItemTimestamp] datetime NOT NULL
 						)");
-			cmd.ExecuteNonQuery();
+				cmd.ExecuteNonQuery();
+			}
 
-			cmd.CommandText = FormatSql(@"
+			if (!TableExists(cn, FormatMainTableName(repositoryId, "LastSync")))
+			{
+				DbCommand cmd = cn.CreateCommand();
+				cmd.CommandType = CommandType.Text;
+				cmd.Connection = cn;
+				cmd.CommandText = FormatSql(@"
 						CREATE TABLE [{0}LastSync](
 							[Feed] NVARCHAR(1000) NOT NULL PRIMARY KEY,
 							[LastSync] [datetime] NOT NULL
 						)");
-			cmd.ExecuteNonQuery();
+				cmd.ExecuteNonQuery();
+			}
 		}
 
 		private static string FormatMainTableName(string repositoryId, string tableName)
