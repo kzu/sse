@@ -63,7 +63,9 @@ namespace SimpleSharing
 			// IXmlRepository implementation.
 
 			string id = incomingItem.XmlItem.Id;
-			IXmlItem localItem = xmlRepository.Get(id);
+			IXmlItem localItem = null;
+			if (xmlRepository.Contains(id))
+				localItem = xmlRepository.Get(id);
 			Sync sync = null;
 
 			if (localItem == null)
@@ -145,7 +147,7 @@ namespace SimpleSharing
 			L.AddRange(localItem.Sync.Conflicts);
 			localItem.Sync.Conflicts.Clear();
 			L.Add(localItem);
-			
+
 
 			//3.3.3
 			List<Item> I = new List<Item>();
@@ -210,7 +212,7 @@ namespace SimpleSharing
 		{
 			List<Item> resOuter = new List<Item>(outerCollection);
 			List<Item> resInner = new List<Item>(innerCollection);
-			
+
 			// Collections must be modified from this method.
 			foreach (Item x in outerCollection)
 			{
@@ -289,7 +291,7 @@ namespace SimpleSharing
 			if (first.Sync.LastUpdate.When == null) return false;
 
 			bool firstWins = second.Sync.LastUpdate.When == null ||
-				   (first.Sync.LastUpdate.When > second.Sync.LastUpdate.When);
+					(first.Sync.LastUpdate.When > second.Sync.LastUpdate.When);
 
 			if (firstWins) winner = first;
 
@@ -303,7 +305,7 @@ namespace SimpleSharing
 			if (first.Sync.LastUpdate.By == null) return false;
 
 			bool firstWins = second.Sync.LastUpdate.By == null ||
-				   (second.Sync.LastUpdate.By != null &&
+					(second.Sync.LastUpdate.By != null &&
 					!first.Sync.LastUpdate.By.Equals(second.Sync.LastUpdate.By) &&
 					first.Sync.LastUpdate.By.Length > second.Sync.LastUpdate.By.Length
 					);
