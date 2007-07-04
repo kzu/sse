@@ -48,6 +48,9 @@ namespace SimpleSharing
 				if (IsItemElement(reader, itemName, XmlNodeType.Element))
 				{
 					yield return ReadItemImpl(reader);
+
+					if (ItemRead != null)
+						ItemRead(this, EventArgs.Empty);
 				}
 			}
 			while (reader.Read());
