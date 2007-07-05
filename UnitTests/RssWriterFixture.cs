@@ -137,5 +137,55 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(1, EvaluateCount(output, "/rss/channel/item/sx:sync"));
 			Assert.AreEqual(true, XmlConvert.ToBoolean(EvaluateString(output, "/rss/channel/item/sx:sync/@deleted")));
 		}
+
+		[TestMethod]
+		public void ShouldWriteHistoryWithNullWhen()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete));
+
+			XmlElement payload = new XmlDocument().CreateElement("payload");
+			payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+			Item item = new Item(
+				new XmlItem("foo", "bar", payload),
+				Behaviors.Create("1", "kzu", null, false));
+
+			FeedWriter writer = new RssFeedWriter(xw);
+			writer.Write(feed, item);
+
+			xw.Flush();
+		}
+
+		[TestMethod]
+		public void ShouldNotWrapPayload()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete));
+
+			XmlElement payload = new XmlDocument().CreateElement("payload");
+			payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+			Item item = new Item(
+				new XmlItem("foo", "bar", payload),
+				Behaviors.Create("1", "kzu", null, false));
+
+			FeedWriter writer = new RssFeedWriter(xw);
+			writer.Write(feed, item);
+
+			xw.Flush();
+
+			Assert.IsFalse(sw.ToString().Contains("<payload>"));
+		}
 	}
 }

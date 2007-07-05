@@ -118,7 +118,8 @@ namespace SimpleSharing
 				// <sx:history>
 				writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.History, Schema.Namespace);
 				writer.WriteAttributeString(Schema.AttributeNames.Sequence, XmlConvert.ToString(history.Sequence));
-				writer.WriteAttributeString(Schema.AttributeNames.When, Timestamp.ToString(history.When.Value));
+				if (history.When.HasValue)
+					writer.WriteAttributeString(Schema.AttributeNames.When, Timestamp.ToString(history.When.Value));
 				writer.WriteAttributeString(Schema.AttributeNames.By, history.By);
 				// </sx:history>
 				writer.WriteEndElement();
