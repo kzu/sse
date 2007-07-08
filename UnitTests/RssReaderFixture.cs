@@ -308,8 +308,9 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, items2.Count);
 		}
 
+		[Ignore]
 		[TestMethod]
-		public void ShouldReadTwoItemsFromFile()
+		public void ShouldReadTwoItemsFromBadSSEDataFeed()
 		{
 			string xml = @"
 <rss xmlns:sx='http://www.microsoft.com/schemas/sse' version='2.0'>
