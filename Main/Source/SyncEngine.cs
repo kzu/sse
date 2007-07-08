@@ -23,16 +23,16 @@ namespace SimpleSharing
 
 		public IEnumerable<Item> Export()
 		{
-			return BuildItems(xmlRepo.GetAll());
+			return BuildItems(xmlRepo.GetAll(), DateTime.MinValue);
 		}
 
 		public IEnumerable<Item> Export(int days)
 		{
-			return BuildItems(xmlRepo.GetAllSince(
-				DateTime.Today.Subtract(TimeSpan.FromDays(days))));
+			DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(days));
+			return BuildItems(xmlRepo.GetAllSince(since), since);
 		}
 
-		private IEnumerable<Item> BuildItems(IEnumerable<IXmlItem> xmlItems)
+		private IEnumerable<Item> BuildItems(IEnumerable<IXmlItem> xmlItems, DateTime since)
 		{
 			// Search deleted items.
 			// TODO: Is there a better way than iterating every sync?
@@ -52,10 +52,11 @@ namespace SimpleSharing
 				}
 				else
 				{
-					sync = SynchronizeSyncFromItem(xml, sync);
+					sync = UpdateSyncIfItemTimestampChanged(xml, sync);
 				}
 
-				yield return new Item(xml, sync);
+				if (HasChangedSince(since, xml, sync))
+					yield return new Item(xml, sync);
 
 				// Process deleted items mixed with regular 
 				// items, so that we don't take as much time
@@ -88,6 +89,18 @@ namespace SimpleSharing
 			}
 		}
 
+		private static bool HasChangedSince(DateTime since, IXmlItem xml, Sync sync)
+		{
+			if (sync.LastUpdate.When.HasValue)
+			{
+				return sync.LastUpdate.When.Value >= since;
+			}
+			else
+			{
+				return xml.Timestamp >= since;
+			}
+		}
+
 		public IEnumerable<Item> ExportConflicts()
 		{
 			foreach (Sync sync in syncRepo.GetConflicts())
@@ -105,7 +118,7 @@ namespace SimpleSharing
 				}
 				else
 				{
-					itemSync = SynchronizeSyncFromItem(item, sync);
+					itemSync = UpdateSyncIfItemTimestampChanged(item, sync);
 				}
 				
 				yield return new Item(item, itemSync);
@@ -137,7 +150,7 @@ namespace SimpleSharing
 
 			foreach (ItemMergeResult result in items)
 			{
-				SynchronizeItemFromSync(result.Proposed);
+				UpdateItemTimestampIfSyncHasWhen(result.Proposed);
 
 				if (result.Operation != MergeOperation.None &&
 					result.Proposed != null &&
@@ -272,7 +285,7 @@ namespace SimpleSharing
 		/// update will be added. Used when exporting/retrieving 
 		/// items from the local stores.
 		/// </summary>
-		private Sync SynchronizeSyncFromItem(IXmlItem item, Sync sync)
+		private Sync UpdateSyncIfItemTimestampChanged(IXmlItem item, Sync sync)
 		{
 			if (item.Timestamp > sync.ItemTimestamp)
 			{
@@ -293,7 +306,7 @@ namespace SimpleSharing
 		/// SynchronizeSyncFromItem, and is used for incoming items
 		/// being imported.
 		/// </summary>
-		private void SynchronizeItemFromSync(Item item)
+		private void UpdateItemTimestampIfSyncHasWhen(Item item)
 		{
 			if (item != null &&
 				item.XmlItem != null && 
