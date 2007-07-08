@@ -15,7 +15,11 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(sync, "sync");
 
-			this.xmlItem = xmlItem;
+			if (xmlItem == null)
+				this.xmlItem = new NullXmlItem(sync.Id);
+			else
+				this.xmlItem = xmlItem;
+
 			this.sync = sync;
 		}
 
