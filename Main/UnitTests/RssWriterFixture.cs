@@ -187,5 +187,121 @@ namespace SimpleSharing.Tests
 
 			Assert.IsFalse(sw.ToString().Contains("<payload>"));
 		}
+
+		[TestMethod]
+		public void ShouldAddAuthorEmailFromLastUpdateIfValidEmail()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			using (XmlWriter xw = XmlWriter.Create(sw, set))
+			{
+				Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+
+				XmlElement payload = new XmlDocument().CreateElement("payload");
+				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+				Item item = new Item(
+					new XmlItem("foo", "bar", payload),
+					Behaviors.Create("1", "nospam@clariusconsulting.net", null, false));
+
+				FeedWriter writer = new RssFeedWriter(xw);
+				writer.Write(feed, item);
+			}
+
+			using (XmlReader reader = GetReader(sw.ToString()))
+			{
+				Assert.IsTrue(reader.ReadToDescendant("author"));
+				Assert.AreEqual("nospam@clariusconsulting.net", reader.ReadElementContentAsString());				
+			}
+		}
+
+		[TestMethod]
+		public void ShouldGenerateAuthorEmailFromLastUpdateIfInvalidEmail()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			using (XmlWriter xw = XmlWriter.Create(sw, set))
+			{
+				Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+
+				XmlElement payload = new XmlDocument().CreateElement("payload");
+				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+				Item item = new Item(
+					new XmlItem("foo", "bar", payload),
+					Behaviors.Create("1", "MACHINE\\UserName", null, false));
+
+				FeedWriter writer = new RssFeedWriter(xw);
+				writer.Write(feed, item);
+			}
+
+			using (XmlReader reader = GetReader(sw.ToString()))
+			{
+				Assert.IsTrue(reader.ReadToDescendant("author"));
+				Assert.AreEqual("UserName@MACHINE.com", reader.ReadElementContentAsString());
+			}
+		}
+
+		[TestMethod]
+		public void ShouldGenerateAuthorEmailFromLastUpdateIfDeviceGuid()
+		{
+			string deviceId = Guid.NewGuid().ToString();
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			using (XmlWriter xw = XmlWriter.Create(sw, set))
+			{
+				Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+
+				XmlElement payload = new XmlDocument().CreateElement("payload");
+				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+				Item item = new Item(
+					new XmlItem("foo", "bar", payload),
+					Behaviors.Create("1", deviceId, null, false));
+
+				FeedWriter writer = new RssFeedWriter(xw);
+				writer.Write(feed, item);
+			}
+
+			using (XmlReader reader = GetReader(sw.ToString()))
+			{
+				Assert.IsTrue(reader.ReadToDescendant("author"));
+				Assert.AreEqual(deviceId + "@example.com", reader.ReadElementContentAsString());
+			}
+		}
+
+		[TestMethod]
+		public void ShouldGenerateAuthorEmailFromDeviceAuthorIfNoBy()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			using (XmlWriter xw = XmlWriter.Create(sw, set))
+			{
+				Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+
+				XmlElement payload = new XmlDocument().CreateElement("payload");
+				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+				Item item = new Item(
+					new XmlItem("foo", "bar", payload),
+					Behaviors.Create("1", null, DateTime.Now, false));
+
+				FeedWriter writer = new RssFeedWriter(xw);
+				writer.Write(feed, item);
+			}
+
+			using (XmlReader reader = GetReader(sw.ToString()))
+			{
+				Assert.IsTrue(reader.ReadToDescendant("author"));
+
+				string[] values = DeviceAuthor.Current.Split('\\');
+
+				Assert.AreEqual(values[1] + "@" + values[0] + ".com", reader.ReadElementContentAsString());
+			}
+		}
 	}
 }
