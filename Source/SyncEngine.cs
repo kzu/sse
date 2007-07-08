@@ -34,6 +34,11 @@ namespace SimpleSharing
 
 		private IEnumerable<Item> BuildItems(IEnumerable<IXmlItem> xmlItems)
 		{
+			// Search deleted items.
+			// TODO: Is there a better way than iterating every sync?
+			IEnumerable<Sync> allSync = syncRepo.GetAll();
+			IEnumerator<Sync> syncEnum = allSync.GetEnumerator();
+
 			foreach (IXmlItem xml in xmlItems)
 			{
 				Sync sync = syncRepo.Get(xml.Id);
@@ -51,15 +56,31 @@ namespace SimpleSharing
 				}
 
 				yield return new Item(xml, sync);
+
+				// Process deleted items mixed with regular 
+				// items, so that we don't take as much time
+				// at the end of the item building process.
+				// Hopefully, both should finish about the same time.
+
+				if (syncEnum.MoveNext())
+				{
+					if (!xmlRepo.Contains(syncEnum.Current.Id) && !syncEnum.Current.Deleted)
+					{
+						Sync updatedSync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
+						syncRepo.Save(updatedSync);
+
+						yield return new Item(null, updatedSync);
+					}
+				}
 			}
 
-			// Search deleted items.
-			// TODO: Is there a better way than iterating every sync?
-			foreach (Sync sync in syncRepo.GetAll())
+			// If there are remaining items in sync, 
+			// keep processing 'till the end.
+			while (syncEnum.MoveNext())
 			{
-				if (!xmlRepo.Contains(sync.Id) && !sync.Deleted)
+				if (!xmlRepo.Contains(syncEnum.Current.Id) && !syncEnum.Current.Deleted)
 				{
-					Sync updatedSync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, true);
+					Sync updatedSync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
 					syncRepo.Save(updatedSync);
 
 					yield return new Item(null, updatedSync);
