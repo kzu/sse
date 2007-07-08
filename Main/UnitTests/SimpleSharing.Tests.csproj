@@ -73,6 +73,7 @@
     <Compile Include="AccessSyncRepositoryFixture.cs" />
     <Compile Include="FeedReaderFixture.cs" />
     <Compile Include="MSLiveLabsFixture.cs" />
+    <Compile Include="NullXmlItemFixture.cs" />
     <Compile Include="TimestampFixture.cs" />
     <Compile Include="Model\SharingFixture.cs" />
     <Compile Include="XmlItemFixture.cs" />

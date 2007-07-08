@@ -79,6 +79,12 @@ namespace SimpleSharing
 
 		private void WriteSharing(Sharing sharing)
 		{
+			if (sharing.Expires == null &&
+				sharing.Since == null &&
+				sharing.Until == null &&
+				sharing.Related.Count == 0)
+				return;
+
 			// <sx:sharing>
 			writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Sharing, Schema.Namespace);
 			if (sharing.Since != null)

@@ -29,7 +29,7 @@ namespace SimpleSharing.Tests
 
 			FeedWriter writer = new RssFeedWriter(xw);
 
-			writer.Write(feed, new Item(new NullXmlItem("1", null), new Sync("1"))); 
+			writer.Write(feed, new Item(new NullXmlItem("1"), new Sync("1"))); 
 
 			xw.Flush();
 		}
