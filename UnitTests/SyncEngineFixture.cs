@@ -91,6 +91,66 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldExportByDaysWithItemTimestampIfNoSync()
+		{
+			MockXmlRepository xmlrepo = new MockXmlRepository();
+			MockSyncRepository syncrepo = new MockSyncRepository();
+
+			IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
+			xi.Id = Guid.NewGuid().ToString();
+
+			xmlrepo.Add(xi);
+
+			SyncEngine engine = new SyncEngine(xmlrepo, syncrepo);
+
+			IEnumerable<Item> items = engine.Export(1);
+
+			Assert.AreEqual(1, Count(items));
+		}
+
+		[TestMethod]
+		public void ShouldExportByDaysWithItemTimestampIfNoSyncLastUpdateWhen()
+		{
+			MockXmlRepository xmlrepo = new MockXmlRepository();
+			MockSyncRepository syncrepo = new MockSyncRepository();
+
+			IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
+			xi.Id = Guid.NewGuid().ToString();
+			Sync sync = Behaviors.Create(xi.Id, "kzu", null, false);
+			Item item = new Item(xi, sync);
+
+			xmlrepo.Add(xi);
+			syncrepo.Save(sync);
+
+			SyncEngine engine = new SyncEngine(xmlrepo, syncrepo);
+
+			IEnumerable<Item> items = engine.Export(1);
+
+			Assert.AreEqual(1, Count(items));
+		}
+
+		[TestMethod]
+		public void ShouldExportByDaysHonorSyncLastUpdateWhen()
+		{
+			MockXmlRepository xmlrepo = new MockXmlRepository();
+			MockSyncRepository syncrepo = new MockSyncRepository();
+
+			IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
+			xi.Id = Guid.NewGuid().ToString();
+			Sync sync = Behaviors.Create(xi.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(2)), false);
+			Item item = new Item(xi, sync);
+
+			xmlrepo.Add(xi);
+			syncrepo.Save(sync);
+
+			SyncEngine engine = new SyncEngine(xmlrepo, syncrepo);
+
+			IEnumerable<Item> items = engine.Export(1);
+
+			Assert.AreEqual(0, Count(items));
+		}
+
+		[TestMethod]
 		public void ShouldUpdateSyncOnExport()
 		{
 			MockXmlRepository xmlrepo = new MockXmlRepository();
@@ -218,7 +278,7 @@ namespace SimpleSharing.Tests
 			Item incoming = item.Clone();
 
 			Thread.Sleep(1000);
-			
+
 			// Local editing.
 			item = new Item(new XmlItem(id, "changed", item.XmlItem.Description,
 				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
@@ -750,7 +810,7 @@ namespace SimpleSharing.Tests
 			Expect.Once.On(syncRepo).Method("Save");
 
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
-			
+
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", null, false);
 			XmlItem item = new XmlItem("foo", "bar", GetElement("<payload/>"));
 
@@ -846,7 +906,7 @@ namespace SimpleSharing.Tests
 			{
 				writer.WriteEndElement();
 			}
-			
+
 		}
 
 		//class NotUpdatingRepository : IXmlRepository
