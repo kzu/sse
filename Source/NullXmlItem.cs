@@ -8,16 +8,15 @@ namespace SimpleSharing
 	// TODO: review the need for this class.
 	public class NullXmlItem : IXmlItem
 	{
-		private string id;
-		private DateTime lastUpdated = DateTime.Now;
-		private XmlElement emptyPayload;
+		string id;
+		DateTime timestamp = DateTime.MinValue;
+		XmlElement emptyPayload;
 
-		public NullXmlItem(string id, DateTime? lastUpdated)
+		public NullXmlItem(string id)
 		{
-			this.id = id;
-			if (lastUpdated.HasValue)
-				this.lastUpdated = lastUpdated.Value;
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
+			this.id = id;
 			emptyPayload = new XmlDocument().CreateElement("payload");
 		}
 
@@ -29,8 +28,8 @@ namespace SimpleSharing
 
 		public DateTime Timestamp
 		{
-			get { return lastUpdated; }
-			set { lastUpdated = value; }
+			get { return timestamp; }
+			set { timestamp = value; }
 		}
 
 		public string Title
@@ -65,7 +64,7 @@ namespace SimpleSharing
 
 		protected virtual IXmlItem DoClone()
 		{
-			return new NullXmlItem(id, lastUpdated);
+			return new NullXmlItem(id);
 		}
 
 		#endregion
@@ -87,8 +86,8 @@ namespace SimpleSharing
 			if (Object.ReferenceEquals(obj1, obj2)) return true;
 			if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
 			{
-				return obj1.id == obj2.id &&
-					obj1.lastUpdated == obj2.lastUpdated;
+				return obj1.id == obj2.id && 
+					obj1.timestamp == obj2.timestamp;
 			}
 
 			return false;
@@ -96,10 +95,7 @@ namespace SimpleSharing
 
 		public override int GetHashCode()
 		{
-			int hash = id.GetHashCode();
-			hash = hash ^ lastUpdated.GetHashCode();
-
-			return hash;
+			return id.GetHashCode() ^ timestamp.GetHashCode();
 		}
 
 		#endregion

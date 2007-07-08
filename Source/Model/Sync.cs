@@ -81,7 +81,7 @@ namespace SimpleSharing
 		/// Adds the conflict history immediately after the topmost history.
 		/// </summary>
 		/// <remarks>Used for conflict resolution only.</remarks>
-		public void AddConflictHistory(History history)
+		internal void AddConflictHistory(History history)
 		{
 			History topmost = updatesHistory.Pop();
 			updatesHistory.Push(history);

@@ -113,7 +113,6 @@ namespace SimpleSharing
 			// actually import items, which is undesirable.
 
 			List<Item> conflicts = new List<Item>();
-			bool updateSync = false;
 
 			foreach (ItemMergeResult result in items)
 			{
@@ -133,14 +132,12 @@ namespace SimpleSharing
 						{
 							result.Proposed.Sync.ItemTimestamp = xmlRepo.Add(result.Proposed.XmlItem);
 							syncRepo.Save(result.Proposed.Sync);
-							updateSync = true;
 						}
 						break;
 					case MergeOperation.Deleted:
 						xmlRepo.Remove(result.Proposed.XmlItem.Id);
 						result.Proposed.Sync.ItemTimestamp = DateTime.Now;
 						syncRepo.Save(result.Proposed.Sync);
-						updateSync = true;
 						break;
 					case MergeOperation.Updated:
 					case MergeOperation.Conflict:
@@ -155,7 +152,6 @@ namespace SimpleSharing
 							result.Proposed.Sync.ItemTimestamp = DateTime.Now;
 						}
 						syncRepo.Save(result.Proposed.Sync);
-						updateSync = true;
 						break;
 					case MergeOperation.None:
 						break;
@@ -164,8 +160,7 @@ namespace SimpleSharing
 				}
 			}
 
-			if (updateSync)
-				syncRepo.SetLastSync(feedUrl, DateTime.Now);
+			syncRepo.SetLastSync(feedUrl, DateTime.Now);
 
 			return conflicts;
 		}

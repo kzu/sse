@@ -307,5 +307,39 @@ namespace SimpleSharing.Tests
 
 			Assert.AreEqual(2, items2.Count);
 		}
+
+		[TestMethod]
+		public void ShouldReadTwoItemsFromFile()
+		{
+			string xml = @"
+<rss xmlns:sx='http://www.microsoft.com/schemas/sse' version='2.0'>
+  <channel>
+    <title>title</title>
+    <description>description</description>
+    <link>link</link>
+    <sx:sharing />
+    <item>
+      <title>Placeholder</title>
+      <description>Placeholder</description>
+      <sx:sync id='e4920921-46c3-4dc1-8eba-57db58595741' updates='0' deleted='false' noconflicts='false' />
+    </item>
+    <item>
+      <title>Placeholder</title>
+      <description>Placeholder</description>
+      <sx:sync id='bceb5282-1bd2-4422-ab9f-c449b3bf0ed0' updates='0' deleted='false' noconflicts='false' />
+    </item>
+  </channel>
+</rss>";
+
+			RssFeedReader reader = new RssFeedReader(GetReader(xml));
+			Feed feed;
+			IEnumerable<Item> items;
+
+			reader.Read(out feed, out items);
+
+			items = new List<Item>(items);
+
+			Assert.AreEqual(2, Count(items));
+		}
 	}
 }
