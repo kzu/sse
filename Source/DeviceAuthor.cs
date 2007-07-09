@@ -13,7 +13,7 @@ namespace SimpleSharing
 			get
 			{
 #if !PocketPC
-				return Environment.MachineName + "\\" + Thread.CurrentPrincipal.Identity.Name;
+				return Thread.CurrentPrincipal.Identity.Name;
 #else
 				// TODO: create IAuditProvider to get/set who/when values.
 				return GetDeviceID(AppDomain.CurrentDomain.FriendlyName).ToString();
