@@ -69,6 +69,24 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(3, EvaluateCount(output, "/rss/channel/item/sx:sync/sx:history[@sequence=1]"));
 		}
 
+
+		[TestMethod]
+		public void ShouldWriteIfNullSharing()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			Feed feed = new Feed("Hello World", "http://kzu", "this is my feed");
+
+			FeedWriter writer = new RssFeedWriter(xw);
+			writer.Write(feed);
+
+			xw.Flush();
+			Console.WriteLine(sw.ToString());
+		}
+
 		[TestMethod]
 		public void ShouldPublishLast1Day()
 		{

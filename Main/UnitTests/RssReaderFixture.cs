@@ -174,6 +174,77 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldReadNoSharingAsEmptySharing()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <item>
+   <title>Buy groceries</title>
+   <description>Get milk, eggs, butter and bread</description>
+   <sx:sync id='0a7903db47fb0fff' updates='3'>
+    <sx:history sequence='3' by='JEO2000'/>
+    <sx:history sequence='2' by='REO1750'/>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>
+  </item>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			Assert.IsNotNull(feed.Sharing);
+		}
+
+		[TestMethod]
+		public void ShouldSkipAuthorElementFromPayload()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <sx:sharing version='0.93' since='2005-02-13T18:30:02Z'
+    until='2005-05-23T18:30:02Z' >
+   <sx:related link='http://x.com/all.xml' type='complete' />
+   <sx:related link='http://y.net/B.xml' type='aggregated' 
+    title='To Do List (Jacks Copy)' />
+  </sx:sharing>
+  <item>
+   <title>Buy groceries</title>
+   <description>Get milk, eggs, butter and bread</description>
+   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
+	<author>kzu@gmail.com</author>
+   <customer id='1' />
+   <sx:sync id='0a7903db47fb0fff' updates='3'>
+    <sx:history sequence='3' by='JEO2000'/>
+    <sx:history sequence='2' by='REO1750'/>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>
+  </item>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			Assert.IsFalse(GetFirst<Item>(i).XmlItem.Payload.OuterXml.Contains("<author>"));
+		}
+
+		[TestMethod]
 		public void ShouldReadItemsLiveFeed()
 		{
 			using (XmlReader xr = XmlReader.Create("feed.sse"))
