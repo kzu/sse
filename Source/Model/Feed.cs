@@ -19,7 +19,6 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNullOrEmptyString(title, "title");
 			Guard.ArgumentNotNullOrEmptyString(linkUrl, "linkUrl");
-			Guard.ArgumentNotNullOrEmptyString(description, "description");
 
 			this.title = title;
 			this.link = linkUrl;
