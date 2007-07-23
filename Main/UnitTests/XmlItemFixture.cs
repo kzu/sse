@@ -14,6 +14,16 @@ namespace SimpleSharing.Tests
 	public class XmlItemFixture : TestFixtureBase
 	{
 		[TestMethod]
+		public void ShouldGetHashcodeWithNullDescription()
+		{
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", null, DateTime.Now, GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title", null, i1.Timestamp, GetElement("<payload/>"));
+
+			Assert.AreEqual(i1, i2);
+			Assert.AreEqual(i1.GetHashCode(), i2.GetHashCode());
+		}
+
+		[TestMethod]
 		public void ShouldEqualWithSameValues()
 		{
 			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", DateTime.Now, GetElement("<payload/>"));

@@ -96,7 +96,8 @@ namespace SimpleSharing
 		{
 			int hash = id.GetHashCode();
 			hash = hash ^ title.GetHashCode();
-			hash = hash ^ description.GetHashCode();
+			if (description != null)
+				hash = hash ^ description.GetHashCode();
 			hash = hash ^ lastUpdated.GetHashCode();
 			hash = hash ^ payload.OuterXml.GetHashCode();
 
