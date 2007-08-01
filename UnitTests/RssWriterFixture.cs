@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.IO;
 using System.Xml.XPath;
-using System.Security.Principal;
+using System.Text.RegularExpressions;
 
 namespace SimpleSharing.Tests
 {
@@ -295,7 +295,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGenerateAuthorEmailFromDeviceAuthorIfNoBy()
 		{
-			AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+			Regex emailExp = new Regex(@"[a-z0-9+_-]+@[a-z0-9][a-z0-9-]*(\.[a-z0-9-]+)+", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
 			StringWriter sw = new StringWriter();
 			XmlWriterSettings set = new XmlWriterSettings();
@@ -319,9 +319,7 @@ namespace SimpleSharing.Tests
 			{
 				Assert.IsTrue(reader.ReadToDescendant("author"));
 
-				string[] values = DeviceAuthor.Current.Split('\\');
-
-				Assert.AreEqual(values[1] + "@" + values[0] + ".com", reader.ReadElementContentAsString());
+				Assert.IsTrue(emailExp.IsMatch(reader.ReadElementContentAsString()));
 			}
 		}
 	}
