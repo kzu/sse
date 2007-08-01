@@ -24,9 +24,12 @@ namespace SimpleSharing
 
 		public void Write(Feed feed, IEnumerable<Item> items)
 		{
-			// write feed root element: rss | atom
-			WriteStartFeed(feed, writer);
-			WriteSharing(feed.Sharing);
+			if (feed != null)
+			{
+				// write feed root element: rss | atom
+				WriteStartFeed(feed, writer);
+				WriteSharing(feed.Sharing);
+			}
 
 			foreach (Item item in items)
 			{
@@ -35,8 +38,11 @@ namespace SimpleSharing
 					ItemWritten(this, EventArgs.Empty);
 			}
 
-			// close feed root
-			WriteEndFeed(feed, writer);
+			if (feed != null)
+			{
+				// close feed root
+				WriteEndFeed(feed, writer);
+			}
 		}
 
 		private void Write(Item item)
