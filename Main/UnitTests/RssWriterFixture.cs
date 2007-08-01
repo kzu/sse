@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.IO;
 using System.Xml.XPath;
+using System.Security.Principal;
 
 namespace SimpleSharing.Tests
 {
@@ -294,6 +295,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGenerateAuthorEmailFromDeviceAuthorIfNoBy()
 		{
+			AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+
 			StringWriter sw = new StringWriter();
 			XmlWriterSettings set = new XmlWriterSettings();
 			set.Indent = true;

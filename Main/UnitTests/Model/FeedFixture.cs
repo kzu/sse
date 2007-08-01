@@ -15,42 +15,40 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldThrowIfTitleNull()
 		{
-			new Feed(null, "asdfas", "asdfasdf");
+			new Feed(null, "link", "description");
 		}
 
 		[ExpectedException(typeof(ArgumentException))]
 		[TestMethod]
 		public void ShouldThrowIfTitleEmpty()
 		{
-			new Feed(String.Empty, "asdfas", "asdfasdf");
+			new Feed(String.Empty, "link", "description");
 		}
 
-		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
-		public void ShouldThrowIfDescriptionNull()
+		public void ShouldNotThrowIfDescriptionNull()
 		{
-			new Feed("foo", null, "asdfasdf");
+			new Feed("title", "link", null);
 		}
 
-		[ExpectedException(typeof(ArgumentException))]
 		[TestMethod]
-		public void ShouldThrowIfDescriptionEmpty()
+		public void ShouldNotThrowIfDescriptionEmpty()
 		{
-			new Feed("foo", String.Empty, "asdfasdf");
+			new Feed("title", "link", String.Empty);
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
 		public void ShouldThrowIfLinkNull()
 		{
-			new Feed("asdfas", "asdfasdf", null);
+			new Feed("title", null, "description");
 		}
 
 		[ExpectedException(typeof(ArgumentException))]
 		[TestMethod]
 		public void ShouldThrowIfLinkEmpty()
 		{
-			new Feed("foo", "asdfas", String.Empty);
+			new Feed("title", "", "description");
 		}
 
 		[TestMethod]
