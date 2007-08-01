@@ -52,18 +52,16 @@ namespace SimpleSharing.Tests
 					DateTime.Now, GetElement("<foo id='bar'/>"));
 			// Save to xml repo only, as a regular app would do.
 			xmlRepo.Add(xmlItem);
-			Thread.Sleep(1000);
 
-			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
+			Sync sync = Behaviors.Create(id, "mypc\\user", DateTime.Now, false);
 			Item remoteItem = new Item(
 				xmlItem, sync);
 
-			Thread.Sleep(1000);
+			Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
 
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
+			Sync s = syncRepo.Get(id);
 
-			Assert.AreEqual(MergeOperation.Updated, result.Operation);
-			Assert.IsNotNull(result.Proposed);
+			Assert.IsNotNull(s);
 		}
 
 		[TestMethod]
@@ -72,7 +70,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 
 			Item remoteItem = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
@@ -91,7 +89,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					DateTime.Now, GetElement("<foo id='bar'/>")),
@@ -123,7 +121,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			string id = sync.Id;
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
@@ -154,7 +152,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item localItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
 					DateTime.Now, GetElement("<foo id='bar'/>")),
@@ -169,7 +167,7 @@ namespace SimpleSharing.Tests
 			Thread.Sleep(50);
 
 			// Local editing.
-			localSync = Behaviors.Update(localItem.Sync, DeviceAuthor.Current, DateTime.Now, false);
+			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
 				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
 				localSync);
@@ -198,7 +196,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					DateTime.Now, GetElement("<foo id='bar'/>")),
@@ -221,7 +219,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					DateTime.Now, GetElement("<foo id='bar'/>")),
@@ -236,7 +234,7 @@ namespace SimpleSharing.Tests
 			Thread.Sleep(50);
 
 			// Simulate editing.
-			sync = Behaviors.Update(item.Sync, DeviceAuthor.Current, DateTime.Now, false);
+			sync = Behaviors.Update(item.Sync, "mypc\\user", DateTime.Now, false);
 			item = new Item(new XmlItem(sync.Id, "changed", item.XmlItem.Description,
 				sync.LastUpdate.When.Value, item.XmlItem.Payload),
 				sync);
@@ -258,7 +256,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			IXmlRepository xmlRepo = new MockXmlRepository();
 
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item localItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
 					DateTime.Now, GetElement("<foo id='bar'/>")),
@@ -273,7 +271,7 @@ namespace SimpleSharing.Tests
 			Thread.Sleep(50);
 
 			// Local editing.
-			localSync = Behaviors.Update(localItem.Sync, DeviceAuthor.Current, DateTime.Now, false);
+			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
 				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
 				localSync);
@@ -296,7 +294,7 @@ namespace SimpleSharing.Tests
 			// Remote item won
 			Assert.AreEqual("REMOTE\\kzu", result.Proposed.Sync.LastUpdate.By);
 			Assert.AreEqual(1, result.Proposed.Sync.Conflicts.Count);
-			Assert.AreEqual(DeviceAuthor.Current, result.Proposed.Sync.Conflicts[0].Sync.LastUpdate.By);
+			Assert.AreEqual("mypc\\user", result.Proposed.Sync.Conflicts[0].Sync.LastUpdate.By);
 		}
 
 		[TestMethod]
@@ -307,7 +305,7 @@ namespace SimpleSharing.Tests
 
 			DateTime now = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
 
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item localItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
 					now, GetElement("<foo id='bar'/>")),
@@ -324,7 +322,7 @@ namespace SimpleSharing.Tests
 				remoteSync);
 
 			// Local editing.
-			localSync = Behaviors.Update(localItem.Sync, DeviceAuthor.Current, DateTime.Now, false);
+			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
 				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
 				localSync);
@@ -337,7 +335,7 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
 			// Local item won
-			Assert.AreEqual(DeviceAuthor.Current, result.Proposed.Sync.LastUpdate.By);
+			Assert.AreEqual("mypc\\user", result.Proposed.Sync.LastUpdate.By);
 			Assert.AreEqual(1, result.Proposed.Sync.Conflicts.Count);
 			Assert.AreEqual("REMOTE\\kzu", result.Proposed.Sync.Conflicts[0].Sync.LastUpdate.By);
 		}
@@ -436,14 +434,14 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void CreateShouldThrowExceptionIfIdNull()
 		{
-			Behaviors.Create(null, DeviceAuthor.Current, DateTime.Now, true);
+			Behaviors.Create(null, "mypc\\user", DateTime.Now, true);
 		}
 
 		[ExpectedException(typeof(ArgumentException))]
 		[TestMethod]
 		public void CreateShouldThrowExceptionIfIdEmpty()
 		{
-			Behaviors.Create("", DeviceAuthor.Current, DateTime.Now, true);
+			Behaviors.Create("", "mypc\\user", DateTime.Now, true);
 		}
 
 		[TestMethod]
@@ -469,7 +467,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldReturnSyncWithId()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), DeviceAuthor.Current, DateTime.Now, true);
+			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
 			Assert.AreEqual(id.ToString(), sync.Id);
 		}
 
@@ -477,7 +475,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldReturnSyncWithUpdatesEqualsToOne()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), DeviceAuthor.Current, DateTime.Now, true);
+			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
 			Assert.AreEqual(1, sync.Updates);
 		}
 
@@ -485,7 +483,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldHaveAHistory()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), DeviceAuthor.Current, DateTime.Now, true);
+			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
 			List<History> histories = new List<History>(sync.UpdatesHistory);
 			Assert.AreEqual(1, histories.Count);
 		}
@@ -494,7 +492,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldHaveHistorySequenceSameAsUpdateCount()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), DeviceAuthor.Current, DateTime.Now, true);
+			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
 			History history = new List<History>(sync.UpdatesHistory)[0];
 			Assert.AreEqual(sync.Updates, history.Sequence);
 		}
@@ -504,7 +502,7 @@ namespace SimpleSharing.Tests
 		{
 			Guid id = Guid.NewGuid();
 			DateTime time = DateTime.Now;
-			Sync sync = Behaviors.Create(id.ToString(), DeviceAuthor.Current, DateTime.Now, true);
+			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
 			History history = new List<History>(sync.UpdatesHistory)[0];
 			DatesEqualWithoutMillisecond(time, history.When.Value);
 		}
@@ -517,7 +515,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldThrowIfSyncNull()
 		{
-			Behaviors.Delete(null, DeviceAuthor.Current, DateTime.Now);
+			Behaviors.Delete(null, "mypc\\user", DateTime.Now);
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
@@ -531,7 +529,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldThrowIfWhenParameterNull()
 		{
-			Behaviors.Delete(new Sync(Guid.NewGuid().ToString()), DeviceAuthor.Current, null);
+			Behaviors.Delete(new Sync(Guid.NewGuid().ToString()), "mypc\\user", null);
 		}
 
 		[TestMethod]
@@ -539,7 +537,7 @@ namespace SimpleSharing.Tests
 		{
 			Sync sync = new Sync(new Guid().ToString());
 			int updates = sync.Updates;
-			sync = Behaviors.Delete(sync, DeviceAuthor.Current, DateTime.Now);
+			sync = Behaviors.Delete(sync, "mypc\\user", DateTime.Now);
 			Assert.AreEqual(updates + 1, sync.Updates);
 		}
 
@@ -547,7 +545,7 @@ namespace SimpleSharing.Tests
 		public void ShouldDeletionAttributeBeTrue()
 		{
 			Sync sync = new Sync(new Guid().ToString());
-			sync = Behaviors.Delete(sync, DeviceAuthor.Current, DateTime.Now);
+			sync = Behaviors.Delete(sync, "mypc\\user", DateTime.Now);
 			Assert.AreEqual(true, sync.Deleted);
 		}
 
