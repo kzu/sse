@@ -38,7 +38,7 @@ namespace SimpleSharing
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
 						CREATE TABLE [{0}Sync](
-							[Id] NVARCHAR(254) NOT NULL PRIMARY KEY,
+							[Id] TEXT NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL, 
 							[ItemTimestamp] DATETIME NOT NULL
 						)");
