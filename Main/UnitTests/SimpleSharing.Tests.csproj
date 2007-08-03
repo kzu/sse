@@ -15,6 +15,9 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Clarius.Net20.Public.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -72,7 +75,6 @@
     </Compile>
     <Compile Include="AccessSyncRepositoryFixture.cs" />
     <Compile Include="FeedReaderFixture.cs" />
-    <Compile Include="Guard.cs" />
     <Compile Include="MSLiveLabsFixture.cs" />
     <Compile Include="NullXmlItemFixture.cs" />
     <Compile Include="TimestampFixture.cs" />
