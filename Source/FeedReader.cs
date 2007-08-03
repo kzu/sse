@@ -221,30 +221,33 @@ namespace SimpleSharing
 
 				List<History> historyUpdates = new List<History>();
 
-				while (base.Read() && !IsEndSync())
+				if (!base.IsEmptyElement)
 				{
-					if (IsSseElement(this, Schema.ElementNames.History, XmlNodeType.Element))
+					while (base.Read() && !IsEndSync())
 					{
-						base.MoveToAttribute(Schema.AttributeNames.Sequence);
-						int sequence = XmlConvert.ToInt32(base.Value);
-						string by = null;
-						DateTime? when = null;
-
-						if (base.MoveToAttribute(Schema.AttributeNames.When))
-							when = DateTime.Parse(base.Value);
-						if (base.MoveToAttribute(Schema.AttributeNames.By))
-							by = base.Value;
-
-						historyUpdates.Add(new History(by, when, sequence));
-					}
-					else if (IsSseElement(this, Schema.ElementNames.Conflicts, XmlNodeType.Element))
-					{
-						while (base.Read() &&
-							!IsSseElement(this, Schema.ElementNames.Conflicts, XmlNodeType.EndElement))
+						if (IsSseElement(this, Schema.ElementNames.History, XmlNodeType.Element))
 						{
-							if (IsItemElement(this, itemName, XmlNodeType.Element))
+							base.MoveToAttribute(Schema.AttributeNames.Sequence);
+							int sequence = XmlConvert.ToInt32(base.Value);
+							string by = null;
+							DateTime? when = null;
+
+							if (base.MoveToAttribute(Schema.AttributeNames.When))
+								when = DateTime.Parse(base.Value);
+							if (base.MoveToAttribute(Schema.AttributeNames.By))
+								by = base.Value;
+
+							historyUpdates.Add(new History(by, when, sequence));
+						}
+						else if (IsSseElement(this, Schema.ElementNames.Conflicts, XmlNodeType.Element))
+						{
+							while (base.Read() &&
+								!IsSseElement(this, Schema.ElementNames.Conflicts, XmlNodeType.EndElement))
 							{
-								newSync.Conflicts.Add(feedReader.ReadItemImpl(base.BaseReader.ReadSubtree()));
+								if (IsItemElement(this, itemName, XmlNodeType.Element))
+								{
+									newSync.Conflicts.Add(feedReader.ReadItemImpl(base.BaseReader.ReadSubtree()));
+								}
 							}
 						}
 					}
