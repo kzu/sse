@@ -10,11 +10,15 @@ namespace SimpleSharing
 	public abstract class DbRepository
 	{
 		Database database;
-		bool initialized = false;
 
 		protected DbRepository(Database database)
 		{
 			this.database = database;
+			using (DbConnection cn = database.CreateConnection())
+			{
+				cn.Open();
+				InitializeSchema(cn);
+			}
 		}
 
 		protected Database Database
@@ -26,12 +30,6 @@ namespace SimpleSharing
 		{
 			DbConnection cn = database.CreateConnection();
 			cn.Open();
-
-			if (!initialized)
-			{
-				InitializeSchema(cn);
-				initialized = true;
-			}
 
 			return cn;
 		}
