@@ -10,24 +10,45 @@ namespace SimpleSharing
 	public abstract class DbRepository
 	{
 		Database database;
+		bool isInitialized;
 
 		protected DbRepository(Database database)
 		{
 			this.database = database;
+		}
+
+		protected void Initialize()
+		{
+			if (isInitialized) throw new InvalidOperationException();
+
 			using (DbConnection cn = database.CreateConnection())
 			{
 				cn.Open();
 				InitializeSchema(cn);
 			}
+
+			isInitialized = true;
 		}
 
 		protected Database Database
 		{
-			get { return database; }
+			get 
+			{
+				ThrowIfNotInitialized();
+				return database; 
+			}
 		}
 
+		private void ThrowIfNotInitialized()
+		{
+			if (!isInitialized) throw new InvalidOperationException();
+		}
+
+		[Obsolete("Use Database property directly.")]
 		protected DbConnection OpenConnection()
 		{
+			ThrowIfNotInitialized();
+
 			DbConnection cn = database.CreateConnection();
 			cn.Open();
 
