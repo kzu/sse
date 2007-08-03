@@ -72,6 +72,7 @@
     </Compile>
     <Compile Include="AccessSyncRepositoryFixture.cs" />
     <Compile Include="FeedReaderFixture.cs" />
+    <Compile Include="Guard.cs" />
     <Compile Include="MSLiveLabsFixture.cs" />
     <Compile Include="NullXmlItemFixture.cs" />
     <Compile Include="TimestampFixture.cs" />
@@ -130,14 +131,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="feed.sse">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Access2007.accdb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="feed.sse" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
 </Project>
