@@ -48,7 +48,12 @@ namespace SimpleSharing
 				writer.WriteElementString("description", item.XmlItem.Description);
 				foreach (XmlNode child in item.XmlItem.Payload.ChildNodes)
 				{
-					writer.WriteNode(new XmlNodeReader(child), false);
+					if (!((child.LocalName == "title" && child.NamespaceURI == "") ||
+						(child.LocalName == "description" && child.NamespaceURI == "") ||
+						(child.LocalName == "author" && child.NamespaceURI == "")))
+					{
+						writer.WriteNode(new XmlNodeReader(child), false);
+					}
 				}
 			}
 			else
