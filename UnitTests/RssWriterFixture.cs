@@ -70,7 +70,6 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(3, EvaluateCount(output, "/rss/channel/item/sx:sync/sx:history[@sequence=1]"));
 		}
 
-
 		[TestMethod]
 		public void ShouldWriteIfNullSharing()
 		{
@@ -204,7 +203,41 @@ namespace SimpleSharing.Tests
 
 			xw.Flush();
 
-			Assert.IsFalse(sw.ToString().Contains("<payload>"));
+			Assert.IsFalse(sw.ToString().IndexOf("<payload>") != -1);
+		}
+
+		[TestMethod]
+		public void ShouldNotDuplicateTitleDescription()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			XmlElement payload = new XmlDocument().CreateElement("payload");
+			payload.InnerXml = "<title>title</title><description>description</description><geo:point xmlns:geo='http://geo'>25</geo:point>";
+
+			Item item = new Item(
+				new XmlItem("foo", "bar", payload),
+				Behaviors.Create("1", "kzu", null, false));
+
+			FeedWriter writer = new RssFeedWriter(xw);
+			writer.Write(null, item);
+
+			xw.Flush();
+
+			string xml = ReadToEnd(GetReader(sw.ToString()));
+			string expected = @"<item xmlns:sx=""http://www.microsoft.com/schemas/sse"">
+  <title>foo</title>
+  <description>bar</description>
+  <geo:point xmlns:geo=""http://geo"">25</geo:point>
+  <author>kzu@example.com</author>
+  <sx:sync id=""1"" updates=""1"" deleted=""false"" noconflicts=""false"">
+    <sx:history sequence=""1"" by=""kzu"" />
+  </sx:sync>
+</item>";
+
+			Assert.AreEqual(expected, xml);
 		}
 
 		[TestMethod]
@@ -321,6 +354,38 @@ namespace SimpleSharing.Tests
 
 				Assert.IsTrue(emailExp.IsMatch(reader.ReadElementContentAsString()));
 			}
+		}
+
+		[TestMethod]
+		public void ShouldWriteFeedPayload()
+		{
+			XmlElement payload = new XmlDocument().CreateElement("payload");
+			payload.InnerXml = "<somedata>fizz</somedata><id d='buz'/>";
+
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			Feed feed = new Feed("Hello World", "http://kzu", "this is my feed", payload);
+
+			FeedWriter writer = new RssFeedWriter(xw);
+			writer.Write(feed);
+
+			xw.Flush();
+
+			string xml = ReadToEnd(GetReader(sw.ToString()));
+			string expected = @"<rss xmlns:sx=""http://www.microsoft.com/schemas/sse"" version=""2.0"">
+  <channel>
+    <title>Hello World</title>
+    <description>this is my feed</description>
+    <link>http://kzu</link>
+    <somedata>fizz</somedata>
+    <id d=""buz"" />
+  </channel>
+</rss>";
+
+			Assert.AreEqual(expected, xml);
 		}
 	}
 }
