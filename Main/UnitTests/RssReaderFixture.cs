@@ -169,6 +169,9 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(1, items[0].Sync.Conflicts.Count);
 			Assert.AreEqual("Buy icecream", items[0].Sync.Conflicts[0].XmlItem.Title);
 			Assert.AreEqual(@"<payload>
+  <title>Buy groceries</title>
+  <description>Get milk, eggs, butter and bread</description>
+  <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
   <customer id=""1"" />
 </payload>", ReadToEnd(new XmlNodeReader(items[0].XmlItem.Payload)));
 		}
@@ -241,7 +244,7 @@ namespace SimpleSharing.Tests
 
 			reader.Read(out feed, out i);
 
-			Assert.IsFalse(GetFirst<Item>(i).XmlItem.Payload.OuterXml.Contains("<author>"));
+			Assert.IsFalse(GetFirst<Item>(i).XmlItem.Payload.OuterXml.IndexOf("<author>") != -1);
 		}
 
 		[TestMethod]
@@ -348,7 +351,10 @@ namespace SimpleSharing.Tests
 			List<Item> items = new List<Item>(i);
 			Assert.AreEqual(1, items.Count);
 			Assert.AreEqual(@"<payload>
+  <title>Buy groceries</title>
   <payload>unknown</payload>
+  <description>Get milk, eggs, butter and bread</description>
+  <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
   <someData id=""1"" xmlns=""foo"" />
   <someOtherData xmlns=""bar"" />
 </payload>", ReadToEnd(new XmlNodeReader(items[0].XmlItem.Payload)));
@@ -379,7 +385,6 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, items2.Count);
 		}
 
-		[Ignore]
 		[TestMethod]
 		public void ShouldReadTwoItemsFromBadSSEDataFeed()
 		{
