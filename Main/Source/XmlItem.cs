@@ -31,7 +31,7 @@ namespace SimpleSharing
 			this.id = id;
 			this.title = title;
 			this.description = description;
-			this.lastUpdated = timestamp;
+			Timestamp = timestamp;
 			this.payload = payload;
 		}
 
@@ -56,7 +56,7 @@ namespace SimpleSharing
 		public DateTime Timestamp
 		{
 			get { return lastUpdated; }
-			set { lastUpdated = value; }
+			set { lastUpdated = SimpleSharing.Timestamp.Normalize(value); }
 		}
 
 		public XmlElement Payload

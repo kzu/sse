@@ -42,10 +42,10 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldNotEqualWithDifferentTimespan()
+		public void ShouldNotEqualWithDifferentTimestampSeconds()
 		{
 			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description", DateTime.Now.AddMilliseconds(50), GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description", DateTime.Now.AddSeconds(50), GetElement("<payload/>"));
 
 			Assert.AreNotEqual(i1, i2);
 		}

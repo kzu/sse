@@ -75,7 +75,8 @@ namespace SimpleSharing
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
 					UPDATE [{0}Sync] 
-					SET Sync = " + Database.BuildParameterName("p_sync") + ", ItemTimestamp = " + Database.BuildParameterName("p_timestamp") + 
+					SET Sync = " + Database.BuildParameterName("p_sync") + ", ItemTimestamp = " + 
+								 Database.BuildParameterName("p_timestamp") + 
 								 " WHERE Id = " + Database.BuildParameterName("p_id"));
 
 				Database.AddInParameter(cmd, "p_sync", DbType.String, sw.ToString());
@@ -89,7 +90,9 @@ namespace SimpleSharing
 						INSERT INTO [{0}Sync] 
 						(Sync, ItemTimestamp, Id)
 						VALUES 
-						(" + Database.BuildParameterName("p_sync") + ", " + Database.BuildParameterName("p_timestamp") + "," + Database.BuildParameterName("p_id") + ")");
+						(" + Database.BuildParameterName("p_sync") + ", " + 
+						   Database.BuildParameterName("p_timestamp") + ", " + 
+						   Database.BuildParameterName("p_id") + ")");
 
 					cmd.ExecuteNonQuery();
 				}

@@ -25,8 +25,9 @@ namespace SimpleSharing.Tests
 		public override void Initialize()
 		{
 			database = new GenericDatabase(
-				"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Access2007.accdb;Persist Security Info=False", 
+				"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Access2007.accdb;Persist Security Info=False",
 				DbProviderFactories.GetFactory("System.Data.OleDb"));
+			Cleanup();
 		}
 
 		[TestCleanup]
@@ -36,12 +37,26 @@ namespace SimpleSharing.Tests
 			{
 				cn.Open();
 				DbCommand cmd = cn.CreateCommand();
-				cmd.CommandText = "DROP TABLE SSE_Foo_Sync";
+				cmd.CommandText = "DROP TABLE Sync";
 				try
 				{
 					cmd.ExecuteNonQuery();
 				}
 				catch { }
+				cmd.CommandText = "DROP TABLE LastSync";
+				try
+				{
+					cmd.ExecuteNonQuery();
+				}
+				catch { }
+				cmd.CommandText = "DROP TABLE SSE_Foo_Sync";
+				try
+				{
+					cmd.ExecuteNonQuery();
+				}
+				catch
+				{
+				}
 				cmd.CommandText = "DROP TABLE SSE_Foo_LastSync";
 				try
 				{

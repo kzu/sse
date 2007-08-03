@@ -21,7 +21,8 @@ namespace SimpleSharing
 			this.updates = updates;
 		}
 
-		public Sync(string id) : this(id, 0)
+		public Sync(string id)
+			: this(id, 0)
 		{
 		}
 
@@ -69,7 +70,17 @@ namespace SimpleSharing
 		public DateTime? ItemTimestamp
 		{
 			get { return itemTimestamp; }
-			set { itemTimestamp = value; }
+			set 
+			{
+				if (value.HasValue)
+				{
+					itemTimestamp = Timestamp.Normalize(value.Value);
+				}
+				else
+				{
+					itemTimestamp = value;
+				}
+			}
 		}
 
 		public void AddHistory(History history)
@@ -130,7 +141,7 @@ namespace SimpleSharing
 					s1.updates == s2.updates &&
 					s1.deleted == s2.deleted &&
 					s1.noConflicts == s2.noConflicts &&
-					s1.updatesHistory == s2.updatesHistory;				
+					s1.updatesHistory == s2.updatesHistory;
 			}
 
 			return false;
