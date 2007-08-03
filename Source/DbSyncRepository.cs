@@ -33,6 +33,8 @@ namespace SimpleSharing
 			{
 				tableNameFormat = "SSE_";
 			}
+
+			Initialize();
 		}
 
 		public Sync Get(string id)
