@@ -67,7 +67,7 @@ namespace SimpleSharing.Tests
 
 		public DateTime Add(IXmlItem item)
 		{
-			Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
+			if (item == null) throw new ArgumentNullException();
 			IXmlItem clone = item.Clone();
 			clone.Timestamp = DateTime.Now;
 

@@ -24,6 +24,13 @@ namespace SimpleSharing
 			writer.WriteElementString("title", feed.Title);
 			writer.WriteElementString("description", feed.Description);
 			writer.WriteElementString("link", feed.Link);
+			if (feed.Payload != null)
+			{
+				foreach (XmlElement el in feed.Payload.ChildNodes)
+				{
+					writer.WriteNode(new XmlNodeReader(el), false);
+				}
+			}
 		}
 
 		protected override void WriteEndFeed(Feed feed, XmlWriter writer)
