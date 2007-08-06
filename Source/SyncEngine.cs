@@ -26,9 +26,16 @@ namespace SimpleSharing
 			return BuildItems(xmlRepo.GetAll(), DateTime.MinValue);
 		}
 
-		public IEnumerable<Item> Export(DateTime since)
+		public IEnumerable<Item> Export(DateTime? since)
 		{
-			return BuildItems(xmlRepo.GetAllSince(since), since);
+			if (since.HasValue)
+			{
+				return BuildItems(xmlRepo.GetAllSince(since.Value), since.Value);
+			}
+			else
+			{
+				return Export();
+			}
 		}
 
 		public IEnumerable<Item> Export(int days)
@@ -48,8 +55,10 @@ namespace SimpleSharing
 		{
 			// Search deleted items.
 			// TODO: Is there a better way than iterating every sync?
-			IEnumerable<Sync> allSync = syncRepo.GetAll();
-			IEnumerator<Sync> syncEnum = allSync.GetEnumerator();
+			// Note that we're only iterating all the Sync elements, which 
+			// means we're not actually re-hidrating all entities just 
+			// to find the deleted ones.
+			IEnumerator<Sync> syncEnum = syncRepo.GetAll().GetEnumerator();
 
 			foreach (IXmlItem xml in xmlItems)
 			{
