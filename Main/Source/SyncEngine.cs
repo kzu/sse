@@ -28,8 +28,15 @@ namespace SimpleSharing
 
 		public IEnumerable<Item> Export(int days)
 		{
-			DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(days));
-			return BuildItems(xmlRepo.GetAllSince(since), since);
+			if (days == -1)
+			{
+				return Export();
+			}
+			else
+			{
+				DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(days));
+				return BuildItems(xmlRepo.GetAllSince(since), since);
+			}
 		}
 
 		private IEnumerable<Item> BuildItems(IEnumerable<IXmlItem> xmlItems, DateTime since)
