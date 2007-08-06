@@ -91,6 +91,20 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldExportSinceDatetime()
+		{
+			MockXmlRepository xmlrepo = new MockXmlRepository();
+			xmlrepo.AddThreeItemsByDays();
+
+			SyncEngine engine = new SyncEngine(
+				xmlrepo, new MockSyncRepository());
+
+			IEnumerable<Item> items = engine.Export(DateTime.Now - TimeSpan.FromDays(2));
+
+			Assert.AreEqual(2, new List<Item>(items).Count);
+		}
+
+		[TestMethod]
 		public void ShouldExportByDaysMinusOneExportAll()
 		{
 			MockXmlRepository xmlrepo = new MockXmlRepository();

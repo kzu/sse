@@ -26,6 +26,11 @@ namespace SimpleSharing
 			return BuildItems(xmlRepo.GetAll(), DateTime.MinValue);
 		}
 
+		public IEnumerable<Item> Export(DateTime since)
+		{
+			return BuildItems(xmlRepo.GetAllSince(since), since);
+		}
+
 		public IEnumerable<Item> Export(int days)
 		{
 			if (days == -1)
@@ -35,7 +40,7 @@ namespace SimpleSharing
 			else
 			{
 				DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(days));
-				return BuildItems(xmlRepo.GetAllSince(since), since);
+				return Export(since);
 			}
 		}
 
@@ -252,6 +257,7 @@ namespace SimpleSharing
 			return item;
 		}
 
+		[Obsolete("Use Export and write to the FeedWriter directly")]
 		public void Publish(Feed feed, FeedWriter writer)
 		{
 			// Since and Until are optional. We don't use them.
@@ -260,6 +266,7 @@ namespace SimpleSharing
 		}
 
 		// Partial feed publishing
+		[Obsolete("Use Export and write to the FeedWriter directly")]
 		public void Publish(Feed feed, FeedWriter writer, int lastDays)
 		{
 			DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(lastDays));
@@ -270,6 +277,7 @@ namespace SimpleSharing
 
 		// TODO: Optimize subscribe when caller doesn't care about 
 		// retrieving the conflicts.
+		[Obsolete("Use FeedReader.Read and call Import with the resulting items directly")]
 		public IList<Item> Subscribe(FeedReader reader)
 		{
 			Feed feed;
