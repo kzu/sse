@@ -154,7 +154,35 @@ namespace SimpleSharing
 			}
 		}
 
+		[Obsolete("Use Import overloads that do not receive a feedUrl argument.", true)]
+		public IList<Item> Import(string feedUrl, IEnumerable<Item> items)
+		{
+			return Import(PreviewImport(items));
+		}
+
+		[Obsolete("Use Import overloads that do not receive a feedUrl argument.", true)]
+		public IList<Item> Import(string feedUrl, params Item[] items)
+		{
+			return Import(PreviewImport(items));
+		}
+
+		[Obsolete("Use Import overloads that do not receive a feedUrl argument.", true)]
 		public IList<Item> Import(string feedUrl, IEnumerable<ItemMergeResult> items)
+		{
+			return Import(items);
+		}
+
+		public IList<Item> Import(IEnumerable<Item> items)
+		{
+			return Import(PreviewImport(items));
+		}
+
+		public IList<Item> Import(params Item[] items)
+		{
+			return Import(PreviewImport(items));
+		}
+
+		public IList<Item> Import(IEnumerable<ItemMergeResult> items)
 		{
 			// Straight import of data in merged results. 
 			// Conflicting items are saved and also 
@@ -215,19 +243,7 @@ namespace SimpleSharing
 				}
 			}
 
-			syncRepo.SetLastSync(feedUrl, DateTime.Now);
-
 			return conflicts;
-		}
-
-		public IList<Item> Import(string feedUrl, IEnumerable<Item> items)
-		{
-			return Import(feedUrl, PreviewImport(items));
-		}
-
-		public IList<Item> Import(string feedUrl, params Item[] items)
-		{
-			return Import(feedUrl, PreviewImport(items));
 		}
 
 		/// <summary>

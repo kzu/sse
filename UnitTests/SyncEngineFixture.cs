@@ -299,7 +299,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository syncRepo = new MockSyncRepository();
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
 
-			IList<Item> conflicts = engine.Import("http://kzu", GetMockItems());
+			IList<Item> conflicts = engine.Import(GetMockItems());
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(2, new List<IXmlItem>(xmlRepo.GetAll()).Count);
@@ -336,7 +336,7 @@ namespace SimpleSharing.Tests
 			xmlRepo.Update(item.XmlItem);
 			syncRepo.Save(item.Sync);
 
-			IList<Item> conflicts = engine.Import("http://kzu", incoming);
+			IList<Item> conflicts = engine.Import(incoming);
 
 			Assert.AreEqual(1, conflicts.Count);
 		}
@@ -377,68 +377,12 @@ namespace SimpleSharing.Tests
 				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
 				Behaviors.Update(incoming.Sync, "REMOTE\\kzu", DateTime.Now, false));
 
-			IList<Item> conflicts = engine.Import("http://kzu", incoming);
+			IList<Item> conflicts = engine.Import(incoming);
 
 			Assert.AreEqual(1, conflicts.Count);
 			Assert.AreEqual(1, new List<IXmlItem>(xmlRepo.GetAll()).Count);
 			Assert.AreEqual("remote", xmlRepo.Get(id).Title);
 			Assert.AreEqual("REMOTE\\kzu", syncRepo.Get(id).LastUpdate.By);
-		}
-
-		[TestMethod]
-		public void ShouldUpdateLastSyncOnImportIfUpdatesSaved()
-		{
-			IXmlRepository xmlRepo = new MockXmlRepository();
-			ISyncRepository syncRepo = new MockSyncRepository();
-			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
-
-			engine.Import("http://kzu", GetMockItems());
-
-			DateTime? lastSync = engine.GetLastSync("http://kzu");
-
-			Assert.IsNotNull(lastSync);
-		}
-
-		[TestMethod]
-		public void ShouldAlwaysUpdateLastSyncEvenIfOnlyConflicts()
-		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
-
-			string id = Guid.NewGuid().ToString();
-			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
-			Item item = new Item(
-				new XmlItem(id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
-				sync);
-
-			// Will save the only item and update LastSync
-			engine.Import("http://kzu", item);
-			DateTime? lastSync = engine.GetLastSync("http://kzu");
-
-			Thread.Sleep(100);
-
-			Assert.AreEqual(1, new List<IXmlItem>(xmlRepo.GetAll()).Count);
-
-			// Remote editing.
-			Item incoming = new Item(new XmlItem(id, "remote", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
-				Behaviors.Update(item.Sync.Clone(), "REMOTE\\kzu", DateTime.Now, false));
-
-			// Local editing.
-			item = new Item(new XmlItem(id, "changed", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
-				Behaviors.Update(item.Sync.Clone(), DeviceAuthor.Current, DateTime.Now, false));
-			xmlRepo.Update(item.XmlItem);
-			syncRepo.Save(item.Sync);
-
-			Thread.Sleep(1000);
-
-			IList<Item> conflicts = engine.Import("http://kzu", incoming);
-
-			Assert.AreEqual(1, conflicts.Count);
-			Assert.AreNotEqual(lastSync, engine.GetLastSync("http://kzu"));
 		}
 
 		[TestMethod]
@@ -470,7 +414,7 @@ namespace SimpleSharing.Tests
 
 			// Import of same item should cause it to 
 			// be updated with new Sync info and a no-op on sync.
-			engine.Import("http://kzu", item);
+			engine.Import(item);
 
 			Sync updated = syncRepo.Get(id);
 			Assert.AreEqual(2, updated.Updates);
@@ -515,7 +459,7 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldImportFeedAndUpdateLastSync()
+		public void ShouldImportFeed()
 		{
 			MockSyncRepository syncRepo = new MockSyncRepository();
 			MockXmlRepository xmlRepo = new MockXmlRepository();
@@ -555,56 +499,10 @@ namespace SimpleSharing.Tests
 			IEnumerable<Item> items;
 			rss.Read(out feed, out items);
 
-			IList<Item> conflicts = engine.Import("Feed.xml", items);
+			IList<Item> conflicts = engine.Import(items);
 
 			Assert.AreEqual(0, conflicts.Count);
 
-			Assert.IsNotNull(engine.GetLastSync("Feed.xml"));
-			Assert.AreEqual(1, new List<IXmlItem>(xmlRepo.GetAll()).Count);
-		}
-
-		[TestMethod]
-		public void ShouldImportFeedAndUpdateLastSyncFromFeedInfo()
-		{
-			MockSyncRepository syncRepo = new MockSyncRepository();
-			MockXmlRepository xmlRepo = new MockXmlRepository();
-
-			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
-
-			Assert.IsNull(engine.GetLastSync("http://somefakeurl.com/partial.xml"));
-
-			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
- <channel>
-  <title>To Do List</title>
-  <description>A list of items to do</description>
-  <link>http://somefakeurl.com/partial.xml</link>
-  <sx:sharing version='0.93' since='2005-02-13T18:30:02Z'
-    until='2005-05-23T18:30:02Z' >
-   <sx:related link='http://x.com/all.xml' type='complete' />
-   <sx:related link='http://y.net/B.xml' type='aggregated' 
-    title='To Do List (Jacks Copy)' />
-  </sx:sharing>
-  <item>
-   <title>Buy groceries</title>
-   <description>Get milk, eggs, butter and bread</description>
-   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
-   <customer id='1' />
-   <sx:sync id='0a7903db47fb0fff' updates='3'>
-    <sx:history sequence='3' by='JEO2000'/>
-    <sx:history sequence='2' by='REO1750'/>
-    <sx:history sequence='1' by='REO1750'/>
-   </sx:sync>
-  </item>
- </channel>
-</rss>";
-
-			RssFeedReader rss = new RssFeedReader(GetReader(xml));
-			IList<Item> conflicts = engine.Subscribe(rss);
-
-			Assert.AreEqual(0, conflicts.Count);
-
-			Assert.IsNotNull(engine.GetLastSync("http://somefakeurl.com/partial.xml"));
 			Assert.AreEqual(1, new List<IXmlItem>(xmlRepo.GetAll()).Count);
 		}
 
@@ -615,8 +513,6 @@ namespace SimpleSharing.Tests
 			MockXmlRepository xmlRepo = new MockXmlRepository();
 
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
-
-			Assert.IsNull(engine.GetLastSync("http://somefakeurl.com/partial.xml"));
 
 			string xml = @"
 <rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
@@ -660,7 +556,6 @@ namespace SimpleSharing.Tests
 
 			Assert.AreEqual(1, conflicts.Count);
 
-			Assert.IsNotNull(engine.GetLastSync("http://somefakeurl.com/partial.xml"));
 			Assert.AreEqual(1, Count(xmlRepo.GetAll()));
 		}
 
@@ -677,7 +572,7 @@ namespace SimpleSharing.Tests
 			IXmlRepository xmlRepo2 = new MockXmlRepository();
 			SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
 
-			engine2.Import("mock", items);
+			engine2.Import(items);
 
 			// both repositories are in sync now.
 
@@ -689,7 +584,7 @@ namespace SimpleSharing.Tests
 			item.Timestamp = DateTime.Now;
 			xmlRepo.Update(item);
 
-			IList<Item> conflicts = engine2.Import("mock", engine.Export());
+			IList<Item> conflicts = engine2.Import(engine.Export());
 			Assert.AreEqual(0, conflicts.Count);
 
 			IXmlItem item2 = GetFirst<IXmlItem>(xmlRepo2.GetAll());
