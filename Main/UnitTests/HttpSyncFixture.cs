@@ -106,7 +106,7 @@ namespace SimpleSharing.Tests
 						new RssFeedReader(r).Read(out feed, out i);
 						List<Item> items = new List<Item>(i);
 
-						IList<Item> conflicts = remoteEngine.Import(feed.Link, items);
+						IList<Item> conflicts = remoteEngine.Import(items);
 						Assert.AreEqual(0, conflicts.Count);
 						Assert.AreEqual(3, Count(remoteXml.GetAll()));
 					}
