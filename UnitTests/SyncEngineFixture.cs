@@ -44,6 +44,48 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldGetSetLastSyncOnSyncRepo()
+		{
+			MockSyncRepository syncRepo = new MockSyncRepository();
+			MockXmlRepository xmlRepo = new MockXmlRepository();
+			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+
+			DateTime now = Timestamp.Normalize(DateTime.Now);
+			engine.SetLastSync("feed", now);
+
+			DateTime? last = engine.GetLastSync("feed");
+
+			Assert.AreEqual(now, last);
+		}
+
+		[TestMethod]
+		public void ShouldLastSyncNormalizeToSSETimestamp()
+		{
+			MockSyncRepository syncRepo = new MockSyncRepository();
+			MockXmlRepository xmlRepo = new MockXmlRepository();
+			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+
+			DateTime now = DateTime.Now;
+			engine.SetLastSync("feed", now);
+
+			DateTime? last = engine.GetLastSync("feed");
+
+			DateTime nowtimestamp = Timestamp.Normalize(now);
+
+			Assert.AreEqual(nowtimestamp, last);
+		}
+
+		[TestMethod]
+		public void ShouldGetNullLastSync()
+		{
+			MockSyncRepository syncRepo = new MockSyncRepository();
+			MockXmlRepository xmlRepo = new MockXmlRepository();
+			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+
+			Assert.IsNull(engine.GetLastSync("feed"));
+		}
+
+		[TestMethod]
 		public void ShouldExportDeleted()
 		{
 			IXmlRepository xmlRepo = new MockXmlRepository().AddOneItem();
@@ -390,6 +432,8 @@ namespace SimpleSharing.Tests
 				Behaviors.Update(item.Sync.Clone(), DeviceAuthor.Current, DateTime.Now, false));
 			xmlRepo.Update(item.XmlItem);
 			syncRepo.Save(item.Sync);
+
+			Thread.Sleep(1000);
 
 			IList<Item> conflicts = engine.Import("http://kzu", incoming);
 

@@ -300,7 +300,19 @@ namespace SimpleSharing
 
 		public DateTime? GetLastSync(string feed)
 		{
-			return syncRepo.GetLastSync(feed);
+			DateTime? lastSync = syncRepo.GetLastSync(feed);
+
+			if (lastSync.HasValue)
+			{
+				lastSync = Timestamp.Normalize(lastSync.Value);
+			}
+
+			return lastSync;
+		}
+
+		public void SetLastSync(string feed, DateTime lastSync)
+		{
+			syncRepo.SetLastSync(feed, Timestamp.Normalize(lastSync));
 		}
 
 		/// <summary>
