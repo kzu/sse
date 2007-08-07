@@ -59,7 +59,7 @@ namespace CustomerLibrary.Tests
 			IXmlRepository xmlRepo2 = new MockXmlRepository();
 			SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
 
-			engine2.Import("customers", items);
+			engine2.Import(items);
 
 			Assert.AreEqual(2, Count(xmlRepo2.GetAll()));
 		}
@@ -83,7 +83,7 @@ namespace CustomerLibrary.Tests
 			IXmlRepository xmlRepo2 = new CustomerRepository(new SqlCeDatabase("Data Source=CustomerDb2.sdf"));
 			SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
 
-			engine2.Import("customers", items);
+			engine2.Import(items);
 
 			Assert.AreEqual(2, Count(xmlRepo2.GetAll()));
 		}
@@ -106,7 +106,7 @@ namespace CustomerLibrary.Tests
 			IXmlRepository xmlRepo2 = new CustomerRepository(new SqlCeDatabase("Data Source=Temp.sdf"));
 			SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
 
-			engine2.Import("customers", engine.Export());
+			engine2.Import(engine.Export());
 
 			// both repositories are in sync now.
 
@@ -124,7 +124,7 @@ namespace CustomerLibrary.Tests
 			IEnumerable<Item> exported = engine.Export();
 			IEnumerable<ItemMergeResult> merge = engine2.PreviewImport(exported);
 
-			IList<Item> conflicts = engine2.Import("customers", exported);
+			IList<Item> conflicts = engine2.Import(exported);
 			Assert.AreEqual(0, conflicts.Count);
 
 			CustomerDataAccess dac2 = new CustomerDataAccess(new SqlCeDatabase("Data Source=Temp.sdf"));
