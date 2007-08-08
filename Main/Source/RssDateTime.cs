@@ -22,7 +22,7 @@ namespace SimpleSharing
 	public struct RssDateTime : IComparable, IComparable<RssDateTime>,
 		IEquatable<RssDateTime>, ICloneable<RssDateTime>
 #if !PocketPC
-		, ISerializable
+, ISerializable
 #endif
 	{
 		#region Parsing expressions
@@ -177,7 +177,7 @@ namespace SimpleSharing
 		/// </summary>
 		public DateTime LocalTime
 		{
-			get { return DateTime.SpecifyKind(value, DateTimeKind.Local).Add(offset); } 
+			get { return DateTime.SpecifyKind(value, DateTimeKind.Local).Add(offset); }
 		}
 
 		/// <summary>Returns a value indicating whether this instance is equal to a specified <see cref="RssDateTime"/>.</summary>
@@ -206,7 +206,7 @@ namespace SimpleSharing
 		public override int GetHashCode()
 		{
 			return value.GetHashCode() ^ offset.GetHashCode();
-		} 
+		}
 
 		/// <summary>
 		/// Renders the date as a valid RSS 2.0 date time.
@@ -311,8 +311,8 @@ namespace SimpleSharing
 			else if (m.Groups[GroupNames.Offset].Success)
 			{
 				offsetValue = m.Groups[GroupNames.Offset].Value;
-				offsetSpan = offsetValue.StartsWith("+") ? 
-					TimeSpan.Parse(offsetValue.Substring(1).Insert(2, ":")) : 
+				offsetSpan = offsetValue.StartsWith("+") ?
+					TimeSpan.Parse(offsetValue.Substring(1).Insert(2, ":")) :
 					TimeSpan.Parse(offsetValue.Insert(3, ":"));
 			}
 			else if (m.Groups[GroupNames.Convert].Success)
@@ -440,7 +440,13 @@ namespace SimpleSharing
 		/// <exception cref="ArgumentOutOfRangeException">The resulting <see cref="RssDateTime"></see> is less than <see cref="RssDateTime.MinValue"></see> or greater than <see cref="RssDateTime.MaxValue"></see>.</exception>
 		public static RssDateTime operator +(RssDateTime d, TimeSpan t)
 		{
-			return new RssDateTime(d.UniversalTime + t, d.Offset);
+			DateTime ut = d.UniversalTime;
+			// Exploit the fact that RssDateTime.[Min|Max]Value == DateTime.[Min|Max]Value
+			if (t > TimeSpan.Zero && ut > DateTime.MaxValue - t
+			 || t < TimeSpan.Zero && ut < DateTime.MinValue - t)
+				throw new ArgumentOutOfRangeException("TimeSpan");
+
+			return new RssDateTime(ut + t, d.Offset);
 		}
 
 		/// <summary>Determines whether two specified instances of <see cref="RssDateTime"></see> are equal.</summary>
@@ -513,7 +519,7 @@ namespace SimpleSharing
 		/// <exception cref="ArgumentOutOfRangeException">The resulting <see cref="RssDateTime"></see> is less than <see cref="RssDateTime.MinValue"></see> or greater than <see cref="RssDateTime.MaxValue"></see>.</exception>
 		public static RssDateTime operator -(RssDateTime d, TimeSpan t)
 		{
-			return new RssDateTime(d.UniversalTime - t, d.Offset);
+			return d + t.Negate();
 		}
 
 		#endregion
