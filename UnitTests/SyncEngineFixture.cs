@@ -593,6 +593,66 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldSyncConflict()
+		{
+			MockXmlRepository remoteXml = new MockXmlRepository();
+			MockSyncRepository remoteSync = new MockSyncRepository();
+			MockXmlRepository localXml = new MockXmlRepository();
+			MockSyncRepository localSync = new MockSyncRepository();
+			Feed mockFeed = new Feed("MockFooFeed", "http://foo", "Mock Foo Description");
+
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "LOCAL\\foo", DateTime.Now, false);
+			Item item = new Item(
+				new XmlItem(sync.Id, "title", "description",
+					DateTime.Now, GetElement("<foo id='bar'/>")),
+				sync);
+
+			// Save original item.
+			localXml.Add(item.XmlItem);
+			localSync.Save(item.Sync);
+
+			SyncEngine localEngine = new SyncEngine(localXml, localSync);
+			SyncEngine remoteEngine = new SyncEngine(remoteXml, remoteSync);
+
+			IList<Item> conflicts = remoteEngine.Import(localEngine.Export());
+			Assert.AreEqual(0, conflicts.Count);
+
+			// Both repos have same item.
+			Assert.AreEqual(1, Count(remoteXml.GetAll()));
+			Assert.AreEqual(GetFirst<Sync>(localSync.GetAll()).LastUpdate, GetFirst<Sync>(remoteSync.GetAll()).LastUpdate);
+			Assert.IsTrue(remoteXml.Contains(item.XmlItem.Id));
+
+			Thread.Sleep(1000);
+
+			// Remote editing.
+			Item remoteItem = item.Clone();
+			remoteItem = new Item(new XmlItem(remoteItem.XmlItem.Id, "remote", remoteItem.XmlItem.Description,
+				remoteItem.Sync.LastUpdate.When.Value, remoteItem.XmlItem.Payload),
+				Behaviors.Update(remoteItem.Sync, "REMOTE\\foo", DateTime.Now, false));
+			remoteItem.Sync.ItemTimestamp = remoteXml.Update(remoteItem.XmlItem);
+			remoteSync.Save(remoteItem.Sync);
+
+			Thread.Sleep(1000);
+
+			// Local editing.
+			item = new Item(new XmlItem(item.XmlItem.Id, "local", item.XmlItem.Description,
+				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				Behaviors.Update(item.Sync, "LOCAL\\bar", DateTime.Now, false));
+			item.Sync.ItemTimestamp = localXml.Update(item.XmlItem);
+			localSync.Save(item.Sync);
+
+			conflicts = remoteEngine.Import(localEngine.Export());
+			Assert.AreEqual(1, conflicts.Count);
+
+			// Synchronizing with local engine should add the conflict.
+			IList<Item> localConflicts = localEngine.Import(conflicts);
+			Assert.AreEqual(1, conflicts.Count);
+
+			Assert.AreEqual(1, Count(localSync.GetConflicts()));
+			Assert.AreEqual(1, Count(remoteSync.GetConflicts()));
+		}
+
+		[TestMethod]
 		public void ShouldSetSyncItemTimestampOnImport()
 		{
 			MockSyncRepository syncRepo = new MockSyncRepository();
