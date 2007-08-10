@@ -24,6 +24,31 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShoudAllowNullTitle()
+		{
+			XmlItem item = new XmlItem(null, "description", GetElement("<payload/>"));
+
+			Assert.IsNull(item.Title);
+		}
+
+		[TestMethod]
+		public void ShoudAllowNullDescription()
+		{
+			XmlItem item = new XmlItem("title", null, GetElement("<payload/>"));
+
+			Assert.IsNull(item.Description);
+		}
+
+		[TestMethod]
+		public void ShouldAddEmptyPayloadIfNullPayload()
+		{
+			XmlItem item = new XmlItem("title", "description", null);
+
+			Assert.IsNotNull(item.Payload);
+			Assert.AreEqual(0, item.Payload.ChildNodes.Count);
+		}
+
+		[TestMethod]
 		public void ShouldEqualWithSameValues()
 		{
 			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", DateTime.Now, GetElement("<payload/>"));

@@ -65,6 +65,9 @@ namespace SimpleSharing
 
 			item.Id = sync.Id;
 
+			if (!sync.Deleted && item.Title == null)
+				throw new ArgumentNullException("title");
+
 			return new Item(item, sync);
 		}
 

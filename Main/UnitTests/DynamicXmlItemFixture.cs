@@ -47,14 +47,6 @@ namespace SimpleSharing.Tests
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void ShouldThrowIfNullPayloadExpression()
-		{
-			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", "foo", DateTime.Now,
-				null, new object());
-		}
-		
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowIfNullDataExpression()
 		{
 			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", "foo", DateTime.Now,
