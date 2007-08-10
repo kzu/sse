@@ -25,8 +25,11 @@ namespace SimpleSharing
 		public XmlItem(string id, string title, string description, DateTime timestamp, XmlElement payload)
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
-			Guard.ArgumentNotNullOrEmptyString(title, "title");
-			Guard.ArgumentNotNull(payload, "payload");
+
+			if (payload == null)
+			{
+				payload = new XmlDocument().CreateElement("payload");
+			}
 
 			this.id = id;
 			this.title = title;

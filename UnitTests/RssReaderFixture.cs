@@ -418,5 +418,38 @@ namespace SimpleSharing.Tests
 
 			Assert.AreEqual(2, Count(items));
 		}
+
+		[TestMethod]
+		public void ShouldReadDeletedItem()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <item>
+   <title></title>
+   <description></description>
+   <sx:sync id='0a7903db47fb0fff' updates='2' deleted='true'>
+    <sx:history sequence='1' by='REO1750'/>
+    <sx:history sequence='2' by='REO1750'/>
+   </sx:sync>
+  </item>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			List<Item> items = new List<Item>(i);
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual("", items[0].XmlItem.Title);
+			Assert.AreEqual("", items[0].XmlItem.Description);
+		}
 	}
 }
