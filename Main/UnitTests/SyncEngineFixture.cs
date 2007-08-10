@@ -576,7 +576,7 @@ namespace SimpleSharing.Tests
 
 			// both repositories are in sync now.
 
-			Thread.Sleep(100);
+			Thread.Sleep(1000);
 
 			// update item on one repository.
 			IXmlItem item = GetFirst<IXmlItem>(xmlRepo.GetAll());
