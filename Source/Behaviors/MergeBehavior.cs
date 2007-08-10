@@ -127,7 +127,7 @@ namespace SimpleSharing
 			Item proposed;
 			MergeOperation operation = MergeItems(original, incoming, out proposed);
 
-			if (proposed != null && proposed.Equals(original) && operation != MergeOperation.Conflict)
+			if (proposed != null && proposed.Sync.Equals(original.Sync) && operation != MergeOperation.Conflict)
 			{
 				return new ItemMergeResult(original, incoming, null, MergeOperation.None);
 			}
