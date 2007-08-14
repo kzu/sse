@@ -36,7 +36,11 @@ namespace CustomerSite
 
 			using (XmlReader r = XmlReader.Create(context.Request.InputStream))
 			{
-				IList<Item> conflicts = engine.Subscribe(new RssFeedReader(r));
+				Feed feed;
+				IEnumerable<Item> items;
+				new RssFeedReader(r).Read(out feed, out items);
+
+				IList<Item> conflicts = engine.Import(items);
 			}
 
 			XmlWriterSettings set = new XmlWriterSettings();
@@ -45,11 +49,13 @@ namespace CustomerSite
 			using (XmlWriter w = XmlWriter.Create(context.Response.OutputStream, set))
 			{
 				Feed feed = new Feed(
-					Properties.Settings.Default.FeedTitle,
+					ConfigurationManager.AppSettings["FeedTitle"],
 					context.Request.Url.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.SafeUnescaped),
-					Properties.Settings.Default.FeedDescription);
+					ConfigurationManager.AppSettings["FeedDescription"]);
 
-				engine.Publish(feed, new RssFeedWriter(w));
+				IEnumerable<Item> items = engine.Export();
+
+				new RssFeedWriter(w).Write(feed, items);
 			}
 
 			context.Response.End();
