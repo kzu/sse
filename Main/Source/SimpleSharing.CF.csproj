@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.20706</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6AB67AF4-83D3-449E-83D0-A88C343801AE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -22,7 +22,7 @@
     <FormFactorID>
     </FormFactorID>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Clarius.Net20.Public.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Mvp-Xml.Net20.Public.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -118,8 +118,8 @@
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Clarius.Net20.Public.snk">
-      <Link>Clarius.Net20.Public.snk</Link>
+    <None Include="..\..\Mvp-Xml.Net20.Public.snk">
+      <Link>Mvp-Xml.Net20.Public.snk</Link>
     </None>
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
