@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CustomerSample.Properties {
+namespace CustomerLibrary.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace CustomerSample.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CustomerSample.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CustomerLibrary.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,15 @@ namespace CustomerSample.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value cannot be null or an empty string..
+        /// </summary>
+        internal static string Arg_NullOrEmpty {
+            get {
+                return ResourceManager.GetString("Arg_NullOrEmpty", resourceCulture);
             }
         }
     }
