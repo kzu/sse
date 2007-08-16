@@ -106,24 +106,24 @@
     <EmbeddedResource Include="App-without-sectiontype.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\mscorlib.dll</HintPath>
-    </Reference>
-    <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Xml.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="App.CF.Config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Microsoft.NET\SDK\CompactFramework\v2.0\WindowsCE\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Microsoft.NET\SDK\CompactFramework\v2.0\WindowsCE\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Microsoft.NET\SDK\CompactFramework\v2.0\WindowsCE\System.Xml.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v3.5'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

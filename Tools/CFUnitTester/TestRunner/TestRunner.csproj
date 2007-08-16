@@ -13,7 +13,7 @@
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
     <OSVersion>5.01</OSVersion>
-    <DeployDirSuffix>GuiTestShell</DeployDirSuffix>
+    <DeployDirSuffix>GuiTestRunner</DeployDirSuffix>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FormFactorID>
     </FormFactorID>
