@@ -20,7 +20,7 @@ using System.Data;
 namespace SimpleSharing.Tests
 {
 	[TestClass]
-	public class DbSyncRepositoryFixture : TestFixtureBase
+	public class DbSyncRepositoryFixture : SyncRepositoryFixture
 	{
 		protected Database database;
 
@@ -80,79 +80,6 @@ namespace SimpleSharing.Tests
 			Sync s = new Sync(Guid.NewGuid().ToString());
 
 			repo.Save(s);
-		}
-
-		[TestMethod]
-		public void ShouldAddSync()
-		{
-			ISyncRepository repo = CreateRepository(database, "Foo");
-			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
-			s.ItemTimestamp = DateTime.Now;
-
-			repo.Save(s);
-
-			Sync s2 = repo.Get(s.Id);
-			Assert.AreEqual(s.Updates, s2.Updates);
-		}
-
-		[TestMethod]
-		public void ShouldGetAllSync()
-		{
-			ISyncRepository repo = CreateRepository(database, "Foo");
-			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
-			s.ItemTimestamp = DateTime.Now;
-
-			repo.Save(s);
-			s = new Sync(Guid.NewGuid().ToString());
-			s.ItemTimestamp = DateTime.Now;
-			repo.Save(s);
-
-			Assert.AreEqual(2, Count(repo.GetAll()));
-		}
-
-		[TestMethod]
-		public void ShouldGetConflictSync()
-		{
-			ISyncRepository repo = CreateRepository(database, "Foo");
-			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
-			s.ItemTimestamp = DateTime.Now;
-
-			repo.Save(s);
-			s = new Sync(Guid.NewGuid().ToString());
-			s.Conflicts.Add(new Item(new XmlItem("title", "desc", GetElement("<payload/>")),
-				Behaviors.Update(s.Clone(), "foo", DateTime.Now, false)));
-			s.ItemTimestamp = DateTime.Now;
-			repo.Save(s);
-
-			Assert.AreEqual(1, Count(repo.GetConflicts()));
-		}
-
-		[TestMethod]
-		public void ShouldGetNullItemIfMissing()
-		{
-			ISyncRepository repo = CreateRepository(database, "Foo");
-			Sync s = repo.Get(Guid.NewGuid().ToString());
-
-			Assert.IsNull(s);
-		}
-
-		[TestMethod]
-		public void ShouldGetNullLastSync()
-		{
-			ISyncRepository repo = CreateRepository(database, "Foo");
-
-			Assert.IsNull(repo.GetLastSync("foo"));
-		}
-
-		[TestMethod]
-		public void ShouldSaveLastSync()
-		{
-			DateTime now = Timestamp.Normalize(DateTime.Now);
-			ISyncRepository repo = CreateRepository(database, "Foo");
-
-			repo.SetLastSync("foo", now);
-
-			Assert.AreEqual(now, repo.GetLastSync("foo"));
 		}
 	}
 }

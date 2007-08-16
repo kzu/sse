@@ -13,11 +13,22 @@ namespace SimpleSharing.Tests
 	{
 		Dictionary<string, IXmlItem> items = new Dictionary<string, IXmlItem>();
 
+		public Dictionary<string, IXmlItem> Items { get { return items; } }
+
 		private XmlElement GetElement(string xml)
 		{
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(xml);
 			return doc.DocumentElement;
+		}
+
+		public MockXmlRepository AddOneItem(string id)
+		{
+			items.Add(id, new XmlItem(id,
+				"Foo Title", "Foo Description", DateTime.Now,
+				GetElement("<Foo Title='Foo'/>")));
+
+			return this;
 		}
 
 		public MockXmlRepository AddOneItem()
@@ -67,7 +78,9 @@ namespace SimpleSharing.Tests
 
 		public DateTime Add(IXmlItem item)
 		{
-			if (item == null) throw new ArgumentNullException();
+			Guard.ArgumentNotNull(item, "item");
+			Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
+
 			IXmlItem clone = item.Clone();
 			clone.Timestamp = DateTime.Now;
 
@@ -78,11 +91,15 @@ namespace SimpleSharing.Tests
 
 		public bool Contains(string id)
 		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
+
 			return items.ContainsKey(id);
 		}
 
 		public IXmlItem Get(string id)
 		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
+
 			if (items.ContainsKey(id))
 			{
 				return items[id].Clone();
@@ -98,6 +115,8 @@ namespace SimpleSharing.Tests
 
 		public DateTime Update(IXmlItem item)
 		{
+			Guard.ArgumentNotNull(item, "item");
+
 			if (!items.ContainsKey(item.Id))
 				throw new KeyNotFoundException();
 
@@ -124,6 +143,51 @@ namespace SimpleSharing.Tests
 				if (item.Timestamp >= date)
 					yield return item.Clone();
 			}
+		}
+
+		public DateTime GetFirstUpdated()
+		{
+			if (items.Count == 0) return DateTime.MinValue;
+
+			DateTime first = DateTime.MaxValue;
+
+			foreach (IXmlItem item in items.Values)
+			{
+				if (item.Timestamp < first)
+					first = item.Timestamp;
+			}
+
+			return first;
+		}
+
+		public DateTime GetFirstUpdated(DateTime since)
+		{
+			if (items.Count == 0) return since;
+
+			DateTime first = DateTime.MaxValue;
+
+			foreach (IXmlItem item in items.Values)
+			{
+				if (item.Timestamp < first && item.Timestamp > since)
+					first = item.Timestamp;
+			}
+
+			return first;
+		}
+
+		public DateTime GetLastUpdated()
+		{
+			if (items.Count == 0) return DateTime.Now;
+
+			DateTime last = DateTime.MinValue;
+
+			foreach (IXmlItem item in items.Values)
+			{
+				if (item.Timestamp > last)
+					last = item.Timestamp;
+			}
+
+			return last;
 		}
 	}
 }
