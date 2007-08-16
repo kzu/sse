@@ -11,8 +11,12 @@ namespace SimpleSharing.Tests
 		Dictionary<string, Sync> syncs = new Dictionary<string, Sync>();
 		Dictionary<string, DateTime> lastSync = new Dictionary<string, DateTime>();
 
+		public Dictionary<string, Sync> Syncs { get { return syncs; } }
+
 		public Sync Get(string id)
 		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
+
 			if (!syncs.ContainsKey(id))
 				return null;
 
@@ -21,6 +25,8 @@ namespace SimpleSharing.Tests
 
 		public void Save(Sync sync)
 		{
+			Guard.ArgumentNotNull(sync, "sync");
+
 			syncs[sync.Id] = sync.Clone();
 		}
 

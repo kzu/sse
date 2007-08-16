@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6634F9B2-94CB-4D65-8AD7-E38D6F503057}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>SimpleSharing.Tests</RootNamespace>
+    <RootNamespace>SimpleSharing</RootNamespace>
     <AssemblyName>SimpleSharing.Tests</AssemblyName>
     <WarningLevel>4</WarningLevel>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -71,6 +71,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Source\Guard.cs">
+      <Link>Guard.cs</Link>
+    </Compile>
     <Compile Include="..\Source\ObjectDumper.cs">
       <Link>ObjectDumper.cs</Link>
     </Compile>
@@ -80,8 +83,17 @@
     </Compile>
     <Compile Include="AccessSyncRepositoryFixture.cs" />
     <Compile Include="FeedReaderFixture.cs" />
+    <Compile Include="Mocks\MockSyncRepository.cs" />
+    <Compile Include="Mocks\MockXmlItem.cs" />
+    <Compile Include="Mocks\MockXmlRepository.cs" />
     <Compile Include="MSLiveLabsFixture.cs" />
     <Compile Include="NullXmlItemFixture.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SyncRepositoryFixture.cs" />
     <Compile Include="TimestampFixture.cs" />
     <Compile Include="Model\SharingFixture.cs" />
     <Compile Include="XmlItemFixture.cs" />
@@ -94,8 +106,6 @@
     <Compile Include="DynamicXmlItemFixture.cs" />
     <Compile Include="RssDateTimeFixture.cs" />
     <Compile Include="RssWriterFixture.cs" />
-    <Compile Include="Mocks\MockSyncRepository.cs" />
-    <Compile Include="Mocks\MockXmlRepository.cs" />
     <Compile Include="SerializerXmlItemFixture.cs" />
     <Compile Include="SyncEngineFixture.cs" />
     <Compile Include="RssReaderFixture.cs" />
@@ -103,15 +113,11 @@
     <Compile Include="Model\RelatedFixture.cs" />
     <Compile Include="Model\SyncFixture.cs" />
     <Compile Include="Model\FeedFixture.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestFixtureBase.cs" />
     <Compile Include="XmlNamespaceFilteringReaderFixture.cs" />
     <Compile Include="XmlNoNsReader.cs" />
+    <Compile Include="XmlRepositoryFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Source\SimpleSharing.csproj">
@@ -131,19 +137,19 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Access2007.accdb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="feed.sse">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
 </Project>
