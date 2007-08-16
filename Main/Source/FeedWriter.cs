@@ -17,11 +17,30 @@ namespace SimpleSharing
 			this.writer = new XmlSharingWriter(writer);
 		}
 
+		/// <summary>
+		/// Writes the items as an xml fragment of items.
+		/// </summary>
+		/// <param name="items"></param>
+		public void Write(IEnumerable<Item> items)
+		{
+			Write(null, items);
+		}
+
+		/// <summary>
+		/// Writes the items with the optional feed information.
+		/// </summary>
+		/// <param name="feed">Feed information, can be null.</param>
+		/// <param name="items">Items to write.</param>
 		public void Write(Feed feed, params Item[] items)
 		{
 			Write(feed, (IEnumerable<Item>)items);
 		}
 
+		/// <summary>
+		/// Writes the items with the optional feed information.
+		/// </summary>
+		/// <param name="feed">Feed information, can be null.</param>
+		/// <param name="items">Items to write.</param>
 		public void Write(Feed feed, IEnumerable<Item> items)
 		{
 			if (feed != null)
@@ -30,6 +49,8 @@ namespace SimpleSharing
 				WriteStartFeed(feed, writer);
 				WriteSharing(feed.Sharing);
 			}
+
+			if (items == null) return;
 
 			foreach (Item item in items)
 			{
