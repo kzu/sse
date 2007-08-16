@@ -57,7 +57,9 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SqlServerCe, Version=3.5.0.0, Culture=neutral, PublicKeyToken=3be235df1c8d2ad3, processorArchitecture=MSIL" />
+    <Reference Include="System.Data.SqlServerCe, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\..\..\Lib\MCSF\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -82,7 +84,7 @@
       <Project>{3385C4E6-0657-48E3-8437-6BF4A51B2315}</Project>
       <Name>UnitTesting %28UnitTests\CFUnitTester\UnitTesting%29</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Tools\TestUtilities\TestUtilities.csproj">
+    <ProjectReference Include="..\..\TestUtilities\TestUtilities.csproj">
       <Project>{32F04FAC-C884-40E8-AF00-763BF8AF8D19}</Project>
       <Name>TestUtilities</Name>
     </ProjectReference>
