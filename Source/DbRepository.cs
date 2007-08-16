@@ -1,14 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Practices.EnterpriseLibrary.Data;
 using System.Data.Common;
 using System.Data;
+
+#if !PocketPC
+using Microsoft.Practices.EnterpriseLibrary.Data;
+#else
+using Microsoft.Practices.Mobile.DataAccess;
+#endif
 
 namespace SimpleSharing
 {
 	public abstract class DbRepository
 	{
+		protected delegate void ExecuteDbHandler(DbConnection connection);
 		Database database;
 		bool isInitialized;
 
@@ -21,38 +27,102 @@ namespace SimpleSharing
 		{
 			if (isInitialized) throw new InvalidOperationException();
 
-			using (DbConnection cn = database.CreateConnection())
-			{
-				cn.Open();
-				InitializeSchema(cn);
-			}
-
 			isInitialized = true;
+			ExecuteDb(delegate(DbConnection conn)
+			{
+				InitializeSchema(conn);
+			});
 		}
 
 		protected Database Database
 		{
-			get 
+			get
 			{
 				ThrowIfNotInitialized();
-				return database; 
+				return database;
 			}
 		}
 
 		private void ThrowIfNotInitialized()
 		{
-			if (!isInitialized) throw new InvalidOperationException();
+			if (!isInitialized)
+				throw new InvalidOperationException(Properties.Resources.UninitializedRepository);
 		}
 
-		[Obsolete("Use Database property directly.")]
-		protected DbConnection OpenConnection()
+		protected DbDataReader ExecuteReader(string sqlCommand, params DbParameter[] parameters)
 		{
-			ThrowIfNotInitialized();
+#if PocketPC
+			return Database.ExecuteReader(sqlCommand, parameters);
+#else
+			DbCommand cmd = Database.DbProviderFactory.CreateCommand();
+			cmd.CommandText = sqlCommand;
+			cmd.Parameters.AddRange(parameters);
+			DbConnection conn = Database.CreateConnection();
+			cmd.Connection = conn;
+			conn.Open();
+			return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+#endif
+		}
 
-			DbConnection cn = database.CreateConnection();
-			cn.Open();
+		protected int ExecuteNonQuery(string sqlCommand, params DbParameter[] parameters)
+		{
+#if PocketPC
+			return Database.ExecuteNonQuery(sqlCommand, parameters);
+#else
+			DbCommand cmd = Database.DbProviderFactory.CreateCommand();
+			cmd.CommandText = sqlCommand;
+			cmd.CommandType = CommandType.Text;
+			cmd.Parameters.AddRange(parameters);
+			using (DbConnection conn = Database.CreateConnection())
+			{
+				cmd.Connection = conn;
+				conn.Open();
+				return cmd.ExecuteNonQuery();
+			}
+#endif
+		}
 
-			return cn;
+		protected int ExecuteNonQuery(DbCommand command, params DbParameter[] parameters)
+		{
+#if PocketPC
+			return Database.ExecuteNonQuery(command, parameters);
+#else
+			command.Parameters.AddRange(parameters);
+			using (DbConnection conn = Database.CreateConnection())
+			{
+				command.Connection = conn;
+				conn.Open();
+				return command.ExecuteNonQuery();
+			}
+#endif
+		}
+
+		protected virtual DbParameter CreateParameter(string name, DbType type, int size, object value)
+		{
+#if PocketPC
+			return Database.CreateParameter(name, type, size, value);
+#else
+			DbParameter param = Database.DbProviderFactory.CreateParameter();
+			param.ParameterName = Database.BuildParameterName(name);
+			param.DbType = type;
+			param.Value = value;
+
+			return param;
+#endif
+		}
+
+		protected void ExecuteDb(ExecuteDbHandler handler)
+		{
+#if PocketPC
+			DbConnection conn = Database.GetConnection();
+			handler(conn);
+#else
+			using (DbConnection conn = Database.CreateConnection())
+			{
+				conn.Open();
+				handler(conn);
+			}
+#endif
 		}
 
 		protected abstract void InitializeSchema(DbConnection openedConnection);
@@ -62,6 +132,9 @@ namespace SimpleSharing
 		/// </summary>
 		protected virtual bool TableExists(DbConnection connection, string tableName)
 		{
+#if PocketPC
+			return database.TableExists(tableName);
+#else
 			// First try ADO.NET schema mechanism.
 			try
 			{
@@ -93,6 +166,7 @@ namespace SimpleSharing
 					return count != 0;
 				}
 			}
+#endif
 		}
 	}
 }

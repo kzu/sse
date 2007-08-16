@@ -1,7 +1,10 @@
 #if PocketPC
 using Microsoft.Practices.Mobile.TestTools.UnitTesting;
+using Microsoft.Practices.Mobile.DataAccess;
 #else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
+using Microsoft.Practices.EnterpriseLibrary.Data;
 #endif
 
 using System;
@@ -11,9 +14,7 @@ using System.Xml.XPath;
 using System.Data.SqlServerCe;
 using System.IO;
 using System.Data.Common;
-using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
-using Microsoft.Practices.EnterpriseLibrary.Data.Sql;
-using Microsoft.Practices.EnterpriseLibrary.Data;
+
 using System.Data;
 
 namespace SimpleSharing.Tests
@@ -30,13 +31,21 @@ namespace SimpleSharing.Tests
 				File.Delete("SyncDb.sdf");
 
 			new SqlCeEngine("Data Source=SyncDb.sdf").CreateDatabase();
+#if PocketPC
+			this.database = new SqlDatabase("Data Source=SyncDb.sdf");
+#else
 			this.database = new SqlCeDatabase("Data Source=SyncDb.sdf");
+#endif
 		}
 
 		[TestCleanup]
 		public virtual void Cleanup()
 		{
+#if PocketPC
+			database.GetConnection().Close();
+#else
 			((SqlCeDatabase)database).CloseSharedConnection();
+#endif
 		}
 
 		protected virtual ISyncRepository CreateRepository(Database database, string repositoryId)
@@ -99,25 +108,6 @@ namespace SimpleSharing.Tests
 			repo.Save(s);
 
 			Assert.AreEqual(2, Count(repo.GetAll()));
-		}
-
-		[Ignore]
-		[TestMethod]
-		public void ShouldGetAllSqlEverywhereSync()
-		{
-			// Ignored as it requires a local database to exist.
-			ISyncRepository repo = CreateRepository(
-				new SqlDatabase("Data Source=.\\SQLEXPRESS;Database=Northwind;Integrated Security=true"),
-				"Foo");
-			Sync s = new Sync(Guid.NewGuid().ToString(), 50);
-			s.ItemTimestamp = DateTime.Now;
-
-			repo.Save(s);
-			s = new Sync(Guid.NewGuid().ToString());
-			s.ItemTimestamp = DateTime.Now;
-			repo.Save(s);
-
-			Assert.IsTrue(Count(repo.GetAll()) > 0);
 		}
 
 		[TestMethod]

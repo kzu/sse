@@ -5,14 +5,18 @@ using System.Data.Common;
 using System.Data;
 using System.IO;
 using System.Xml;
+#if !PocketPC
 using Microsoft.Practices.EnterpriseLibrary.Data;
+#else
+using Microsoft.Practices.Mobile.DataAccess;
+#endif
 
 namespace SimpleSharing
 {
 	public class DbSyncRepository : DbRepository, ISyncRepository
 	{
+		private const string RepositoryPrefix = "SSE_";
 		string repositoryId = String.Empty;
-		string tableNameFormat;
 
 		public DbSyncRepository(Database database)
 			: this(database, null)
@@ -23,39 +27,19 @@ namespace SimpleSharing
 			: base(database)
 		{
 			Guard.ArgumentNotNull(database, "database");
-
-			if (!String.IsNullOrEmpty(repositoryId))
-			{
-				this.repositoryId = repositoryId;
-				tableNameFormat = "SSE_" + repositoryId + "_";
-			}
-			else
-			{
-				tableNameFormat = "SSE_";
-			}
-
 			Initialize();
 		}
 
 		public Sync Get(string id)
 		{
-			using (DbConnection cn = OpenConnection())
+			using (DbDataReader reader = ExecuteReader(
+				FormatSql(@"SELECT * FROM [{0}] WHERE Id = {1}", "Sync", "id"),
+				CreateParameter("id", DbType.String, 254, id)))
 			{
-				DbCommand cmd = cn.CreateCommand();
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql("SELECT * FROM [{0}Sync] WHERE Id = " + Database.BuildParameterName("p_id"));
-				
-				Database.AddInParameter(cmd, "p_id", DbType.String, id);
-
-				DbDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
-				{
 					return Read(reader);
-				}
-				else
-				{
-					return null;
-				}
+
+				return null;
 			}
 		}
 
@@ -63,100 +47,85 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(sync.ItemTimestamp, "sync.ItemTimestamp");
 
-			using (DbConnection cn = OpenConnection())
+			string data = Write(sync);
+
+			ExecuteDb(delegate(DbConnection conn)
 			{
-				StringWriter sw = new StringWriter();
-				using (XmlWriter xw = XmlWriter.Create(sw))
+				using (DbTransaction transaction = conn.BeginTransaction())
 				{
-					new RssFeedWriter(xw).WriteSync(sync);
+					using (DbCommand cmd = conn.CreateCommand())
+					{
+						cmd.CommandText = FormatSql(@"
+							UPDATE [{0}] 
+								SET Sync = {2}, ItemTimestamp = {3}
+							WHERE Id = {1}", "Sync", "id", "sync", "ts");
+
+						int count = ExecuteNonQuery(cmd,
+							CreateParameter("id", DbType.String, 254, sync.Id),
+							CreateParameter("sync", DbType.String, 0, data),
+							CreateParameter("ts", DbType.DateTime, 0, sync.ItemTimestamp));
+						if (count == 0)
+						{
+							cmd.CommandText = FormatSql(@"
+								INSERT INTO [{0}] (Id, Sync, ItemTimestamp)
+								VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "ts");
+							// The parameters are already set on the command
+							count = this.Database.ExecuteNonQuery(cmd);
+						}
+					}
+					transaction.Commit();
 				}
-
-				DbCommand cmd = cn.CreateCommand();
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql(@"
-					UPDATE [{0}Sync] 
-					SET Sync = " + Database.BuildParameterName("p_sync") + ", ItemTimestamp = " + 
-								 Database.BuildParameterName("p_timestamp") + 
-								 " WHERE Id = " + Database.BuildParameterName("p_id"));
-
-				Database.AddInParameter(cmd, "p_sync", DbType.String, sw.ToString());
-				Database.AddInParameter(cmd, "p_timestamp", DbType.DateTime, sync.ItemTimestamp);
-				Database.AddInParameter(cmd, "p_id", DbType.String, sync.Id);
-				
-				int count = cmd.ExecuteNonQuery();
-				if (count == 0)
-				{
-					cmd.CommandText = FormatSql(@"
-						INSERT INTO [{0}Sync] 
-						(Sync, ItemTimestamp, Id)
-						VALUES 
-						(" + Database.BuildParameterName("p_sync") + ", " + 
-						   Database.BuildParameterName("p_timestamp") + ", " + 
-						   Database.BuildParameterName("p_id") + ")");
-
-					cmd.ExecuteNonQuery();
-				}
-			}
+			});
 		}
 
 		public DateTime? GetLastSync(string feed)
 		{
-			using (DbConnection cn = OpenConnection())
+			using (DbDataReader reader = ExecuteReader(
+				FormatSql(@"SELECT LastSync FROM [{0}] WHERE Feed = {1}", "LastSync", "feed"),
+				CreateParameter("feed", DbType.String, 1000, feed)))
 			{
-				DbCommand cmd = cn.CreateCommand();
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql("SELECT LastSync FROM [{0}LastSync] WHERE Feed = " + Database.BuildParameterName("p_feed"));
-				Database.AddInParameter(cmd, "p_feed", DbType.String, feed);
-				
-				DbDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
-				{
 					return reader.GetDateTime(0);
-				}
-				else
-				{
-					return null;
-				}
+
+				return null;
 			}
 		}
 
 		public void SetLastSync(string feed, DateTime date)
 		{
-			using (DbConnection cn = OpenConnection())
+			ExecuteDb(delegate(DbConnection conn)
 			{
-				DbCommand cmd = cn.CreateCommand();
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql(@"
-					UPDATE [{0}LastSync] 
-					SET LastSync = " + Database.BuildParameterName("p_lastSync") + 
-									 " WHERE Feed = " + Database.BuildParameterName("p_feed"));
-				
-				Database.AddInParameter(cmd, "p_lastSync", DbType.DateTime, date);
-				Database.AddInParameter(cmd, "p_feed", DbType.String, feed);
-				
-				int count = cmd.ExecuteNonQuery();
-				if (count == 0)
+				using (DbTransaction transaction = conn.BeginTransaction())
 				{
-					cmd.CommandText = FormatSql(@"
-						INSERT INTO [{0}LastSync] 
-						(LastSync, Feed)
-						VALUES 
-						(" + Database.BuildParameterName("p_lastSync") + ", " + Database.BuildParameterName("p_feed") + ")");
+					using (DbCommand cmd = conn.CreateCommand())
+					{
+						cmd.CommandText = FormatSql(@"
+							UPDATE [{0}] 
+								SET LastSync = {1}
+							WHERE Feed = {2}", "LastSync", "date", "feed");
 
-					cmd.ExecuteNonQuery();
+						int count = ExecuteNonQuery(cmd,
+							CreateParameter("date", DbType.DateTime, 0, date),
+							CreateParameter("feed", DbType.String, 1000, feed));
+						if (count == 0)
+						{
+							cmd.CommandText = FormatSql(@"
+								INSERT INTO [{0}] (LastSync, Feed)
+								VALUES ({1}, {2})", "LastSync", "date", "feed");
+							// The parameters are already set on the command
+							count = ExecuteNonQuery(cmd);
+						}
+
+						transaction.Commit();
+					}
 				}
-			}
+			});
 		}
 
 		public IEnumerable<Sync> GetAll()
 		{
-			using (DbConnection cn = OpenConnection())
+			using (DbDataReader reader = ExecuteReader(FormatSql("SELECT * FROM [{0}]", "Sync")))
 			{
-				DbCommand cmd = cn.CreateCommand();
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql("SELECT * FROM [{0}Sync]");
-
-				DbDataReader reader = cmd.ExecuteReader();
 				while (reader.Read())
 				{
 					yield return Read(reader);
@@ -190,38 +159,22 @@ namespace SimpleSharing
 		{
 			if (!TableExists(cn, FormatTableName(repositoryId, "Sync")))
 			{
-				DbCommand cmd = cn.CreateCommand();
-				cmd.CommandType = CommandType.Text;
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql(@"
-						CREATE TABLE [{0}Sync](
+				ExecuteNonQuery(FormatSql(@"
+						CREATE TABLE [{0}](
 							[Id] NVARCHAR(254) NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL, 
 							[ItemTimestamp] DATETIME NOT NULL
-						)");
-				cmd.ExecuteNonQuery();
+						)", "Sync"));
 			}
-			
+
 			if (!TableExists(cn, FormatTableName(repositoryId, "LastSync")))
 			{
-				DbCommand cmd = cn.CreateCommand();
-				cmd.CommandType = CommandType.Text;
-				cmd.Connection = cn;
-				cmd.CommandText = FormatSql(@"
-						CREATE TABLE [{0}LastSync](
+				ExecuteNonQuery(FormatSql(@"
+						CREATE TABLE [{0}](
 							[Feed] NVARCHAR(1000) NOT NULL PRIMARY KEY,
 							[LastSync] DATETIME NOT NULL
-						)");
-				cmd.ExecuteNonQuery();
+						)", "LastSync"));
 			}
-		}
-
-		protected virtual void AddInParameter(DbCommand command, DbType dbType, object value)
-		{
-			DbParameter param = command.CreateParameter();
-			param.DbType = dbType;
-			param.Value = value;
-			command.Parameters.Add(param);
 		}
 
 		protected string FormatTableName(string tableName)
@@ -233,17 +186,35 @@ namespace SimpleSharing
 		{
 			if (!String.IsNullOrEmpty(repositoryId))
 			{
-				return "SSE_" + repositoryId + "_" + tableName;
+				return RepositoryPrefix + repositoryId + "_" + tableName;
 			}
 			else
 			{
-				return "SSE_" + tableName;
+				return RepositoryPrefix + tableName;
 			}
 		}
 
-		protected string FormatSql(string value)
+		protected string FormatSql(string cmd, string tableName, params string[] parms)
 		{
-			return String.Format(value, tableNameFormat);
+			string[] names = new string[1 + (parms != null ? parms.Length : 0)];
+			names[0] = FormatTableName(tableName);
+			if (parms != null)
+			{
+				int index = 1;
+				foreach (string parm in parms)
+					names[index++] = this.Database.BuildParameterName(parm);
+			}
+			return String.Format(cmd, names);
+		}
+
+		private string Write(Sync sync)
+		{
+			StringWriter sw = new StringWriter();
+			using (XmlWriter xw = XmlWriter.Create(sw))
+			{
+				new RssFeedWriter(xw).WriteSync(sync);
+			}
+			return sw.ToString();
 		}
 	}
 }
