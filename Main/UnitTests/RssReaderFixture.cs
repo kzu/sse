@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.IO;
+using System.Reflection;
 
 namespace SimpleSharing.Tests
 {
@@ -250,7 +251,9 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldReadItemsLiveFeed()
 		{
-			using (XmlReader xr = XmlReader.Create("feed.sse"))
+			string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
+			path = Path.Combine(path, "feed.sse");
+			using (XmlReader xr = XmlReader.Create(path))
 			{
 				FeedReader reader = new RssFeedReader(xr);
 
@@ -279,7 +282,7 @@ namespace SimpleSharing.Tests
   <description>A list of items to do</description>
   <link>http://somefakeurl.com/partial.xml</link>
   <sx:sharing version='0.93' since='2005-02-13T18:30:02Z'
-    until='2005-05-23T18:30:02Z' />
+    until='2005-05-23T18:30:02Z' />r
   <item>
    <title>Buy groceries</title>
    <description>Get milk, eggs, butter and bread</description>

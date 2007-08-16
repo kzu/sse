@@ -137,5 +137,14 @@ namespace SimpleSharing.Properties {
                 return ResourceManager.GetString("SyncHistoryRequired", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Initialize method has not been called on the repository..
+        /// </summary>
+        internal static string UninitializedRepository {
+            get {
+                return ResourceManager.GetString("UninitializedRepository", resourceCulture);
+            }
+        }
     }
 }

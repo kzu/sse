@@ -21,14 +21,6 @@ namespace SimpleSharing
 		{
 		}
 
-		protected override void AddInParameter(DbCommand command, DbType dbType, object value)
-		{
-			if (dbType == DbType.DateTime)
-				base.AddInParameter(command, DbType.DateTime, ((DateTime)value).ToString());
-			else
-				base.AddInParameter(command, dbType, value);
-		}
-
 		protected override void InitializeSchema(DbConnection cn)
 		{
 			if (!TableExists(cn, FormatTableName("Sync")))
@@ -37,11 +29,11 @@ namespace SimpleSharing
 				cmd.CommandType = CommandType.Text;
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
-						CREATE TABLE [{0}Sync](
+						CREATE TABLE [{0}](
 							[Id] TEXT NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL, 
 							[ItemTimestamp] DATETIME NOT NULL
-						)");
+						)", "Sync");
 				cmd.ExecuteNonQuery();
 			}
 
@@ -51,10 +43,10 @@ namespace SimpleSharing
 				cmd.CommandType = CommandType.Text;
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
-						CREATE TABLE [{0}LastSync](
+						CREATE TABLE [{0}](
 							[Feed] TEXT NOT NULL PRIMARY KEY,
 							[LastSync] DATETIME NOT NULL
-						)");
+						)", "LastSync");
 				cmd.ExecuteNonQuery();
 			}
 		}
