@@ -22,7 +22,9 @@ namespace SimpleSharing.Tests
 	[TestClass]
 	public class DbSyncRepositoryFixture : SyncRepositoryFixture
 	{
-		protected Database database;
+		private delegate void ExecuteDbHandler(DbConnection connection);
+
+        protected Database database;
 
 		[TestInitialize]
 		public virtual void Initialize()
@@ -81,5 +83,65 @@ namespace SimpleSharing.Tests
 
 			repo.Save(s);
 		}
+
+        [TestMethod]
+        public void ShouldAddSingleSyncItem()
+        {
+            ISyncRepository repo = CreateRepository(database, "Foo");
+            Sync s = new Sync(Guid.NewGuid().ToString());
+            s.ItemTimestamp = DateTime.Now;
+
+            repo.Save(s);
+
+            int count = CountSyncRecords(s.Id);
+
+            Assert.AreEqual(1, count);
+        }
+
+        [TestMethod]
+        public void ShouldModifySingleSyncItem()
+        {
+            ISyncRepository repo = CreateRepository(database, "Foo");
+            Sync s = new Sync(Guid.NewGuid().ToString());
+            s.ItemTimestamp = DateTime.Now;
+
+            repo.Save(s);
+
+            s.ItemTimestamp = DateTime.Now;
+            repo.Save(s);
+
+            int count = CountSyncRecords(s.Id);
+            Assert.AreEqual(1, count);
+        }
+
+        private int CountSyncRecords(string syncId)
+        {
+            DbConnection connection = null;
+            try
+            {
+#if PocketPC
+                connection = database.GetConnection()
+#else
+                connection = database.CreateConnection();
+#endif
+                connection.Open();
+                DbCommand command = connection.CreateCommand();
+                command.CommandText = "SELECT COUNT(*) FROM SSE_Foo_Sync WHERE ID = id";
+
+                DbParameter parameter = command.CreateParameter();
+                parameter.ParameterName = database.BuildParameterName("id");
+                parameter.DbType = DbType.String;
+                parameter.Size = 254;
+                parameter.Value = syncId;
+
+                return (int)command.ExecuteScalar();
+            }
+            finally
+            {
+#if !PocketPC
+                connection.Close();
+#endif
+            }
+        }
 	}
 }
