@@ -16,7 +16,7 @@ namespace SimpleSharing
 	public class DbSyncRepository : DbRepository, ISyncRepository
 	{
 		private const string RepositoryPrefix = "SSE_";
-		string repositoryId = String.Empty;
+		string repositoryId;
 
 		public DbSyncRepository(Database database)
 			: this(database, null)
@@ -27,6 +27,8 @@ namespace SimpleSharing
 			: base(database)
 		{
 			Guard.ArgumentNotNull(database, "database");
+
+			this.repositoryId = repositoryId;
 			Initialize();
 		}
 
@@ -55,16 +57,17 @@ namespace SimpleSharing
 				{
 					using (DbCommand cmd = conn.CreateCommand())
 					{
-						cmd.CommandText = FormatSql(@"
+                        cmd.CommandText = FormatSql(@"
 							UPDATE [{0}] 
 								SET Sync = {2}, ItemTimestamp = {3}
 							WHERE Id = {1}", "Sync", "id", "sync", "ts");
 
-						int count = ExecuteNonQuery(cmd,
+                        int count = ExecuteNonQuery(cmd,
 							CreateParameter("id", DbType.String, 254, sync.Id),
 							CreateParameter("sync", DbType.String, 0, data),
 							CreateParameter("ts", DbType.DateTime, 0, sync.ItemTimestamp));
-						if (count == 0)
+						
+                        if (count == 0)
 						{
 							cmd.CommandText = FormatSql(@"
 								INSERT INTO [{0}] (Id, Sync, ItemTimestamp)

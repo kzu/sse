@@ -126,6 +126,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "C:\...\CustomerSite\", "Sam
 		SccAuxPath = "SAK"
 		SccLocalPath = "SAK"
 		SccProvider = "SAK"
+		ProjectReferences = "{5A747B6C-D230-4D59-9321-83B48C4553CF}|SimpleSharing.dll;{39CD4932-82D1-4CAC-A262-60C747BBE58F}|CustomerLibrary.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/CustomerSite"
 		Debug.AspNetCompiler.PhysicalPath = "Samples\CustomerSite\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\CustomerSite\"
@@ -199,9 +200,6 @@ Global
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SimpleSharing.vsmdi
-	EndGlobalSection
-	GlobalSection(TextTemplating) = postSolution
-		TextTemplating = 1
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -301,13 +299,11 @@ Global
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Release|.NET.ActiveCfg = Release|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{6AB67AF4-83D3-449E-83D0-A88C343801AE}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{F3D077E0-0FD6-4914-A55C-3FC14F36276A}.Debug|.NET.ActiveCfg = Debug|Any CPU
 		{F3D077E0-0FD6-4914-A55C-3FC14F36276A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F3D077E0-0FD6-4914-A55C-3FC14F36276A}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -345,5 +341,8 @@ Global
 		{39CD4932-82D1-4CAC-A262-60C747BBE58F} = {79108410-9F61-4979-A972-6139E491C1F0}
 		{668EB0BF-98AC-4511-B1AF-53536D2FC4E5} = {79108410-9F61-4979-A972-6139E491C1F0}
 		{9C25AC62-C3C5-4A9A-866F-1B698CC55E58} = {79108410-9F61-4979-A972-6139E491C1F0}
+	EndGlobalSection
+	GlobalSection(TextTemplating) = postSolution
+		TextTemplating = 1
 	EndGlobalSection
 EndGlobal
