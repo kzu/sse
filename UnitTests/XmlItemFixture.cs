@@ -1,12 +1,9 @@
+using System;
 #if PocketPC
 using Microsoft.Practices.Mobile.TestTools.UnitTesting;
 #else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #endif
-
-using System;
-using System.Collections.Generic;
-using System.Xml;
 
 namespace SimpleSharing.Tests
 {
@@ -37,15 +34,6 @@ namespace SimpleSharing.Tests
 			XmlItem item = new XmlItem("title", null, GetElement("<payload/>"));
 
 			Assert.IsNull(item.Description);
-		}
-
-		[TestMethod]
-		public void ShouldAddEmptyPayloadIfNullPayload()
-		{
-			XmlItem item = new XmlItem("title", "description", null);
-
-			Assert.IsNotNull(item.Payload);
-			Assert.AreEqual(0, item.Payload.ChildNodes.Count);
 		}
 
 		[TestMethod]
@@ -91,6 +79,23 @@ namespace SimpleSharing.Tests
 			XmlItem i2 = new XmlItem(i1.Id, "title", "description2", i1.Timestamp, GetElement("<payload/>"));
 
 			Assert.AreNotEqual(i1, i2);
+		}
+
+		[TestMethod]
+		public void ShouldAddEmptyPayloadIfTitleAndDescriptionAreNull()
+		{
+			XmlItem item = new XmlItem(null, null, null);
+
+			Assert.IsNotNull(item.Payload);
+			Assert.AreEqual(0, item.Payload.ChildNodes.Count);
+		}
+
+		[TestMethod]
+		public void ShouldNotThrowExceptionIfTitleAndDescriptionAreNull()
+		{
+			XmlItem item = new XmlItem(null, null, null);
+
+			item.GetHashCode();
 		}
 	}
 }
