@@ -92,12 +92,11 @@ namespace SimpleSharing
 			{
 				if (reader.NodeType == XmlNodeType.Element)
 				{
-					// We persist all elements in the payload, as they may 
+					// We persist all elements (except title & description) in the payload, as they may 
 					// be needed for further processing by other libraries.
 					if (reader.LocalName == "title" && reader.NamespaceURI.Length == 0)
 					{
 						title = ReadElementValue(reader);
-						writer.WriteElementString("title", title);
 					}
 					else if (reader.LocalName == "pubDate" && reader.NamespaceURI.Length == 0)
 					{
@@ -108,7 +107,6 @@ namespace SimpleSharing
 					else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
 					{
 						description = ReadElementValue(reader);
-						writer.WriteElementString("description", description);
 					}
 					else if (reader.LocalName == "author" && reader.NamespaceURI.Length == 0)
 					{

@@ -170,8 +170,6 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(1, items[0].Sync.Conflicts.Count);
 			Assert.AreEqual("Buy icecream", items[0].Sync.Conflicts[0].XmlItem.Title);
 			Assert.AreEqual(@"<payload>
-  <title>Buy groceries</title>
-  <description>Get milk, eggs, butter and bread</description>
   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
   <customer id=""1"" />
 </payload>", ReadToEnd(new XmlNodeReader(items[0].XmlItem.Payload)));
@@ -353,10 +351,10 @@ namespace SimpleSharing.Tests
 
 			List<Item> items = new List<Item>(i);
 			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual("Buy groceries", items[0].XmlItem.Title);
+			Assert.AreEqual("Get milk, eggs, butter and bread", items[0].XmlItem.Description);
 			Assert.AreEqual(@"<payload>
-  <title>Buy groceries</title>
   <payload>unknown</payload>
-  <description>Get milk, eggs, butter and bread</description>
   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
   <someData id=""1"" xmlns=""foo"" />
   <someOtherData xmlns=""bar"" />

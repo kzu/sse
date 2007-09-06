@@ -41,19 +41,23 @@ namespace SimpleSharing
 		public string Id
 		{
 			get { return id; }
-			set { Guard.ArgumentNotNullOrEmptyString(value, "Id"); id = value; }
+			set
+			{
+				Guard.ArgumentNotNullOrEmptyString(value, "Id");
+				id = value;
+			}
 		}
 
 		public string Title
 		{
 			get { return title; }
-			set { Guard.ArgumentNotNullOrEmptyString(value, "Title"); title = value; }
+			set { title = value; }
 		}
 
 		public string Description
 		{
 			get { return description; }
-			set { Guard.ArgumentNotNullOrEmptyString(value, "Description"); description = value; }
+			set { description = value; }
 		}
 
 		public DateTime Timestamp
@@ -65,7 +69,11 @@ namespace SimpleSharing
 		public XmlElement Payload
 		{
 			get { return payload; }
-			set { Guard.ArgumentNotNull(value, "Payload"); payload = value; }
+			set
+			{
+				Guard.ArgumentNotNull(value, "Payload");
+				payload = value;
+			}
 		}
 
 		#region Equality
@@ -82,7 +90,8 @@ namespace SimpleSharing
 
 		public static bool Equals(IXmlItem obj1, IXmlItem obj2)
 		{
-			if (Object.ReferenceEquals(obj1, obj2)) return true;
+			if (Object.ReferenceEquals(obj1, obj2))
+				return true;
 			if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
 			{
 				return obj1.Id == obj2.Id &&
@@ -98,7 +107,8 @@ namespace SimpleSharing
 		public override int GetHashCode()
 		{
 			int hash = id.GetHashCode();
-			hash = hash ^ title.GetHashCode();
+			if (title != null)
+				hash = hash ^ title.GetHashCode();
 			if (description != null)
 				hash = hash ^ description.GetHashCode();
 			hash = hash ^ lastUpdated.GetHashCode();
