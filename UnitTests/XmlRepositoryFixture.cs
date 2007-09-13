@@ -31,17 +31,6 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldAddReturnItemTimestamp()
-		{
-			IXmlItem item = new MockXmlItem();
-			item.Hash = ((DateTime)item.Hash).Subtract(TimeSpan.FromDays(1));
-			DateTime original = (DateTime)item.Hash;
-			DateTime timestamp = (DateTime)CreateRepository().Add(item);
-
-			Assert.AreNotEqual(original, timestamp);
-		}
-
-		[TestMethod]
 		public void ShouldContainAfterAdd()
 		{
 			IXmlItem item = new MockXmlItem();
@@ -171,13 +160,11 @@ namespace SimpleSharing.Tests
 		{
 			IXmlRepository repo = CreateRepository();
 			IXmlItem item = new MockXmlItem();
-			DateTime original = (DateTime)repo.Add(item);
+			repo.Add(item);
 
 			item.Payload.InnerXml = "<foo>updated</foo>";
 
-			DateTime dt = (DateTime)repo.Update(item);
-
-			Assert.AreNotEqual(original, dt);
+			repo.Update(item);
 
 			IXmlItem item2 = repo.Get(item.Id);
 

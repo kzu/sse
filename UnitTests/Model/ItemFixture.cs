@@ -89,8 +89,8 @@ namespace SimpleSharing.Tests.Model
 			Sync s2 = new Sync(s1.Id);
 			DateTime now = DateTime.Now;
 
-			Item obj1 = new Item(new XmlItem(s1.Id, "foo", "bar", now, GetElement("<payload/>")), s1);
-			Item obj2 = new Item(new XmlItem(s1.Id, "foo", "bar", now, GetElement("<payload/>")), s2);
+			Item obj1 = new Item(new XmlItem(s1.Id, "foo", "bar", GetElement("<payload/>")), s1);
+			Item obj2 = new Item(new XmlItem(s1.Id, "foo", "bar", GetElement("<payload/>")), s2);
 
 			AssertEquals(obj1, obj2);
 		}
@@ -102,8 +102,8 @@ namespace SimpleSharing.Tests.Model
 			Sync s2 = new Sync(s1.Id);
 			DateTime now = DateTime.Now;
 
-			Item obj1 = new Item(new XmlItem(s1.Id, "foo", "bar", now, GetElement("<payload/>")), s1);
-			Item obj2 = new Item(new XmlItem(s1.Id, "foo", "bar", now, GetElement("<payload/>")), s2);
+			Item obj1 = new Item(new XmlItem(s1.Id, "foo", "bar", GetElement("<payload/>")), s1);
+			Item obj2 = new Item(new XmlItem(s1.Id, "foo", "bar", GetElement("<payload/>")), s2);
 
 			Assert.AreEqual(obj1.GetHashCode(), obj2.GetHashCode());
 		}

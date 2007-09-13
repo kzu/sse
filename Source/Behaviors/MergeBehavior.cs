@@ -95,16 +95,16 @@ namespace SimpleSharing
 			if (sync == null)
 			{
 				sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
-				sync.ItemHash = localItem.Hash;
+				sync.ItemHash = localItem.GetHashCode();
 
 				syncRepository.Save(sync);
 			}
 			else if (localItem != null && 
                 sync.ItemHash != null &&
-				!sync.ItemHash.Equals(localItem.Hash))
+				!sync.ItemHash.Equals(localItem.GetHashCode()))
 			{
 				sync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, false);
-				sync.ItemHash = localItem.Hash;
+				sync.ItemHash = localItem.GetHashCode();
 				syncRepository.Save(sync);
 			}
 

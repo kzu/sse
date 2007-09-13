@@ -25,14 +25,12 @@ namespace CustomerLibrary
 			converter = new CustomerConverter(mapper);
 		}
 
-		public object Add(IXmlItem item)
+		public void Add(IXmlItem item)
 		{
 			Customer customer = converter.Convert(item);
 			int customerId = dac.Add(customer);
 
 			mapper.Map(item.Id, customerId);
-
-			return customer.Timestamp;
 		}
 
 		public bool Contains(string id)
@@ -40,13 +38,11 @@ namespace CustomerLibrary
 			return dac.Exists(mapper.Map(id));
 		}
 
-		public object Update(IXmlItem item)
+		public void Update(IXmlItem item)
 		{
 			Customer customer = converter.Convert(item);
 			if (!dac.Update(customer))
 				throw new InvalidOperationException("Could not update customer");
-
-			return customer.Timestamp;
 		}
 
 		public bool Remove(string id)

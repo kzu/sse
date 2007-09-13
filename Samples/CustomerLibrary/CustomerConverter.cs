@@ -27,7 +27,6 @@ namespace CustomerLibrary
 					if (reader.LocalName == "Customer")
 					{
 						Customer customer = (Customer)serializer.Deserialize(reader);
-						customer.Timestamp = (DateTime)item.Hash;
 						return customer;
 					}
 				}
@@ -41,7 +40,7 @@ namespace CustomerLibrary
 			return new SerializerXmlItem<Customer>(
 				mapper.Map(customer.Id),
 				"{FirstName}, {LastName}", "Born on {Birthday}",
-				customer.Timestamp, customer);
+				customer);
 		}
 	}
 }

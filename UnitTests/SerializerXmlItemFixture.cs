@@ -22,14 +22,14 @@ namespace SimpleSharing.Tests
 		public void ShouldThrowIfNullData()
 		{
 			new SerializerXmlItem<SerializableData>(Guid.NewGuid().ToString(), "title",
-				"description", DateTime.Now, null);
+				"description", null);
 		}
 
 		[TestMethod]
 		public void ShouldSerializePayloadWithoutDefaultXsiAttributes()
 		{
 			IXmlItem item = new SerializerXmlItem<SerializableData>(
-				Guid.NewGuid().ToString(), "title", "description", DateTime.Now, new SerializableData());
+				Guid.NewGuid().ToString(), "title", "description", new SerializableData());
 
 			StringWriter sw = new StringWriter();
 			XmlWriterSettings set = new XmlWriterSettings();
@@ -40,14 +40,14 @@ namespace SimpleSharing.Tests
 				w.WriteNode(new XmlNodeReader(item.Payload), false);
 			}
 
-            Assert.AreEqual("<payload><SerializableData /><title>title</title><description>description</description></payload>", sw.ToString());
+            Assert.AreEqual("<payload><SerializableData /></payload>", sw.ToString());
 		}
 
 		[TestMethod]
 		public void ShouldSerializePayloadWithNamespace()
 		{
 			IXmlItem item = new SerializerXmlItem<SerializableDataNs>(
-				Guid.NewGuid().ToString(), "title", "description", DateTime.Now, new SerializableDataNs());
+				Guid.NewGuid().ToString(), "title", "description", new SerializableDataNs());
 
 			StringWriter sw = new StringWriter();
 			XmlWriterSettings set = new XmlWriterSettings();
@@ -60,7 +60,7 @@ namespace SimpleSharing.Tests
 
 			string xml = sw.ToString();
 
-            Assert.AreEqual("<payload><SerializableDataNs xmlns=\"mvp-xml\" /><title>title</title><description>description</description></payload>", xml);
+            Assert.AreEqual("<payload><SerializableDataNs xmlns=\"mvp-xml\" /></payload>", xml);
 		}
 
 		public class SerializableData

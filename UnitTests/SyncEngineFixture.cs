@@ -180,7 +180,7 @@ namespace SimpleSharing.Tests
 			MockXmlRepository xmlrepo = new MockXmlRepository();
 			MockSyncRepository syncrepo = new MockSyncRepository();
 
-			IXmlItem xi = new XmlItem("title", "description", DateTime.Now, new XmlDocument().CreateElement("payload"));
+			IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
 			xi.Id = Guid.NewGuid().ToString();
 
 			xmlrepo.Add(xi);
@@ -198,7 +198,7 @@ namespace SimpleSharing.Tests
 			MockXmlRepository xmlrepo = new MockXmlRepository();
 			MockSyncRepository syncrepo = new MockSyncRepository();
 
-			IXmlItem xi = new XmlItem("title", "description", DateTime.Now, new XmlDocument().CreateElement("payload"));
+			IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
 			xi.Id = Guid.NewGuid().ToString();
 			Sync sync = Behaviors.Create(xi.Id, "kzu", DateTime.Now, false);
 			Item item = new Item(xi, sync);
@@ -219,7 +219,7 @@ namespace SimpleSharing.Tests
 			MockXmlRepository xmlrepo = new MockXmlRepository();
 			MockSyncRepository syncrepo = new MockSyncRepository();
 
-            IXmlItem xi = new XmlItem("title", "description", DateTime.Now.Subtract(TimeSpan.FromDays(2)), new XmlDocument().CreateElement("payload"));
+            IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
 			xi.Id = Guid.NewGuid().ToString();
 			Sync sync = Behaviors.Create(xi.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(2)), false);
 			Item item = new Item(xi, sync);
@@ -231,7 +231,7 @@ namespace SimpleSharing.Tests
 
 			IEnumerable<Item> items = engine.Export(1);
 
-			Assert.AreEqual(0, Count(items));
+			Assert.AreEqual(1, Count(items));
 		}
 
 		[TestMethod]
@@ -315,23 +315,23 @@ namespace SimpleSharing.Tests
 			string id = Guid.NewGuid().ToString();
 			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
 			Item item = new Item(
-				new XmlItem(id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+				new XmlItem(id, "foo", "bar", GetElement("<foo id='bar'/>")),
 				sync);
 
-			// Save original item.
-			item.Sync.ItemHash = xmlRepo.Add(item.XmlItem);
+            xmlRepo.Add(item.XmlItem);
+            // Save original item.
+			item.Sync.ItemHash = item.XmlItem.GetHashCode();
 			syncRepo.Save(item.Sync);
 
 			// Remote editing.
 			Item incoming = item.Clone();
 			incoming = new Item(new XmlItem(id, "remote", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				Behaviors.Update(incoming.Sync, "REMOTE\\kzu", DateTime.Now, false));
 
 			// Local editing.
 			item = new Item(new XmlItem(id, "changed", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				Behaviors.Update(item.Sync, DeviceAuthor.Current, DateTime.Now, false));
 			xmlRepo.Update(item.XmlItem);
 			syncRepo.Save(item.Sync);
@@ -352,7 +352,7 @@ namespace SimpleSharing.Tests
 			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -365,7 +365,7 @@ namespace SimpleSharing.Tests
 
 			// Local editing.
 			item = new Item(new XmlItem(id, "changed", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				Behaviors.Update(item.Sync, DeviceAuthor.Current, DateTime.Now, false));
 			xmlRepo.Update(item.XmlItem);
 			syncRepo.Save(item.Sync);
@@ -374,7 +374,7 @@ namespace SimpleSharing.Tests
 
 			// Conflicting remote editing.
 			incoming = new Item(new XmlItem(id, "remote", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				Behaviors.Update(incoming.Sync, "REMOTE\\kzu", DateTime.Now, false));
 
 			IList<Item> conflicts = engine.Import(incoming);
@@ -397,7 +397,7 @@ namespace SimpleSharing.Tests
 			sync.ItemHash = DateTime.Now;
 			Item item = new Item(
 				new XmlItem(id, "foo", "bar",
-					sync.ItemHash, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -408,8 +408,8 @@ namespace SimpleSharing.Tests
 			Thread.Sleep(1000);
 
 			// Local editing outside of SSE by the local app.
-			object hash = xmlRepo.Update(new XmlItem(id, "changed", item.XmlItem.Description,
-				null, item.XmlItem.Payload));
+			xmlRepo.Update(new XmlItem(id, "changed", item.XmlItem.Description,
+				item.XmlItem.Payload));
 			
 			// Import of same item should cause it to 
 			// be updated with new Sync info and a no-op on sync.
@@ -577,7 +577,6 @@ namespace SimpleSharing.Tests
 			// update item on one repository.
 			IXmlItem item = GetFirst<IXmlItem>(xmlRepo.GetAll());
 			item.Title = "updated";
-			item.Hash = null;
 			xmlRepo.Update(item);
 
 			IList<Item> conflicts = engine2.Import(engine.Export());
@@ -600,7 +599,7 @@ namespace SimpleSharing.Tests
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "LOCAL\\foo", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "title", "description",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -626,18 +625,20 @@ namespace SimpleSharing.Tests
 			// Remote editing.
 			Item remoteItem = item.Clone();
 			remoteItem = new Item(new XmlItem(remoteItem.XmlItem.Id, "remote", remoteItem.XmlItem.Description,
-				remoteItem.Sync.LastUpdate.When.Value, remoteItem.XmlItem.Payload),
+				remoteItem.XmlItem.Payload),
 				Behaviors.Update(remoteItem.Sync, "REMOTE\\foo", DateTime.Now, false));
-			remoteItem.Sync.ItemHash = remoteXml.Update(remoteItem.XmlItem);
+			remoteXml.Update(remoteItem.XmlItem);
+            remoteItem.Sync.ItemHash = remoteItem.XmlItem.GetHashCode();
 			remoteSync.Save(remoteItem.Sync);
 
 			Thread.Sleep(1000);
 
 			// Local editing.
 			item = new Item(new XmlItem(item.XmlItem.Id, "local", item.XmlItem.Description,
-				item.Sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				Behaviors.Update(item.Sync, "LOCAL\\bar", DateTime.Now, false));
-			item.Sync.ItemHash = localXml.Update(item.XmlItem);
+			localXml.Update(item.XmlItem);
+            item.Sync.ItemHash = item.XmlItem.GetHashCode();
 			localSync.Save(item.Sync);
 
 			conflicts = remoteEngine.Import(localEngine.Export());
@@ -688,7 +689,7 @@ namespace SimpleSharing.Tests
 
 			Item item = GetFirst<Item>(engine.Export());
 			Assert.IsNotNull(item.Sync.ItemHash);
-			Assert.AreEqual(item.XmlItem.Hash, item.Sync.ItemHash);
+			Assert.AreEqual(item.XmlItem.GetHashCode(), item.Sync.ItemHash);
 		}
 
 
@@ -825,7 +826,7 @@ namespace SimpleSharing.Tests
 			IXmlRepository xmlRepo = mocks.NewMock<IXmlRepository>();
 
 			Expect.Once.On(xmlRepo).Method("Contains").Will(Return.Value(false));
-			Expect.Once.On(xmlRepo).Method("Add").Will(Return.Value(DateTime.Now));
+			Expect.Once.On(xmlRepo).Method("Add");
 			Expect.Once.On(syncRepo).Method("Save");
 
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
@@ -846,7 +847,7 @@ namespace SimpleSharing.Tests
 			IXmlRepository xmlRepo = mocks.NewMock<IXmlRepository>();
 
 			Expect.Once.On(xmlRepo).Method("Contains").Will(Return.Value(true));
-			Expect.Once.On(xmlRepo).Method("Update").Will(Return.Value(DateTime.Now));
+			Expect.Once.On(xmlRepo).Method("Update");
 			Expect.Once.On(syncRepo).Method("Save");
 
 			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
@@ -899,21 +900,18 @@ namespace SimpleSharing.Tests
 		private IEnumerable<Item> GetMockItems()
 		{
 			string id = null;
-			DateTime? when;
 			return new List<Item>(
 				new Item[] {
 					new Item(
 						new XmlItem(
 							(id = Guid.NewGuid().ToString()), "Foo", "Description",
-							(when = DateTime.Now).Value, 
 							GetElement("<foo id='1'/>")), 
-						Behaviors.Update(new Sync(id), DeviceAuthor.Current, when, false)), 
+						Behaviors.Update(new Sync(id), DeviceAuthor.Current, DateTime.Now, false)), 
 					new Item(
 						new XmlItem(
 							(id = Guid.NewGuid().ToString()), "Foo", "Description", 
-							(when = DateTime.Now).Value, 
 							GetElement("<foo id='2'/>")), 
-						Behaviors.Update(new Sync(id), DeviceAuthor.Current, when, false))
+						Behaviors.Update(new Sync(id), DeviceAuthor.Current, DateTime.Now, false))
 				});
 		}
 

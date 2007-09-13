@@ -13,8 +13,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetHashcodeWithNullDescription()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", null, DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", null, i1.Timestamp, GetElement("<payload/>"));
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", null, GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title", null, GetElement("<payload/>"));
 
 			Assert.AreEqual(i1, i2);
 			Assert.AreEqual(i1.GetHashCode(), i2.GetHashCode());
@@ -39,8 +39,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldEqualWithSameValues()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description", i1.Timestamp, GetElement("<payload/>"));
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description", GetElement("<payload/>"));
 
 			Assert.AreEqual(i1, i2);
 		}
@@ -48,17 +48,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualWithDifferentPayload()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description", i1.Timestamp, GetElement("<payload id='foo'/>"));
-
-			Assert.AreNotEqual(i1, i2);
-		}
-
-		[TestMethod]
-		public void ShouldNotEqualWithDifferentTimestampSeconds()
-		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description", DateTime.Now.AddSeconds(50), GetElement("<payload/>"));
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description", GetElement("<payload id='foo'/>"));
 
 			Assert.AreNotEqual(i1, i2);
 		}
@@ -66,8 +57,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualWithDifferentTitle()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title1", "description", DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title2", "description", i1.Timestamp, GetElement("<payload/>"));
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title1", "description", GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title2", "description", GetElement("<payload/>"));
 
 			Assert.AreNotEqual(i1, i2);
 		}
@@ -75,8 +66,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualWithDifferentDescription()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description1", DateTime.Now, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description2", i1.Timestamp, GetElement("<payload/>"));
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description1", GetElement("<payload/>"));
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description2", GetElement("<payload/>"));
 
 			Assert.AreNotEqual(i1, i2);
 		}
