@@ -9,20 +9,15 @@ namespace SimpleSharing
         private string id;
         private string description;
         private string title;
-        object hash = null;
+        
         private XmlElement payload;
 
         public XmlItem(string title, string description, XmlElement payload)
-            : this(Guid.NewGuid().ToString(), title, description, null, payload)
+            : this(Guid.NewGuid().ToString(), title, description, payload)
         {
         }
 
-        public XmlItem(string title, string description, object hash, XmlElement payload)
-            : this(Guid.NewGuid().ToString(), title, description, hash, payload)
-        {
-        }
-
-        public XmlItem(string id, string title, string description, object hash, XmlElement payload)
+        public XmlItem(string id, string title, string description, XmlElement payload)
         {
             Guard.ArgumentNotNullOrEmptyString(id, "id");
 
@@ -34,7 +29,6 @@ namespace SimpleSharing
             this.id = id;
             this.title = title;
             this.description = description;
-            Hash = hash;
             this.payload = payload;
         }
 
@@ -58,12 +52,6 @@ namespace SimpleSharing
         {
             get { return description; }
             set { description = value; }
-        }
-
-        public object Hash
-        {
-            get { return hash; }
-            set { hash = value; }
         }
 
         public XmlElement Payload
@@ -97,7 +85,6 @@ namespace SimpleSharing
                 return obj1.Id == obj2.Id &&
                     obj1.Title == obj2.Title &&
                     obj1.Description == obj2.Description &&
-                    ((obj1.Hash == null && obj2.Hash == null) || obj1.Hash.Equals(obj2.Hash)) &&
                     obj1.Payload.OuterXml == obj2.Payload.OuterXml;
             }
 
@@ -111,8 +98,6 @@ namespace SimpleSharing
                 hash = hash ^ title.GetHashCode();
             if (description != null)
                 hash = hash ^ description.GetHashCode();
-            if (this.Hash != null)
-                hash = hash ^ this.Hash.GetHashCode();
             hash = hash ^ payload.OuterXml.GetHashCode();
 
             return hash;
@@ -134,7 +119,7 @@ namespace SimpleSharing
 
         protected virtual IXmlItem DoClone()
         {
-            return new XmlItem(id, title, description, hash, payload);
+            return new XmlItem(id, title, description, payload);
         }
 
         #endregion

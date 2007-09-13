@@ -10,9 +10,8 @@ namespace SimpleSharing.Tests
 	{
 		string id = Guid.NewGuid().ToString();
 		XmlElement payload;
-		DateTime timestamp = SimpleSharing.Timestamp.Normalize(DateTime.Now);
 
-		public MockXmlItem()
+        public MockXmlItem()
 		{
 			payload = new XmlDocument().CreateElement("payload");
 			payload.InnerXml = "<foo>bar</foo>";
@@ -41,12 +40,6 @@ namespace SimpleSharing.Tests
 			set { }
 		}
 
-		public object Hash
-		{
-			get { return timestamp; }
-			set { timestamp = (DateTime)value; }
-		}
-
 		public string Title
 		{
 			get { return "Title"; }
@@ -57,7 +50,6 @@ namespace SimpleSharing.Tests
 		{
 			MockXmlItem item = new MockXmlItem();
 			item.payload = this.payload;
-			item.timestamp = this.timestamp;
 			item.id = this.id;
 
 			return item;
@@ -73,7 +65,6 @@ namespace SimpleSharing.Tests
 			return other != null &&
 				other is MockXmlItem &&
 				other.Id == this.id &&
-				other.Hash == this.Hash &&
 				other.Payload.OuterXml == this.payload.OuterXml;
 		}
 	}

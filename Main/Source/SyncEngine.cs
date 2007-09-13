@@ -68,7 +68,6 @@ namespace SimpleSharing
 				{
 					// Add sync on-the-fly.
 					sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
-					sync.ItemHash = xml.Hash;
 					syncRepo.Save(sync);
 				}
 				else
@@ -204,7 +203,8 @@ namespace SimpleSharing
 					case MergeOperation.Added:
 						if (!result.Proposed.Sync.Deleted)
 						{
-							result.Proposed.Sync.ItemHash = xmlRepo.Add(result.Proposed.XmlItem);
+							xmlRepo.Add(result.Proposed.XmlItem);
+                            result.Proposed.Sync.ItemHash = result.Proposed.XmlItem.GetHashCode();
 							syncRepo.Save(result.Proposed.Sync);
 						}
 						break;
@@ -219,7 +219,8 @@ namespace SimpleSharing
 						// delete, should we delete from the xmlRepo?
 						if (!result.Proposed.Sync.Deleted)
 						{
-							result.Proposed.Sync.ItemHash = xmlRepo.Update(result.Proposed.XmlItem);
+							xmlRepo.Update(result.Proposed.XmlItem);
+                            result.Proposed.Sync.ItemHash = result.Proposed.XmlItem.GetHashCode();
 						}
 						else
 						{
@@ -261,11 +262,13 @@ namespace SimpleSharing
 
 			if (xmlRepo.Contains(item.XmlItem.Id))
 			{
-				item.Sync.ItemHash = xmlRepo.Update(item.XmlItem);
+				xmlRepo.Update(item.XmlItem);
+                item.Sync.ItemHash = item.XmlItem.GetHashCode();
 			}
 			else
 			{
-				item.Sync.ItemHash = xmlRepo.Add(item.XmlItem);
+                xmlRepo.Add(item.XmlItem);
+				item.Sync.ItemHash = item.XmlItem.GetHashCode();
 			}
 				
 			syncRepo.Save(item.Sync);
@@ -330,12 +333,12 @@ namespace SimpleSharing
 		/// </summary>
 		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
 		{
-			if (!item.Hash.Equals(sync.ItemHash))
+			if (!item.GetHashCode().Equals(sync.ItemHash))
 			{
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
 					DateTime.Now, sync.Deleted);
-				sync.ItemHash = item.Hash;
+				sync.ItemHash = item.GetHashCode();
 				syncRepo.Save(sync);
 				return updated;
 			}

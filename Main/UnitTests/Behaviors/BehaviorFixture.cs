@@ -49,7 +49,7 @@ namespace SimpleSharing.Tests
 
 			string id = Guid.NewGuid().ToString();
 			XmlItem xmlItem = new XmlItem(id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>"));
+					GetElement("<foo id='bar'/>"));
 			// Save to xml repo only, as a regular app would do.
 			xmlRepo.Add(xmlItem);
 
@@ -74,7 +74,7 @@ namespace SimpleSharing.Tests
 
 			Item remoteItem = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
@@ -92,7 +92,7 @@ namespace SimpleSharing.Tests
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -104,7 +104,7 @@ namespace SimpleSharing.Tests
 			// Simulate editing.
 			sync = Behaviors.Update(item.Sync, "REMOTE\\kzu", DateTime.Now, false);
 			item = new Item(new XmlItem(sync.Id, "changed", item.XmlItem.Description,
-				sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				sync);
 
 			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, item);
@@ -125,7 +125,7 @@ namespace SimpleSharing.Tests
 			string id = sync.Id;
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -155,7 +155,7 @@ namespace SimpleSharing.Tests
 			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item localItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				localSync);
 
 			// Save original item.
@@ -169,7 +169,7 @@ namespace SimpleSharing.Tests
 			// Local editing.
 			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
-				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
+				localItem.XmlItem.Payload),
 				localSync);
 			xmlRepo.Update(localItem.XmlItem);
 			syncRepo.Save(localItem.Sync);
@@ -199,7 +199,7 @@ namespace SimpleSharing.Tests
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -222,7 +222,7 @@ namespace SimpleSharing.Tests
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				sync);
 
 			// Save original item.
@@ -236,11 +236,12 @@ namespace SimpleSharing.Tests
 			// Simulate editing.
 			sync = Behaviors.Update(item.Sync, "mypc\\user", DateTime.Now, false);
 			item = new Item(new XmlItem(sync.Id, "changed", item.XmlItem.Description,
-				sync.LastUpdate.When.Value, item.XmlItem.Payload),
+				item.XmlItem.Payload),
 				sync);
 
 			// Save the updated local item.
-			item.Sync.ItemHash = xmlRepo.Update(item.XmlItem);
+            xmlRepo.Update(item.XmlItem);
+			item.Sync.ItemHash = item.XmlItem.GetHashCode();
 			syncRepo.Save(item.Sync);
 
 			// Merge with the older incoming item.
@@ -259,7 +260,7 @@ namespace SimpleSharing.Tests
 			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item localItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
-					DateTime.Now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				localSync);
 
 			// Save original item.
@@ -273,9 +274,10 @@ namespace SimpleSharing.Tests
 			// Local editing.
 			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
-				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
+				localItem.XmlItem.Payload),
 				localSync);
-			localSync.ItemHash = xmlRepo.Update(localItem.XmlItem);
+            xmlRepo.Update(localItem.XmlItem);
+			localSync.ItemHash = localItem.XmlItem.GetHashCode();
 			syncRepo.Save(localItem.Sync);
 
 			Thread.Sleep(50);
@@ -283,7 +285,7 @@ namespace SimpleSharing.Tests
 			// Remote editing.
 			Sync remoteSync = Behaviors.Update(remoteItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
 			remoteItem = new Item(new XmlItem(localSync.Id, "changed2", localItem.XmlItem.Description,
-				remoteSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
+				localItem.XmlItem.Payload),
 				remoteSync);
 
 			// Merge conflicting changed incoming item.
@@ -308,7 +310,7 @@ namespace SimpleSharing.Tests
 			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item localItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
-					now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				localSync);
 
 			// Save original item.
@@ -318,15 +320,16 @@ namespace SimpleSharing.Tests
 			// Remote editing.
 			Sync remoteSync = Behaviors.Update(localSync, "REMOTE\\kzu", now.AddSeconds(20), false);
 			Item remoteItem = new Item(new XmlItem(localSync.Id, "changed2", localItem.XmlItem.Description,
-				remoteSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
+				localItem.XmlItem.Payload),
 				remoteSync);
 
 			// Local editing.
 			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
-				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
+				localItem.XmlItem.Payload),
 				localSync);
-			localSync.ItemHash = xmlRepo.Update(localItem.XmlItem);
+            xmlRepo.Update(localItem.XmlItem);
+			localSync.ItemHash = localItem.XmlItem.GetHashCode();
 			syncRepo.Save(localItem.Sync);
 
 			// Merge conflicting changed incoming item.
@@ -352,11 +355,12 @@ namespace SimpleSharing.Tests
 			string id = localSync.Id;
 			Item localItem = new Item(
 				new XmlItem(id, "foo", "bar",
-					now, GetElement("<foo id='bar'/>")),
+					GetElement("<foo id='bar'/>")),
 				localSync);
 
 			// Save original item.
-			localItem.Sync.ItemHash = xmlRepo.Add(localItem.XmlItem);
+            xmlRepo.Add(localItem.XmlItem);
+			localItem.Sync.ItemHash = localItem.XmlItem.GetHashCode();
 			syncRepo.Save(localItem.Sync);
 
 			// Delete item from repository from outside of SSE.
@@ -365,7 +369,7 @@ namespace SimpleSharing.Tests
 			// Remote editing.
 			Sync remoteSync = Behaviors.Update(localItem.Sync, "REMOTE\\kzu", now.AddSeconds(1), false);
 			Item remoteItem = new Item(
-				new XmlItem(id, "changed2", localItem.XmlItem.Description, remoteSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
+				new XmlItem(id, "changed2", localItem.XmlItem.Description, localItem.XmlItem.Payload),
 				remoteSync);
 
 			// Merge conflicting changed incoming item.
@@ -569,7 +573,7 @@ namespace SimpleSharing.Tests
 		public void ResolveShouldUpdateEvenIfNoConflicts()
 		{
 			Item item = new Item(
-				new XmlItem("foo", "bar", DateTime.Now, GetElement("<payload/>")),
+				new XmlItem("foo", "bar", GetElement("<payload/>")),
 				Behaviors.Create(Guid.NewGuid().ToString(), "one", DateTime.Now, false));
 
 			Item resolved = Behaviors.ResolveConflicts(item, "two", DateTime.Now, false);

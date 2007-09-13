@@ -17,7 +17,7 @@ namespace SimpleSharing.Tests
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowIfNullTitleExpression()
 		{
-			new DynamicXmlItem(Guid.NewGuid().ToString(), null, "foo", DateTime.Now,
+			new DynamicXmlItem(Guid.NewGuid().ToString(), null, "foo", 
 				GetDummyPayload(), new object());
 		}
 
@@ -25,7 +25,7 @@ namespace SimpleSharing.Tests
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowIfNullDescriptionExpression()
 		{
-			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", null, DateTime.Now, 
+			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", null, 
 				GetDummyPayload(), new object());
 		}
 
@@ -33,7 +33,7 @@ namespace SimpleSharing.Tests
 		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowIfEmptyTitleExpression()
 		{
-			new DynamicXmlItem(Guid.NewGuid().ToString(), "", "foo", DateTime.Now, 
+			new DynamicXmlItem(Guid.NewGuid().ToString(), "", "foo", 
 				GetDummyPayload(), new object());
 		}
 
@@ -41,7 +41,7 @@ namespace SimpleSharing.Tests
 		[ExpectedException(typeof(ArgumentException))]
 		public void ShouldThrowIfEmptyDescriptionExpression()
 		{
-			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", "", DateTime.Now, 
+			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", "", 
 				GetDummyPayload(), new object());
 		}
 
@@ -49,7 +49,7 @@ namespace SimpleSharing.Tests
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ShouldThrowIfNullDataExpression()
 		{
-			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", "foo", DateTime.Now,
+			new DynamicXmlItem(Guid.NewGuid().ToString(), "foo", "foo",
 				GetDummyPayload(), null);
 		}
 
@@ -57,7 +57,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReturnSameValueIfNoExpression()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "title", 
-				"description", DateTime.Now, GetDummyPayload(), new object());
+				"description", GetDummyPayload(), new object());
 
 			Assert.AreEqual("title", item.Title);
 			Assert.AreEqual("description", item.Description);
@@ -68,7 +68,7 @@ namespace SimpleSharing.Tests
 		public void ShouldThrowIfNoMemberFoundInTitleExpression()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{foo}", 
-				"description", DateTime.Now, GetDummyPayload(), new object());
+				"description", GetDummyPayload(), new object());
 		}
 
 		[TestMethod]
@@ -76,7 +76,7 @@ namespace SimpleSharing.Tests
 		public void ShouldThrowIfNoMemberFoundInDescriptionExpression()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "title", "{foo}",
-				DateTime.Now, GetDummyPayload(), new object());
+				GetDummyPayload(), new object());
 		}
 
 		[TestMethod]
@@ -84,14 +84,14 @@ namespace SimpleSharing.Tests
 		public void ShouldThrowIfMemberIsMethodWithArgs()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{GetValueWithArg}",
-				"{GetValueWithArg}", DateTime.Now, GetDummyPayload(), new Data());
+				"{GetValueWithArg}", GetDummyPayload(), new Data());
 		}
 
 		[TestMethod]
 		public void ShouldEvaluateToFieldValue()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{FieldValue}",
-				"description", DateTime.Now, GetDummyPayload(), new Data());
+				"description", GetDummyPayload(), new Data());
 
 			Assert.AreEqual("FieldValue", item.Title);
 		}
@@ -100,7 +100,7 @@ namespace SimpleSharing.Tests
 		public void ShouldEvaluateToPropertyValue()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{PropertyValue}",
-				"description", DateTime.Now, GetDummyPayload(), new Data());
+				"description", GetDummyPayload(), new Data());
 
 			Assert.AreEqual("PropertyValue", item.Title);
 		}
@@ -109,7 +109,7 @@ namespace SimpleSharing.Tests
 		public void ShouldEvaluateToMethodValue()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{MethodValue}", 
-				"description", DateTime.Now, GetDummyPayload(), new Data());
+				"description", GetDummyPayload(), new Data());
 
 			Assert.AreEqual("MethodValue", item.Title);
 		}
@@ -118,7 +118,7 @@ namespace SimpleSharing.Tests
 		public void ShouldEvaluateToMethodOverloadWithoutArgument()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{MethodOverload}",
-				"description", DateTime.Now, GetDummyPayload(), new Data());
+				"description", GetDummyPayload(), new Data());
 
 			Assert.AreEqual("MethodOverload1", item.Title);
 		}
@@ -128,7 +128,7 @@ namespace SimpleSharing.Tests
 		public void ShouldThrowIfParameterlessMethodNotFound()
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), "{MethodWithParameterOverload}",
-				"description", DateTime.Now, GetDummyPayload(), new Data());
+				"description", GetDummyPayload(), new Data());
 		}
 		
 		[TestMethod]
@@ -136,7 +136,7 @@ namespace SimpleSharing.Tests
 		{
 			IXmlItem item = new DynamicXmlItem(Guid.NewGuid().ToString(), 
 				"{FieldValue}, {PropertyValue} - {MethodValue}", "description", 
-				DateTime.Now, GetDummyPayload(), new Data());
+				GetDummyPayload(), new Data());
 
 			Assert.AreEqual("FieldValue, PropertyValue - MethodValue", item.Title);
 		}

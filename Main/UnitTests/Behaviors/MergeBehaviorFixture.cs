@@ -94,7 +94,8 @@ namespace SimpleSharing.Tests
 
 			 Item a = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
 			 a.XmlItem.Id = sb.Id;
-			 a.Sync.ItemHash = xmlRepo.Add(a.XmlItem);
+             xmlRepo.Add(a.XmlItem);
+			 a.Sync.ItemHash = a.XmlItem.GetHashCode();
 			 syncRepo.Save(a.Sync);
 
 			 Item b = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
@@ -118,7 +119,8 @@ namespace SimpleSharing.Tests
 
 			 Item a = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
 			 a.XmlItem.Id = sb.Id;
-			 a.Sync.ItemHash = xmlRepo.Add(a.XmlItem);
+             xmlRepo.Add(a.XmlItem);
+			 a.Sync.ItemHash = a.XmlItem.GetHashCode();
 			 syncRepo.Save(a.Sync);
 
 			 Item b = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);

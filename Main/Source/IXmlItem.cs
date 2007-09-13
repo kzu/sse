@@ -8,7 +8,7 @@ namespace SimpleSharing
 		string Title { get; set; }
 		string Description { get; set; }
 		string Id { get; set; }
-		object Hash { get; set; }
+		
 		XmlElement Payload { get; set; }
 	}
 }

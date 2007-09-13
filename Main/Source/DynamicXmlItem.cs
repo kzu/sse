@@ -12,10 +12,9 @@ namespace SimpleSharing
 		static readonly Regex ReplacementExpression = new Regex("{([^}]+)}", RegexOptions.Compiled);
 		
 		public DynamicXmlItem(string id, string titleExpression, 
-			string descriptionExpression, object hash, 
-			XmlElement payload, object data) 
+			string descriptionExpression, XmlElement payload, object data) 
 			: base(id, Evaluate(titleExpression, data), Evaluate(descriptionExpression, data),
-				hash, payload)
+				payload)
 		{
 		}
 
