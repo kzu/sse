@@ -65,16 +65,16 @@ namespace CustomerLibrary.Tests
 			return this;
 		}
 
-		public DateTime Add(IXmlItem item)
+		public object Add(IXmlItem item)
 		{
 			Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
 
 			IXmlItem clone = item.Clone();
-			clone.Timestamp = DateTime.Now;
+			clone.Hash = DateTime.Now;
 
 			items.Add(item.Id, clone);
 
-			return clone.Timestamp;
+			return clone.Hash;
 		}
 
 		public bool Contains(string id)
@@ -97,17 +97,17 @@ namespace CustomerLibrary.Tests
 			return items.Remove(id);
 		}
 
-		public DateTime Update(IXmlItem item)
+		public object Update(IXmlItem item)
 		{
 			if (!items.ContainsKey(item.Id))
 				throw new KeyNotFoundException();
 
 
 			IXmlItem clone = item.Clone();
-			clone.Timestamp = DateTime.Now;
+			clone.Hash = DateTime.Now;
 			items[item.Id] = clone;
 
-			return clone.Timestamp;
+			return clone.Hash;
 		}
 
 		public IEnumerable<IXmlItem> GetAll()
@@ -122,7 +122,7 @@ namespace CustomerLibrary.Tests
 		{
 			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp >= date)
+				if ((DateTime)item.Hash >= date)
 					yield return item.Clone();
 			}
 		}

@@ -40,7 +40,7 @@ namespace SimpleSharing.Tests
 				w.WriteNode(new XmlNodeReader(item.Payload), false);
 			}
 
-			Assert.AreEqual("<payload><SerializableData /></payload>", sw.ToString());
+            Assert.AreEqual("<payload><SerializableData /><title>title</title><description>description</description></payload>", sw.ToString());
 		}
 
 		[TestMethod]
@@ -60,7 +60,7 @@ namespace SimpleSharing.Tests
 
 			string xml = sw.ToString();
 
-			Assert.AreEqual("<payload><SerializableDataNs xmlns=\"mvp-xml\" /></payload>", xml);
+            Assert.AreEqual("<payload><SerializableDataNs xmlns=\"mvp-xml\" /><title>title</title><description>description</description></payload>", xml);
 		}
 
 		public class SerializableData

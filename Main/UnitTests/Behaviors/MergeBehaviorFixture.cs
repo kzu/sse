@@ -94,7 +94,7 @@ namespace SimpleSharing.Tests
 
 			 Item a = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
 			 a.XmlItem.Id = sb.Id;
-			 a.Sync.ItemTimestamp = xmlRepo.Add(a.XmlItem);
+			 a.Sync.ItemHash = xmlRepo.Add(a.XmlItem);
 			 syncRepo.Save(a.Sync);
 
 			 Item b = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
@@ -118,7 +118,7 @@ namespace SimpleSharing.Tests
 
 			 Item a = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
 			 a.XmlItem.Id = sb.Id;
-			 a.Sync.ItemTimestamp = xmlRepo.Add(a.XmlItem);
+			 a.Sync.ItemHash = xmlRepo.Add(a.XmlItem);
 			 syncRepo.Save(a.Sync);
 
 			 Item b = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
@@ -142,8 +142,6 @@ namespace SimpleSharing.Tests
 			 sa = Behaviors.Update(sa, "kzu", DateTime.Now, false);
 
 			 Sync sb = sa.Clone();
-
-			 DateTime now;
 
 			 sb = Behaviors.Update(sb, "vga", DateTime.Now.AddSeconds(50), false);
 			 sa = Behaviors.Update(sa, "kzu", DateTime.Now.AddSeconds(100), false);

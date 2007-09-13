@@ -89,7 +89,7 @@ namespace SimpleSharing.Tests
         {
             ISyncRepository repo = CreateRepository(database, "Foo");
             Sync s = new Sync(Guid.NewGuid().ToString());
-            s.ItemTimestamp = DateTime.Now;
+            s.ItemHash = "";
 
             repo.Save(s);
 
@@ -103,11 +103,11 @@ namespace SimpleSharing.Tests
         {
             ISyncRepository repo = CreateRepository(database, "Foo");
             Sync s = new Sync(Guid.NewGuid().ToString());
-            s.ItemTimestamp = DateTime.Now;
+            s.ItemHash = "";
 
             repo.Save(s);
 
-            s.ItemTimestamp = DateTime.Now;
+            s.ItemHash = "";
             repo.Save(s);
 
             int count = CountSyncRecords(s.Id);
@@ -120,7 +120,7 @@ namespace SimpleSharing.Tests
             try
             {
 #if PocketPC
-                connection = database.GetConnection()
+                connection = database.GetConnection();
 #else
                 connection = database.CreateConnection();
 #endif

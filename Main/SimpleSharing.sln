@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
 		localtestrun.testrunconfig = localtestrun.testrunconfig
-		SimpleSharing.vsmdi = SimpleSharing.vsmdi
+		SimpleSharing1.vsmdi = SimpleSharing1.vsmdi
 	EndProjectSection
 	ProjectSection(FolderStartupServices) = postProject
 		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}
@@ -199,7 +199,7 @@ Global
 		SccProjectEnlistmentChoice11 = 2
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = SimpleSharing.vsmdi
+		CategoryFile = SimpleSharing1.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET

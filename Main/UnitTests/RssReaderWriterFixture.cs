@@ -32,8 +32,7 @@ namespace SimpleSharing.Tests
 			// local edit
 			localSync = Behaviors.Update(localItem.Sync, "local", DateTime.Now, false);
 			localItem = new Item(localItem.XmlItem, localSync);
-			localItem.XmlItem.Timestamp = localSync.LastUpdate.When.Value;
-
+			
 			// remote edit
 			remoteXml.Title = "remote";
 			remoteSync = Behaviors.Update(remoteSync, "remote", conflicTime, false);

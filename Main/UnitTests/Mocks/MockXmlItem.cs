@@ -41,10 +41,10 @@ namespace SimpleSharing.Tests
 			set { }
 		}
 
-		public DateTime Timestamp
+		public object Hash
 		{
 			get { return timestamp; }
-			set { timestamp = value; }
+			set { timestamp = (DateTime)value; }
 		}
 
 		public string Title
@@ -73,7 +73,7 @@ namespace SimpleSharing.Tests
 			return other != null &&
 				other is MockXmlItem &&
 				other.Id == this.id &&
-				other.Timestamp == this.timestamp &&
+				other.Hash == this.Hash &&
 				other.Payload.OuterXml == this.payload.OuterXml;
 		}
 	}

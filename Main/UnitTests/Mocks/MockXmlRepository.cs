@@ -76,17 +76,17 @@ namespace SimpleSharing.Tests
 			return this;
 		}
 
-		public DateTime Add(IXmlItem item)
+		public object Add(IXmlItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 			Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
 
 			IXmlItem clone = item.Clone();
-			clone.Timestamp = DateTime.Now;
-
+            clone.Hash = DateTime.Now;
+            
 			items.Add(item.Id, clone);
 
-			return clone.Timestamp;
+			return clone.Hash;
 		}
 
 		public bool Contains(string id)
@@ -113,19 +113,19 @@ namespace SimpleSharing.Tests
 			return items.Remove(id);
 		}
 
-		public DateTime Update(IXmlItem item)
+		public object Update(IXmlItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
 			if (!items.ContainsKey(item.Id))
 				throw new KeyNotFoundException();
-
-
+            
 			IXmlItem clone = item.Clone();
-			clone.Timestamp = DateTime.Now;
+            clone.Hash = DateTime.Now;
+            
 			items[item.Id] = clone;
 
-			return clone.Timestamp;
+			return clone.Hash;
 		}
 
 		public IEnumerable<IXmlItem> GetAll()
@@ -140,7 +140,7 @@ namespace SimpleSharing.Tests
 		{
 			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp >= date)
+				if ((DateTime)item.Hash >= date)
 					yield return item.Clone();
 			}
 		}
@@ -153,8 +153,8 @@ namespace SimpleSharing.Tests
 
 			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp < first)
-					first = item.Timestamp;
+				if ((DateTime)item.Hash < first)
+					first = (DateTime)item.Hash;
 			}
 
 			return first;
@@ -168,8 +168,8 @@ namespace SimpleSharing.Tests
 
 			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp < first && item.Timestamp > since)
-					first = item.Timestamp;
+				if ((DateTime)item.Hash < first && (DateTime)item.Hash > since)
+					first = (DateTime)item.Hash;
 			}
 
 			return first;
@@ -183,8 +183,8 @@ namespace SimpleSharing.Tests
 
 			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp > last)
-					last = item.Timestamp;
+				if ((DateTime)item.Hash > last)
+					last = (DateTime)item.Hash;
 			}
 
 			return last;

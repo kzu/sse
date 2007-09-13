@@ -67,13 +67,13 @@ namespace SimpleSharing
 				if (sync == null)
 				{
 					// Add sync on-the-fly.
-					sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, xml.Timestamp, false);
-					sync.ItemTimestamp = xml.Timestamp;
+					sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
+					sync.ItemHash = xml.Hash;
 					syncRepo.Save(sync);
 				}
 				else
 				{
-					sync = UpdateSyncIfItemTimestampChanged(xml, sync);
+					sync = UpdateSyncIfItemHashChanged(xml, sync);
 				}
 
 				if (HasChangedSince(since, xml, sync))
@@ -112,14 +112,7 @@ namespace SimpleSharing
 
 		private static bool HasChangedSince(DateTime since, IXmlItem xml, Sync sync)
 		{
-			if (sync.LastUpdate.When.HasValue)
-			{
-				return sync.LastUpdate.When.Value >= since;
-			}
-			else
-			{
-				return xml.Timestamp >= since;
-			}
+			return sync.LastUpdate.When.Value >= since;
 		}
 
 		public IEnumerable<Item> ExportConflicts()
@@ -139,7 +132,7 @@ namespace SimpleSharing
 				}
 				else
 				{
-					itemSync = UpdateSyncIfItemTimestampChanged(item, sync);
+					itemSync = UpdateSyncIfItemHashChanged(item, sync);
 				}
 				
 				yield return new Item(item, itemSync);
@@ -199,8 +192,6 @@ namespace SimpleSharing
 
 			foreach (ItemMergeResult result in items)
 			{
-				UpdateItemTimestampIfSyncHasWhen(result.Proposed);
-
 				if (result.Operation != MergeOperation.None &&
 					result.Proposed != null &&
 					result.Proposed.Sync.Conflicts.Count > 0)
@@ -213,13 +204,13 @@ namespace SimpleSharing
 					case MergeOperation.Added:
 						if (!result.Proposed.Sync.Deleted)
 						{
-							result.Proposed.Sync.ItemTimestamp = xmlRepo.Add(result.Proposed.XmlItem);
+							result.Proposed.Sync.ItemHash = xmlRepo.Add(result.Proposed.XmlItem);
 							syncRepo.Save(result.Proposed.Sync);
 						}
 						break;
 					case MergeOperation.Deleted:
 						xmlRepo.Remove(result.Proposed.XmlItem.Id);
-						result.Proposed.Sync.ItemTimestamp = DateTime.Now;
+						result.Proposed.Sync.ItemHash = null;
 						syncRepo.Save(result.Proposed.Sync);
 						break;
 					case MergeOperation.Updated:
@@ -228,11 +219,11 @@ namespace SimpleSharing
 						// delete, should we delete from the xmlRepo?
 						if (!result.Proposed.Sync.Deleted)
 						{
-							result.Proposed.Sync.ItemTimestamp = xmlRepo.Update(result.Proposed.XmlItem);
+							result.Proposed.Sync.ItemHash = xmlRepo.Update(result.Proposed.XmlItem);
 						}
 						else
 						{
-							result.Proposed.Sync.ItemTimestamp = DateTime.Now;
+							result.Proposed.Sync.ItemHash = null;
 						}
 						syncRepo.Save(result.Proposed.Sync);
 						break;
@@ -270,11 +261,11 @@ namespace SimpleSharing
 
 			if (xmlRepo.Contains(item.XmlItem.Id))
 			{
-				item.Sync.ItemTimestamp = xmlRepo.Update(item.XmlItem);
+				item.Sync.ItemHash = xmlRepo.Update(item.XmlItem);
 			}
 			else
 			{
-				item.Sync.ItemTimestamp = xmlRepo.Add(item.XmlItem);
+				item.Sync.ItemHash = xmlRepo.Add(item.XmlItem);
 			}
 				
 			syncRepo.Save(item.Sync);
@@ -337,14 +328,14 @@ namespace SimpleSharing
 		/// update will be added. Used when exporting/retrieving 
 		/// items from the local stores.
 		/// </summary>
-		private Sync UpdateSyncIfItemTimestampChanged(IXmlItem item, Sync sync)
+		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
 		{
-			if (item.Timestamp > sync.ItemTimestamp)
+			if (!item.Hash.Equals(sync.ItemHash))
 			{
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
-					item.Timestamp, sync.Deleted);
-				sync.ItemTimestamp = item.Timestamp;
+					DateTime.Now, sync.Deleted);
+				sync.ItemHash = item.Hash;
 				syncRepo.Save(sync);
 				return updated;
 			}
@@ -352,21 +343,21 @@ namespace SimpleSharing
 			return sync;
 		}
 
-		/// <summary>
-		/// Ensures the LastUpdate property on the <see cref="IXmlItem"/> 
-		/// matches the Sync last update. This is the opposite of 
-		/// SynchronizeSyncFromItem, and is used for incoming items
-		/// being imported.
-		/// </summary>
-		private void UpdateItemTimestampIfSyncHasWhen(Item item)
-		{
-			if (item != null &&
-				item.XmlItem != null && 
-				item.Sync.LastUpdate != null && 
-				item.Sync.LastUpdate.When != null)
-			{
-				item.XmlItem.Timestamp = item.Sync.LastUpdate.When.Value;
-			}
-		}
+        ///// <summary>
+        ///// Ensures the LastUpdate property on the <see cref="IXmlItem"/> 
+        ///// matches the Sync last update. This is the opposite of 
+        ///// SynchronizeSyncFromItem, and is used for incoming items
+        ///// being imported.
+        ///// </summary>
+        //private void UpdateItemHashIfSyncHasWhen(Item item)
+        //{
+        //    if (item != null &&
+        //        item.XmlItem != null && 
+        //        item.Sync.LastUpdate != null && 
+        //        item.Sync.LastUpdate.When != null)
+        //    {
+        //        item.XmlItem.Hash = item.Sync.LastUpdate.When.Value; //TODO: What is the correct value here, Ask Kzu ?
+        //    }
+        //}
 	}
 }
