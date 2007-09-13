@@ -240,7 +240,7 @@ namespace SimpleSharing.Tests
 				sync);
 
 			// Save the updated local item.
-			item.Sync.ItemTimestamp = xmlRepo.Update(item.XmlItem);
+			item.Sync.ItemHash = xmlRepo.Update(item.XmlItem);
 			syncRepo.Save(item.Sync);
 
 			// Merge with the older incoming item.
@@ -275,7 +275,7 @@ namespace SimpleSharing.Tests
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
 				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
 				localSync);
-			localSync.ItemTimestamp = xmlRepo.Update(localItem.XmlItem);
+			localSync.ItemHash = xmlRepo.Update(localItem.XmlItem);
 			syncRepo.Save(localItem.Sync);
 
 			Thread.Sleep(50);
@@ -326,7 +326,7 @@ namespace SimpleSharing.Tests
 			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
 				localSync.LastUpdate.When.Value, localItem.XmlItem.Payload),
 				localSync);
-			localSync.ItemTimestamp = xmlRepo.Update(localItem.XmlItem);
+			localSync.ItemHash = xmlRepo.Update(localItem.XmlItem);
 			syncRepo.Save(localItem.Sync);
 
 			// Merge conflicting changed incoming item.
@@ -356,7 +356,7 @@ namespace SimpleSharing.Tests
 				localSync);
 
 			// Save original item.
-			localItem.Sync.ItemTimestamp = xmlRepo.Add(localItem.XmlItem);
+			localItem.Sync.ItemHash = xmlRepo.Add(localItem.XmlItem);
 			syncRepo.Save(localItem.Sync);
 
 			// Delete item from repository from outside of SSE.
@@ -569,7 +569,7 @@ namespace SimpleSharing.Tests
 		public void ResolveShouldUpdateEvenIfNoConflicts()
 		{
 			Item item = new Item(
-				new XmlItem("foo", "bar", GetElement("<payload/>")),
+				new XmlItem("foo", "bar", DateTime.Now, GetElement("<payload/>")),
 				Behaviors.Create(Guid.NewGuid().ToString(), "one", DateTime.Now, false));
 
 			Item resolved = Behaviors.ResolveConflicts(item, "two", DateTime.Now, false);

@@ -3,139 +3,140 @@ using System.Xml;
 
 namespace SimpleSharing
 {
-	[Serializable]
-	public class XmlItem : IXmlItem
-	{
-		private string id;
-		private string description;
-		private string title;
-		private DateTime lastUpdated = DateTime.Now;
-		private XmlElement payload;
+    [Serializable]
+    public class XmlItem : IXmlItem
+    {
+        private string id;
+        private string description;
+        private string title;
+        object hash = null;
+        private XmlElement payload;
 
-		public XmlItem(string title, string description, XmlElement payload)
-			: this(Guid.NewGuid().ToString(), title, description, DateTime.Now, payload)
-		{
-		}
+        public XmlItem(string title, string description, XmlElement payload)
+            : this(Guid.NewGuid().ToString(), title, description, null, payload)
+        {
+        }
 
-		public XmlItem(string title, string description, DateTime timestamp, XmlElement payload)
-			: this(Guid.NewGuid().ToString(), title, description, timestamp, payload)
-		{
-		}
+        public XmlItem(string title, string description, object hash, XmlElement payload)
+            : this(Guid.NewGuid().ToString(), title, description, hash, payload)
+        {
+        }
 
-		public XmlItem(string id, string title, string description, DateTime timestamp, XmlElement payload)
-		{
-			Guard.ArgumentNotNullOrEmptyString(id, "id");
+        public XmlItem(string id, string title, string description, object hash, XmlElement payload)
+        {
+            Guard.ArgumentNotNullOrEmptyString(id, "id");
 
-			if (payload == null)
-			{
-				payload = new XmlDocument().CreateElement("payload");
-			}
+            if (payload == null)
+            {
+                payload = new XmlDocument().CreateElement("payload");
+            }
 
-			this.id = id;
-			this.title = title;
-			this.description = description;
-			Timestamp = timestamp;
-			this.payload = payload;
-		}
+            this.id = id;
+            this.title = title;
+            this.description = description;
+            Hash = hash;
+            this.payload = payload;
+        }
 
-		public string Id
-		{
-			get { return id; }
-			set
-			{
-				Guard.ArgumentNotNullOrEmptyString(value, "Id");
-				id = value;
-			}
-		}
+        public string Id
+        {
+            get { return id; }
+            set
+            {
+                Guard.ArgumentNotNullOrEmptyString(value, "Id");
+                id = value;
+            }
+        }
 
-		public string Title
-		{
-			get { return title; }
-			set { title = value; }
-		}
+        public string Title
+        {
+            get { return title; }
+            set { title = value; }
+        }
 
-		public string Description
-		{
-			get { return description; }
-			set { description = value; }
-		}
+        public string Description
+        {
+            get { return description; }
+            set { description = value; }
+        }
 
-		public DateTime Timestamp
-		{
-			get { return lastUpdated; }
-			set { lastUpdated = SimpleSharing.Timestamp.Normalize(value); }
-		}
+        public object Hash
+        {
+            get { return hash; }
+            set { hash = value; }
+        }
 
-		public XmlElement Payload
-		{
-			get { return payload; }
-			set
-			{
-				Guard.ArgumentNotNull(value, "Payload");
-				payload = value;
-			}
-		}
+        public XmlElement Payload
+        {
+            get { return payload; }
+            set
+            {
+                Guard.ArgumentNotNull(value, "Payload");
+                payload = value;
+            }
+        }
 
-		#region Equality
+        #region Equality
 
-		public bool Equals(IXmlItem other)
-		{
-			return XmlItem.Equals(this, other);
-		}
+        public bool Equals(IXmlItem other)
+        {
+            return XmlItem.Equals(this, other);
+        }
 
-		public override bool Equals(object obj)
-		{
-			return XmlItem.Equals(this, obj as IXmlItem);
-		}
+        public override bool Equals(object obj)
+        {
+            return XmlItem.Equals(this, obj as IXmlItem);
+        }
 
-		public static bool Equals(IXmlItem obj1, IXmlItem obj2)
-		{
-			if (Object.ReferenceEquals(obj1, obj2))
-				return true;
-			if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
-			{
-				return obj1.Id == obj2.Id &&
-					obj1.Title == obj2.Title &&
-					obj1.Description == obj2.Description &&
-					obj1.Timestamp == obj2.Timestamp &&
-					obj1.Payload.OuterXml == obj2.Payload.OuterXml;
-			}
+        public static bool Equals(IXmlItem obj1, IXmlItem obj2)
+        {
+            if (Object.ReferenceEquals(obj1, obj2))
+                return true;
+            if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
+            {
+                return obj1.Id == obj2.Id &&
+                    obj1.Title == obj2.Title &&
+                    obj1.Description == obj2.Description &&
+                    ((obj1.Hash == null && obj2.Hash == null) || obj1.Hash.Equals(obj2.Hash)) &&
+                    obj1.Payload.OuterXml == obj2.Payload.OuterXml;
+            }
 
-			return false;
-		}
+            return false;
+        }
 
-		public override int GetHashCode()
-		{
-			int hash = id.GetHashCode();
-			if (title != null)
-				hash = hash ^ title.GetHashCode();
-			if (description != null)
-				hash = hash ^ description.GetHashCode();
-			hash = hash ^ lastUpdated.GetHashCode();
-			hash = hash ^ payload.OuterXml.GetHashCode();
+        public override int GetHashCode()
+        {
+            int hash = id.GetHashCode();
+            if (title != null)
+                hash = hash ^ title.GetHashCode();
+            if (description != null)
+                hash = hash ^ description.GetHashCode();
+            if (this.Hash != null)
+                hash = hash ^ this.Hash.GetHashCode();
+            hash = hash ^ payload.OuterXml.GetHashCode();
 
-			return hash;
-		}
+            return hash;
+        }
 
-		#endregion
+        #endregion
 
-		#region ICloneable Members
+        #region ICloneable Members
 
-		object ICloneable.Clone()
-		{
-			return DoClone();
-		}
+        object ICloneable.Clone()
+        {
+            return DoClone();
+        }
 
-		public IXmlItem Clone()
-		{
-			return DoClone();
-		}
+        public IXmlItem Clone()
+        {
+            return DoClone();
+        }
 
-		protected virtual IXmlItem DoClone()
-		{
-			return new XmlItem(id, title, description, lastUpdated, payload);
-		}
+        protected virtual IXmlItem DoClone()
+        {
+            return new XmlItem(id, title, description, hash, payload);
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

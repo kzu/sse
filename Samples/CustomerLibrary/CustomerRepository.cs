@@ -25,7 +25,7 @@ namespace CustomerLibrary
 			converter = new CustomerConverter(mapper);
 		}
 
-		public DateTime Add(IXmlItem item)
+		public object Add(IXmlItem item)
 		{
 			Customer customer = converter.Convert(item);
 			int customerId = dac.Add(customer);
@@ -40,7 +40,7 @@ namespace CustomerLibrary
 			return dac.Exists(mapper.Map(id));
 		}
 
-		public DateTime Update(IXmlItem item)
+		public object Update(IXmlItem item)
 		{
 			Customer customer = converter.Convert(item);
 			if (!dac.Update(customer))

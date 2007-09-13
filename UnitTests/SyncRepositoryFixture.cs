@@ -85,7 +85,7 @@ namespace SimpleSharing.Tests
 			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
 			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
 
-			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", null, false);
+			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false);
 			Sync conflict = s.Clone();
 			s = Behaviors.Update(s, "vcc", null, false);
 			conflict = Behaviors.Update(conflict, "ary", null, false);

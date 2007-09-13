@@ -17,9 +17,9 @@ namespace SimpleSharing
 		public SerializerXmlItem(string id,
 			string titleExpression,
 			string descriptionExpression,
-			DateTime timestamp,
+			object hash,
 			TData data)
-			: base(id, titleExpression, descriptionExpression, timestamp, Serialize(data), data)
+			: base(id, titleExpression, descriptionExpression, hash, Serialize(data), data)
 		{
 			this.data = data;
 		}

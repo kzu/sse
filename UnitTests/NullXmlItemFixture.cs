@@ -28,10 +28,13 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldEqualNoTimestamp()
+		public void ShouldEqualHash()
 		{
 			IXmlItem item1 = new NullXmlItem("1");
 			IXmlItem item2 = new NullXmlItem("1");
+
+            item1.Hash = "Item";
+            item2.Hash = "Item";
 
 			Assert.AreEqual(item1, item2);
 			Assert.AreEqual(item1.GetHashCode(), item2.GetHashCode());
@@ -48,11 +51,11 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldNotEqualDifferentTimestamp()
+		public void ShouldNotEqualDifferentHash()
 		{
 			IXmlItem item1 = new NullXmlItem("1");
 			IXmlItem item2 = new NullXmlItem("1");
-			item2.Timestamp = DateTime.Now;
+			item2.Hash = "Different";
 
 			Assert.AreNotEqual(item1, item2);
 			Assert.AreNotEqual(item1.GetHashCode(), item2.GetHashCode());

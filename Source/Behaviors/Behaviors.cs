@@ -43,7 +43,7 @@ namespace SimpleSharing
 			updated.Updates++;
 
 			// 3.2.2 & 3.2.2.a.i
-			History history = new History(by, when, updated.Updates);
+			History history = new History(by, when, updated.Updates); 
 
 			// 3.2.3
 			updated.AddHistory(history);

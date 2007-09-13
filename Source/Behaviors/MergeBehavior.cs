@@ -95,15 +95,16 @@ namespace SimpleSharing
 			if (sync == null)
 			{
 				sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
-				sync.ItemTimestamp = localItem.Timestamp;
+				sync.ItemHash = localItem.Hash;
 
 				syncRepository.Save(sync);
 			}
-			else if (localItem != null &&
-				sync.ItemTimestamp < localItem.Timestamp)
+			else if (localItem != null && 
+                sync.ItemHash != null &&
+				!sync.ItemHash.Equals(localItem.Hash))
 			{
-				sync = Behaviors.Update(sync, DeviceAuthor.Current, localItem.Timestamp, false);
-				sync.ItemTimestamp = localItem.Timestamp;
+				sync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, false);
+				sync.ItemHash = localItem.Hash;
 				syncRepository.Save(sync);
 			}
 
@@ -116,13 +117,6 @@ namespace SimpleSharing
 			{
 				throw new ArgumentException(Properties.Resources.SyncHistoryRequired);
 			}
-
-			// Ensure LastUpdated on IXmlItem matches LastUpdate on Sync.
-			// XmlItem will be null if item is deleted. Only Sync info will be available.
-			if (original.XmlItem != null)
-				original.XmlItem.Timestamp = original.Sync.LastUpdate.When.Value;
-			if (incoming.XmlItem != null)
-				incoming.XmlItem.Timestamp = incoming.Sync.LastUpdate.When.Value;
 
 			Item proposed;
 			MergeOperation operation = MergeItems(original, incoming, out proposed);

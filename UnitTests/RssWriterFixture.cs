@@ -172,7 +172,7 @@ namespace SimpleSharing.Tests
 
 			Item item = new Item(
 				new XmlItem("foo", "bar", payload),
-				Behaviors.Create("1", "kzu", null, false));
+				Behaviors.Create("1", "kzu", DateTime.Now, false));
 
 			FeedWriter writer = new RssFeedWriter(xw);
 			writer.Write(feed, item);
@@ -196,7 +196,7 @@ namespace SimpleSharing.Tests
 
 			Item item = new Item(
 				new XmlItem("foo", "bar", payload),
-				Behaviors.Create("1", "kzu", null, false));
+				Behaviors.Create("1", "kzu", DateTime.Now, false));
 
 			FeedWriter writer = new RssFeedWriter(xw);
 			writer.Write(feed, item);
@@ -255,7 +255,7 @@ namespace SimpleSharing.Tests
 
 				Item item = new Item(
 					new XmlItem("foo", "bar", payload),
-					Behaviors.Create("1", "nospam@clariusconsulting.net", null, false));
+					Behaviors.Create("1", "nospam@clariusconsulting.net", DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);
 				writer.Write(feed, item);
@@ -283,7 +283,7 @@ namespace SimpleSharing.Tests
 
 				Item item = new Item(
 					new XmlItem("foo", "bar", payload),
-					Behaviors.Create("1", "MACHINE\\UserName", null, false));
+					Behaviors.Create("1", "MACHINE\\UserName", DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);
 				writer.Write(feed, item);
@@ -312,7 +312,7 @@ namespace SimpleSharing.Tests
 
 				Item item = new Item(
 					new XmlItem("foo", "bar", payload),
-					Behaviors.Create("1", deviceId, null, false));
+					Behaviors.Create("1", deviceId, DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);
 				writer.Write(feed, item);

@@ -233,7 +233,7 @@ namespace SimpleSharing
 							base.MoveToAttribute(Schema.AttributeNames.Sequence);
 							int sequence = XmlConvert.ToInt32(base.Value);
 							string by = null;
-							DateTime? when = null;
+							DateTime? when = DateTime.Now;
 
 							if (base.MoveToAttribute(Schema.AttributeNames.When))
 								when = DateTime.Parse(base.Value);

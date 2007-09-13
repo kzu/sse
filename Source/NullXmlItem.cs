@@ -9,7 +9,7 @@ namespace SimpleSharing
 	public class NullXmlItem : IXmlItem
 	{
 		string id;
-		DateTime timestamp = DateTime.MinValue;
+        object hash = null;
 		XmlElement emptyPayload;
 
 		public NullXmlItem(string id)
@@ -26,10 +26,10 @@ namespace SimpleSharing
 			set { id = value; }
 		}
 
-		public DateTime Timestamp
+		public object Hash
 		{
-			get { return timestamp; }
-			set { timestamp = value; }
+			get { return hash; }
+			set { hash = value; }
 		}
 
 		public string Title
@@ -87,7 +87,7 @@ namespace SimpleSharing
 			if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
 			{
 				return obj1.id == obj2.id && 
-					obj1.timestamp == obj2.timestamp;
+					obj1.hash == obj2.hash;
 			}
 
 			return false;
@@ -95,7 +95,11 @@ namespace SimpleSharing
 
 		public override int GetHashCode()
 		{
-			return id.GetHashCode() ^ timestamp.GetHashCode();
+            if (hash != null)
+                return id.GetHashCode() ^ hash.GetHashCode();
+            else
+                return id.GetHashCode();
+
 		}
 
 		#endregion
