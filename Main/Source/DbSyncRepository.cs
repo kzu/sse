@@ -47,7 +47,7 @@ namespace SimpleSharing
 
 		public void Save(Sync sync)
 		{
-			Guard.ArgumentNotNull(sync.ItemTimestamp, "sync.ItemTimestamp");
+			Guard.ArgumentNotNull(sync.ItemHash, "sync.ItemHash");
 
 			string data = Write(sync);
 
@@ -57,21 +57,37 @@ namespace SimpleSharing
 				{
 					using (DbCommand cmd = conn.CreateCommand())
 					{
-                        cmd.CommandText = FormatSql(@"
-							UPDATE [{0}] 
-								SET Sync = {2}, ItemTimestamp = {3}
-							WHERE Id = {1}", "Sync", "id", "sync", "ts");
+                        List<DbParameter> parameters = new List<DbParameter>();
 
-                        int count = ExecuteNonQuery(cmd,
-							CreateParameter("id", DbType.String, 254, sync.Id),
-							CreateParameter("sync", DbType.String, 0, data),
-							CreateParameter("ts", DbType.DateTime, 0, sync.ItemTimestamp));
-						
+                        if (sync.LastUpdate != null && sync.LastUpdate.When.HasValue)
+                        {
+                            cmd.CommandText = FormatSql(@"
+							UPDATE [{0}] 
+								SET Sync = {2}, ItemHash = {3}, LastUpdate = {4}
+							WHERE Id = {1}", "Sync", "id", "sync", "hash", "lastupd");
+
+                            parameters.Add(CreateParameter("lastupd", DbType.DateTime, 0, sync.LastUpdate.When.Value));
+                        }
+                        else
+                        {
+                            cmd.CommandText = FormatSql(@"
+							UPDATE [{0}] 
+								SET Sync = {2}, [ItemHash] = {3}
+							WHERE Id = {1}", "Sync", "id", "sync", "hh");
+                        }
+                        
+                        parameters.Add(CreateParameter("id", DbType.String, 254, sync.Id));
+                        parameters.Add(CreateParameter("sync", DbType.String, 0, data));
+                        parameters.Add(CreateParameter("hh", DbType.String, 0, sync.ItemHash));
+
+                        int count = ExecuteNonQuery(cmd, parameters.ToArray());
+					
                         if (count == 0)
 						{
-							cmd.CommandText = FormatSql(@"
-								INSERT INTO [{0}] (Id, Sync, ItemTimestamp)
-								VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "ts");
+                            cmd.CommandText = FormatSql(@"
+							INSERT INTO [{0}] (Id, Sync, [ItemHash])
+							VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "hh");
+                            
 							// The parameters are already set on the command
 							count = this.Database.ExecuteNonQuery(cmd);
 						}
@@ -153,7 +169,7 @@ namespace SimpleSharing
 			xr.MoveToContent();
 
 			Sync sync = new FeedReader.SyncXmlReader(xr, new RssFeedReader(xr)).ReadSync();
-			sync.ItemTimestamp = (DateTime)reader["ItemTimestamp"];
+			sync.ItemHash = (String)reader["ItemHash"];
 
 			return sync;
 		}
@@ -166,7 +182,8 @@ namespace SimpleSharing
 						CREATE TABLE [{0}](
 							[Id] NVARCHAR(254) NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL, 
-							[ItemTimestamp] DATETIME NOT NULL
+                            [LastUpdate] DATETIME NULL,
+							[ItemHash] NVARCHAR(254) NOT NULL
 						)", "Sync"));
 			}
 
