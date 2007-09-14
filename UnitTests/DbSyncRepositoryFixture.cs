@@ -89,8 +89,8 @@ namespace SimpleSharing.Tests
         {
             ISyncRepository repo = CreateRepository(database, "Foo");
             Sync s = new Sync(Guid.NewGuid().ToString());
-            s.ItemHash = "";
-
+            s.ItemHash = "hash";
+            
             repo.Save(s);
 
             int count = CountSyncRecords(s.Id);
@@ -103,11 +103,11 @@ namespace SimpleSharing.Tests
         {
             ISyncRepository repo = CreateRepository(database, "Foo");
             Sync s = new Sync(Guid.NewGuid().ToString());
-            s.ItemHash = "";
+            s.ItemHash = "hash";
 
             repo.Save(s);
 
-            s.ItemHash = "";
+            s.ItemHash = "hash";
             repo.Save(s);
 
             int count = CountSyncRecords(s.Id);
