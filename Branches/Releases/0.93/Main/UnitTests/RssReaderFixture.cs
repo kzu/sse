@@ -454,5 +454,81 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual("", items[0].XmlItem.Title);
 			Assert.AreEqual("", items[0].XmlItem.Description);
 		}
+
+		[TestMethod]
+		public void ShouldReadFeedPayload()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <foo>some random stuff<nid/></foo>
+  <item>
+   <title>Buy groceries</title>
+   <payload>unknown</payload>
+   <description>Get milk, eggs, butter and bread</description>
+   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
+   <someData id='1' xmlns='foo' />
+   <sx:sync id='0a7903db47fb0fff' updates='1'>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>
+  </item>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			List<Item> items = new List<Item>(i);
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual(@"<payload>
+  <foo>some random stuff<nid /></foo>
+</payload>",
+				ReadToEnd(new XmlNodeReader(feed.Payload)));
+		}
+
+		[TestMethod]
+		public void ShouldReadFeedPayload2()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <item>
+   <title>Buy groceries</title>
+   <payload>unknown</payload>
+   <description>Get milk, eggs, butter and bread</description>
+   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
+   <someData id='1' xmlns='foo' />
+   <sx:sync id='0a7903db47fb0fff' updates='1'>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>
+  </item>
+  <foo>some random stuff<nid/></foo>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+
+			List<Item> items = new List<Item>(i);
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual(@"<payload>
+  <foo>some random stuff<nid /></foo>
+</payload>",
+				ReadToEnd(new XmlNodeReader(feed.Payload)));
+		}
 	}
 }
