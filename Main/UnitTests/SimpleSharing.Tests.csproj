@@ -82,7 +82,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AccessSyncRepositoryFixture.cs" />
+    <Compile Include="CompoundRepositoryFixture.cs" />
     <Compile Include="FeedReaderFixture.cs" />
+    <Compile Include="ItemEventArgsFixture.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mocks\MockSyncRepository.cs" />
     <Compile Include="Mocks\MockXmlItem.cs" />
     <Compile Include="Mocks\MockXmlRepository.cs" />
@@ -92,6 +96,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SyncEngine2Fixture.cs">
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="SyncRepositoryFixture.cs" />
     <Compile Include="TimestampFixture.cs" />

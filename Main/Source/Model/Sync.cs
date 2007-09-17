@@ -73,6 +73,16 @@ namespace SimpleSharing
 			set { itemHash = value; }
 		}
 
+		public Sync Update(string by, DateTime? when)
+		{
+			return Behaviors.Update(this, by, when, false);
+		}
+
+		public Sync Update(string by, DateTime? when, bool deleteItem)
+		{
+			return Behaviors.Update(this, by, when, deleteItem);
+		}
+
 		public void AddHistory(History history)
 		{
 			updatesHistory.Push(history);

@@ -3,8 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8E28D357-213F-4239-8F14-60423045A4AF}"
 	ProjectSection(SolutionItems) = preProject
-		localtestrun.testrunconfig = localtestrun.testrunconfig
-		SimpleSharing.vsmdi = SimpleSharing.vsmdi
+		localtestrun.2008.testrunconfig = localtestrun.2008.testrunconfig
+		SimpleSharing.2008.vsmdi = SimpleSharing.2008.vsmdi
 	EndProjectSection
 	ProjectSection(FolderStartupServices) = postProject
 		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}
@@ -136,7 +136,7 @@ Global
 		SccProjectEnlistmentChoice11 = 2
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = SimpleSharing.vsmdi
+		CategoryFile = SimpleSharing.2008.vsmdi
 	EndGlobalSection
 	GlobalSection(TextTemplating) = postSolution
 		TextTemplating = 1
