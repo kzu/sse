@@ -54,10 +54,9 @@ namespace SimpleSharing
 				}
 				else if (reader.NodeType == XmlNodeType.Element)
 				{
-					using (XmlWriter writer = feed.Payload.CreateNavigator().AppendChild())
-					{
-						writer.WriteNode(reader.ReadSubtree(), false);
-					}
+					XmlElement el = feed.Payload.OwnerDocument.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+					el.InnerXml = reader.ReadInnerXml();
+					feed.Payload.AppendChild(el);
 				}
 			}
 			while (reader.Read());
