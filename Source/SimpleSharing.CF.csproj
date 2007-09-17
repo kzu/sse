@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.20706</ProductVersion>
+    <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6AB67AF4-83D3-449E-83D0-A88C343801AE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -84,6 +84,7 @@
     <Compile Include="HttpSync.cs" />
     <Compile Include="ICloneable.cs" />
     <Compile Include="ISyncRepository.cs" />
+    <Compile Include="ItemEventArgs.cs" />
     <Compile Include="ItemMergeResult.cs" />
     <Compile Include="IXmlItem.cs" />
     <Compile Include="IXmlRepository.cs" />

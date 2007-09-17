@@ -20,7 +20,7 @@ namespace SimpleSharing
 		public void Read(out Feed feed, out IEnumerable<Item> items)
 		{
 			feed = ReadFeedImpl();
-			items = ReadItemsImpl();
+			items = ReadItemsImpl(feed);
 		}
 
 		protected abstract XmlQualifiedName ItemName { get; }
@@ -39,7 +39,7 @@ namespace SimpleSharing
 			return feed;
 		}
 
-		private IEnumerable<Item> ReadItemsImpl()
+		private IEnumerable<Item> ReadItemsImpl(Feed feed)
 		{
 			XmlQualifiedName itemName = this.ItemName;
 
@@ -51,6 +51,12 @@ namespace SimpleSharing
 
 					if (ItemRead != null)
 						ItemRead(this, EventArgs.Empty);
+				}
+				else if (reader.NodeType == XmlNodeType.Element)
+				{
+					XmlElement el = feed.Payload.OwnerDocument.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+					el.InnerXml = reader.ReadInnerXml();
+					feed.Payload.AppendChild(el);
 				}
 			}
 			while (reader.Read());

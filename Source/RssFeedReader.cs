@@ -31,33 +31,33 @@ namespace SimpleSharing
             XmlWriter writer = XmlWriter.Create(mem);
             writer.WriteStartElement("payload");
 
-            if (reader.ReadToDescendant("channel", ""))
-            {
-                while (reader.Read() && !IsItemElement(reader, XmlNodeType.Element))
-                {
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        if (reader.LocalName == "title" && reader.NamespaceURI.Length == 0)
-                        {
-                            title = ReadElementValue(reader);
-                            writer.WriteElementString("title", title);
-                        }
-                        else if (reader.LocalName == "link" && reader.NamespaceURI.Length == 0)
-                        {
-                            link = ReadElementValue(reader);
-                            writer.WriteElementString("link", link);
-                        }
-                        else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
-                        {
-                            description = ReadElementValue(reader);
-                            writer.WriteElementString("description", description);
-                        }
-                        else
-                        {
-                            writer.WriteNode(reader.ReadSubtree(), false);
-                        }
-                    }
-                }
+			if (reader.ReadToDescendant("channel", ""))
+			{
+				while (reader.Read() && !IsItemElement(reader, XmlNodeType.Element))
+				{
+					if (reader.NodeType == XmlNodeType.Element)
+					{
+						if (reader.LocalName == "title" && reader.NamespaceURI.Length == 0)
+						{
+							title = ReadElementValue(reader);
+							//writer.WriteElementString("title", title);
+						}
+						else if (reader.LocalName == "link" && reader.NamespaceURI.Length == 0)
+						{
+							link = ReadElementValue(reader);
+							//writer.WriteElementString("link", link);
+						}
+						else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
+						{
+							description = ReadElementValue(reader);
+							//writer.WriteElementString("description", description);
+						}
+						else
+						{
+							writer.WriteNode(reader.ReadSubtree(), false);
+						}
+					}
+				}
 
                 writer.WriteEndElement();
                 writer.Close();
