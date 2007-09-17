@@ -2,4 +2,6 @@
 
 @echo off
 sn -Ra %1 %~p0\Mvp-Xml.Net20.snk
-%~p0\signcode -spc %~p0\xmlmvpcert.spc -v %~p0\xmlmvpkey.pvk -t http://timestamp.verisign.com/scripts/timstamp.dll %1
+
+echo %~dp0signcode -spc %~dp0xmlmvpcert.spc -v %~dp0xmlmvpkey.pvk -t http://timestamp.verisign.com/scripts/timstamp.dll %~f1
+%~dp0signcode -spc %~dp0xmlmvpcert.spc -v %~dp0xmlmvpkey.pvk -t http://timestamp.verisign.com/scripts/timstamp.dll %~f1
