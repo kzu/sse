@@ -55,41 +55,47 @@ namespace SimpleSharing
 			{
 				using (DbTransaction transaction = conn.BeginTransaction())
 				{
+					int count;
 					using (DbCommand cmd = conn.CreateCommand())
 					{
-						List<DbParameter> parameters = new List<DbParameter>();
-
 						if (sync.LastUpdate != null && sync.LastUpdate.When.HasValue)
 						{
-							cmd.CommandText = FormatSql(@"
-							UPDATE [{0}] 
-								SET Sync = {2}, ItemHash = {3}, LastUpdate = {4}
-							WHERE Id = {1}", "Sync", "id", "sync", "hash", "lastupd");
+							cmd.CommandText = FormatSql(
+								"UPDATE [{0}] " +
+								"SET Sync = {2}, ItemHash = {3}, LastUpdate = {4} " +
+								"WHERE Id = {1}", "Sync", "id", "sync", "hash", "lastupd");
 
-							parameters.Add(CreateParameter("lastupd", DbType.DateTime, 0, sync.LastUpdate.When.Value));
+							count = ExecuteNonQuery(cmd,
+								CreateParameter("lastupd", DbType.DateTime, 0, sync.LastUpdate.When.Value),
+								CreateParameter("id", DbType.String, 254, sync.Id),
+								CreateParameter("sync", DbType.String, 0, data),
+								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
 						}
 						else
 						{
-							cmd.CommandText = FormatSql(@"
-							UPDATE [{0}] 
-								SET Sync = {2}, [ItemHash] = {3}
-							WHERE Id = {1}", "Sync", "id", "sync", "hash");
+							cmd.CommandText = FormatSql(
+								"UPDATE [{0}] " +
+								"SET Sync = {2}, [ItemHash] = {3} " +
+								"WHERE Id = {1}", "Sync", "id", "sync", "hash");
+
+							count = ExecuteNonQuery(cmd,
+								CreateParameter("id", DbType.String, 254, sync.Id),
+								CreateParameter("sync", DbType.String, 0, data),
+								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
 						}
-
-						parameters.Add(CreateParameter("id", DbType.String, 254, sync.Id));
-						parameters.Add(CreateParameter("sync", DbType.String, 0, data));
-						parameters.Add(CreateParameter("hash", DbType.String, 254, sync.ItemHash));
-
-						int count = ExecuteNonQuery(cmd, parameters.ToArray());
-
-						if (count == 0)
+					}
+					if (count == 0)
+					{
+						using (DbCommand cmd = conn.CreateCommand())
 						{
-							cmd.CommandText = FormatSql(@"
-							INSERT INTO [{0}] (Id, Sync, [ItemHash])
-							VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "hash");
+							cmd.CommandText = FormatSql(
+								"INSERT INTO [{0}] (Id, Sync, [ItemHash]) " +
+								"VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "hash");
 
-							// The parameters are already set on the command
-							count = this.Database.ExecuteNonQuery(cmd);
+							ExecuteNonQuery(cmd,
+								CreateParameter("id", DbType.String, 254, sync.Id),
+								CreateParameter("sync", DbType.String, 0, data),
+								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
 						}
 					}
 					transaction.Commit();
