@@ -73,12 +73,12 @@ namespace SimpleSharing
 							cmd.CommandText = FormatSql(@"
 							UPDATE [{0}] 
 								SET Sync = {2}, [ItemHash] = {3}
-							WHERE Id = {1}", "Sync", "id", "sync", "hh");
+							WHERE Id = {1}", "Sync", "id", "sync", "hash");
 						}
 
 						parameters.Add(CreateParameter("id", DbType.String, 254, sync.Id));
 						parameters.Add(CreateParameter("sync", DbType.String, 0, data));
-						parameters.Add(CreateParameter("hh", DbType.String, 254, sync.ItemHash));
+						parameters.Add(CreateParameter("hash", DbType.String, 254, sync.ItemHash));
 
 						int count = ExecuteNonQuery(cmd, parameters.ToArray());
 
@@ -86,7 +86,7 @@ namespace SimpleSharing
 						{
 							cmd.CommandText = FormatSql(@"
 							INSERT INTO [{0}] (Id, Sync, [ItemHash])
-							VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "hh");
+							VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "hash");
 
 							// The parameters are already set on the command
 							count = this.Database.ExecuteNonQuery(cmd);
