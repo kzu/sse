@@ -68,6 +68,7 @@ namespace SimpleSharing
 				{
 					// Add sync on-the-fly.
 					sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
+					sync.ItemHash = xml.GetHashCode();
 					syncRepo.Save(sync);
 				}
 				else
@@ -333,7 +334,7 @@ namespace SimpleSharing
 		/// </summary>
 		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
 		{
-			if (!item.GetHashCode().Equals(sync.ItemHash))
+			if (!item.GetHashCode().ToString().Equals(sync.ItemHash))
 			{
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
