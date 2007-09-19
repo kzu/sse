@@ -42,9 +42,10 @@ namespace SimpleSharing
 		private IEnumerable<Item> ReadItemsImpl(Feed feed)
 		{
 			XmlQualifiedName itemName = this.ItemName;
-
+			bool read;
 			do
 			{
+				read = true;
 				if (IsItemElement(reader, itemName, XmlNodeType.Element))
 				{
 					yield return ReadItemImpl(reader);
@@ -55,11 +56,19 @@ namespace SimpleSharing
 				else if (reader.NodeType == XmlNodeType.Element)
 				{
 					XmlElement el = feed.Payload.OwnerDocument.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+					if (reader.HasAttributes && reader.MoveToFirstAttribute())
+						do
+						{
+							el.SetAttribute(reader.Name, reader.Value);
+						} while (reader.MoveToNextAttribute());
+					reader.MoveToElement();
 					el.InnerXml = reader.ReadInnerXml();
 					feed.Payload.AppendChild(el);
+					read = false;
 				}
+				if (read) reader.Read();
 			}
-			while (reader.Read());
+			while (reader.ReadState != ReadState.EndOfFile);
 		}
 
 		private Item ReadItemImpl(XmlReader reader)

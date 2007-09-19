@@ -530,5 +530,65 @@ namespace SimpleSharing.Tests
 </payload>",
 				ReadToEnd(new XmlNodeReader(feed.Payload)));
 		}
+
+		[TestMethod]
+		public void ShouldReadFeedPayloadWithAttributesAndSubElements()
+		{
+			string xml = @"
+<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+ <channel>
+  <title>To Do List</title>
+  <description>A list of items to do</description>
+  <link>http://somefakeurl.com/partial.xml</link>
+  <item>
+   <title>Buy groceries</title>
+   <payload>unknown</payload>
+   <description>Get milk, eggs, butter and bread</description>
+   <pubDate>Sun, 19 May 02 15:21:36 GMT</pubDate>
+   <someData id='1' xmlns='foo' />
+   <sx:sync id='0a7903db47fb0fff' updates='1'>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>
+  </item>
+  <foo attr1='value1' attr2='value2' attr3='value3'>
+	Some random stuff
+	<innerelement attr1='value1' attr2='value2'>one</innerelement>
+	<innerelement attr1='value3' attr2='value4'>two</innerelement>
+	<innerelement attr1='value5' attr2='value6'>three</innerelement>
+  </foo>
+  <foo2>
+	<foo3>value3<foo4/></foo3>
+  </foo2>
+  <foo7>seven</foo7>
+ </channel>
+</rss>";
+
+			FeedReader reader = new RssFeedReader(GetReader(xml));
+
+			Feed feed;
+			IEnumerable<Item> i;
+
+			reader.Read(out feed, out i);
+			XmlDocument doc = new XmlDocument();
+			XmlElement expected = GetElement(@"<payload>
+  <foo attr1='value1' attr2='value2' attr3='value3'>
+	Some random stuff
+	<innerelement attr1='value1' attr2='value2'>one</innerelement>
+	<innerelement attr1='value3' attr2='value4'>two</innerelement>
+	<innerelement attr1='value5' attr2='value6'>three</innerelement>
+  </foo>
+  <foo2>
+	<foo3>value3<foo4/></foo3>
+  </foo2>
+  <foo7>seven</foo7>
+</payload>");
+
+			List<Item> items = new List<Item>(i);
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual(ReadToEnd(new XmlNodeReader(expected)),
+			    ReadToEnd(new XmlNodeReader(feed.Payload)));
+		}
+
+
 	}
 }
