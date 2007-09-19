@@ -9,6 +9,7 @@ using System.Xml;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 #else
 using Microsoft.Practices.Mobile.DataAccess;
+using System.Globalization;
 #endif
 
 namespace SimpleSharing
@@ -62,11 +63,12 @@ namespace SimpleSharing
 						{
 							cmd.CommandText = FormatSql(
 								"UPDATE [{0}] " +
-								"SET Sync = {2}, ItemHash = {3}, LastUpdate = {4} " +
-								"WHERE Id = {1}", "Sync", "id", "sync", "hash", "lastupd");
+								"SET Sync = {2}, ItemHash = {3}, LastUpdate = '{4}' " +
+								"WHERE Id = {1}", "Sync", "id", "sync", "hash", 
+								Timestamp.Normalize(sync.LastUpdate.When.Value).ToString(System.Globalization.CultureInfo.InvariantCulture)); //Hack: Date/Time problems with Access
 
 							count = ExecuteNonQuery(cmd,
-								CreateParameter("lastupd", DbType.DateTime, 0, sync.LastUpdate.When.Value),
+								//CreateParameter("lastupd", DbType.DateTime, 0, Timestamp.Normalize(sync.LastUpdate.When.Value) ),
 								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
 								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
