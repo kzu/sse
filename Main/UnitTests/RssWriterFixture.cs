@@ -40,9 +40,17 @@ namespace SimpleSharing.Tests
 		{
 			MockSyncRepository syncRepo = new MockSyncRepository();
 			MockXmlRepository xmlRepo = new MockXmlRepository();
-			xmlRepo.AddThreeItemsByDays();
-			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
 
+			string id = Guid.NewGuid().ToString();
+			repo.Add(new Item(new NullXmlItem(id), Behaviors.Create(id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(3)), false)));
+
+			id = Guid.NewGuid().ToString();
+			repo.Add(new Item(new NullXmlItem(id), Behaviors.Create(id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(2)), false)));
+
+			id = Guid.NewGuid().ToString();
+			repo.Add(new Item(new NullXmlItem(id), Behaviors.Create(id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false)));
+			
 			StringWriter sw = new StringWriter();
 			XmlWriterSettings set = new XmlWriterSettings();
 			set.Indent = true;
@@ -53,7 +61,7 @@ namespace SimpleSharing.Tests
 			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete, "Complete feed"));
 
 			FeedWriter writer = new RssFeedWriter(xw);
-			engine.Publish(feed, writer);
+			writer.Write(feed, repo.GetAll());
 
 			xw.Flush();
 
@@ -87,13 +95,22 @@ namespace SimpleSharing.Tests
 			Console.WriteLine(sw.ToString());
 		}
 
+		[Ignore]
 		[TestMethod]
 		public void ShouldPublishLast1Day()
 		{
 			MockSyncRepository syncRepo = new MockSyncRepository();
 			MockXmlRepository xmlRepo = new MockXmlRepository();
-			xmlRepo.AddThreeItemsByDays();
-			SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
+
+			string id = Guid.NewGuid().ToString();
+			repo.Add(new Item(new NullXmlItem(id), Behaviors.Create(id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(3)), false)));
+
+			id = Guid.NewGuid().ToString();
+			repo.Add(new Item(new NullXmlItem(id), Behaviors.Create(id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(2)), false)));
+
+			id = Guid.NewGuid().ToString();
+			repo.Add(new Item(new NullXmlItem(id), Behaviors.Create(id, "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false)));
 
 			StringWriter sw = new StringWriter();
 			XmlWriterSettings set = new XmlWriterSettings();
@@ -104,7 +121,7 @@ namespace SimpleSharing.Tests
 			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete));
 
 			FeedWriter writer = new RssFeedWriter(xw);
-			engine.Publish(feed, writer, 1);
+			writer.Write(feed, repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromDays(1))));
 
 			xw.Flush();
 
@@ -126,11 +143,9 @@ namespace SimpleSharing.Tests
 		public void ShouldWriteFeedWithDeletedItem()
 		{
 			IXmlRepository xmlRepo = new MockXmlRepository().AddOneItem();
-			SyncEngine engine = new SyncEngine(
-				xmlRepo,
-				new MockSyncRepository());
+			IRepository repo = new CompoundRepository(xmlRepo, new MockSyncRepository());
 
-			Item item = GetFirst<Item>(engine.Export());
+			Item item = GetFirst<Item>(repo.GetAll());
 			xmlRepo.Remove(item.XmlItem.Id);
 
 			StringWriter sw = new StringWriter();
@@ -142,7 +157,7 @@ namespace SimpleSharing.Tests
 			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete));
 
 			FeedWriter writer = new RssFeedWriter(xw);
-			engine.Publish(feed, writer);
+			writer.Write(feed, repo.GetAll());
 
 			xw.Flush();
 

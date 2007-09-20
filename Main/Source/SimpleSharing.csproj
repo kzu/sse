@@ -63,13 +63,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AccessSyncRepository.cs" />
+    <Compile Include="CompoundRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbRepository.cs" />
     <Compile Include="DbSyncRepository.cs" />
     <Compile Include="FeedReader.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="HttpSync.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ItemEventArgs.cs">
       <SubType>Code</SubType>

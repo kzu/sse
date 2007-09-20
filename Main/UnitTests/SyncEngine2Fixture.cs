@@ -128,6 +128,50 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldImportUpdateWithConflictLeft()
+		{
+			MockRepository left = new MockRepository();
+			MockRepository right = new MockRepository();
+			SyncEngine engine = new SyncEngine(left, right);
+
+			string id = Guid.NewGuid().ToString();
+			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			Item item = new Item(
+				new XmlItem(id, "foo", "bar",
+					GetElement("<foo id='bar'/>")),
+				sync);
+
+			left.Add(item);
+			right.Add(item);
+
+			Item incomingItem = item.Clone();
+
+			// Local editing.
+			item = new Item(new XmlItem(id, "changed", item.XmlItem.Description,
+				item.XmlItem.Payload),
+				Behaviors.Update(item.Sync, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false));
+
+			left.Update(item);
+
+			// Conflicting remote editing.
+			incomingItem = new Item(new XmlItem(id, "remote", item.XmlItem.Description,
+				item.XmlItem.Payload),
+				Behaviors.Update(incomingItem.Sync, "REMOTE\\kzu", DateTime.Now, false));
+
+			right.Update(incomingItem);
+			
+			IList<Item> conflicts = engine.Synchronize();
+
+			Assert.AreEqual(1, conflicts.Count);
+			Assert.AreEqual(1, Count(left.GetAll()));
+			Assert.AreEqual("remote", left.Get(id).XmlItem.Title);
+			Assert.AreEqual("REMOTE\\kzu", left.Get(id).Sync.LastUpdate.By);
+
+			Assert.AreEqual(1, Count(left.GetConflicts()));
+			Assert.AreEqual(1, Count(right.GetConflicts()));
+		}
+
+		[TestMethod]
 		public void ShouldCallMergeIfRepositorySupportsIt()
 		{
 			MockMergeRepository left = new MockMergeRepository();
@@ -143,9 +187,85 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldCallImportPreviewHandler()
 		{
-			//PreviewImportHandler 
+			bool left = false;
+			bool right = false;
+			bool none = false;
+			int both = 0;
+			PreviewImportHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			{
+				Assert.AreEqual("left", targetRepository.FriendlyName);
+				left = true;
+				return mergedItems;
+			};
+			PreviewImportHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			{
+				Assert.AreEqual("right", targetRepository.FriendlyName);
+				right = true;
+				return mergedItems;
+			};
+			PreviewImportHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			{
+				both++;
+				return mergedItems;
+			};
+			PreviewImportHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			{
+				none = true;
+				return mergedItems;
+			};
+
+			SyncEngine engine = new SyncEngine(new MockRepository("left"), new MockRepository("right"));
+
+			engine.Synchronize(leftHandler, PreviewBehavior.Left);
+			Assert.IsTrue(left);
+
+			engine.Synchronize(rightHandler, PreviewBehavior.Right);
+			Assert.IsTrue(right);
+
+			engine.Synchronize(bothHandler, PreviewBehavior.Both);
+			Assert.AreEqual(2, both);
+
+			engine.Synchronize(noneHandler, PreviewBehavior.None);
+			Assert.IsFalse(none);
 		}
 
+		//[TestMethod]
+		//public void ShouldExportByDaysWithItemTimestampIfNoSyncLastUpdateWhen()
+		//{
+		//   MockXmlRepository xmlrepo = new MockXmlRepository();
+		//   MockSyncRepository syncrepo = new MockSyncRepository();
+
+		//   IXmlItem xi = new XmlItem("title", "description", new XmlDocument().CreateElement("payload"));
+		//   xi.Id = Guid.NewGuid().ToString();
+		//   Sync sync = Behaviors.Create(xi.Id, "kzu", DateTime.Now, false);
+		//   Item item = new Item(xi, sync);
+
+		//   xmlrepo.Add(xi);
+		//   syncrepo.Save(sync);
+
+		//   SyncEngine engine = new SyncEngine(xmlrepo, syncrepo);
+
+		//   IEnumerable<Item> items = engine.Export(1);
+
+		//   Assert.AreEqual(1, Count(items));
+		//}
+
+		//[ExpectedException(typeof(InvalidOperationException))]
+		//[TestMethod]
+		//public void ShouldThrowIfRepositoryDoesntUpdateTimestamp()
+		//{
+		//    ISyncRepository syncRepo = new MockSyncRepository();
+		//    IXmlRepository xmlRepo = new MockXmlRepository().AddOneItem();
+		//    SyncEngine engine = new SyncEngine(xmlRepo, syncRepo);
+
+		//    IEnumerable<Item> items = engine.Export();
+
+		//    ISyncRepository syncRepo2 = new MockSyncRepository();
+		//    IXmlRepository xmlRepo2 = new NotUpdatingRepository();
+		//    SyncEngine engine2 = new SyncEngine(xmlRepo2, syncRepo2);
+
+		//    engine2.Import("mock", items);
+		//}
 
 		private Item CreateItem(string title, string id, History history, params History[] otherHistory)
 		{
@@ -157,72 +277,6 @@ namespace SimpleSharing.Tests
 			}
 
 			return new Item(xml, sync);
-		}
-
-		class MockRepository : IRepository
-		{
-			public Dictionary<string, Item> Items = new Dictionary<string, Item>();
-
-			public MockRepository(params Item[] items)
-			{
-				foreach (Item item in items)
-				{
-					Items.Add(item.Sync.Id, item);
-				}
-			}
-
-			public string FriendlyName
-			{
-				get { return "Mock"; }
-			}
-
-			public bool SupportsMerge
-			{
-				get { return false; }
-			}
-
-			public Item Get(string id)
-			{
-				if (Items.ContainsKey(id))
-					return Items[id].Clone();
-				else
-					return null;
-			}
-
-			public IEnumerable<Item> GetAll()
-			{
-				return Items.Values;
-			}
-
-			public IEnumerable<Item> GetAllSince(DateTime? since)
-			{
-				foreach (Item i in Items.Values)
-				{
-					if (i.Sync.LastUpdate.When >= since)
-						yield return i.Clone();
-				}
-			}
-
-			public void Delete(string id)
-			{
-				Items.Remove(id);
-			}
-
-			public void Update(Item item)
-			{
-				Item i = item.Clone();
-				Items[item.Sync.Id] = i;
-			}
-
-			public IList<Item> Merge(IEnumerable<Item> items)
-			{
-				throw new NotSupportedException();
-			}
-
-			public void Add(Item item)
-			{
-				Items.Add(item.Sync.Id, item);
-			}
 		}
 
 		class MockMergeRepository : IRepository
@@ -256,11 +310,20 @@ namespace SimpleSharing.Tests
 				return new Item[0];
 			}
 
+			public IEnumerable<Item> GetConflicts()
+			{
+				return new Item[0];
+			}
+
 			public void Delete(string id)
 			{
 			}
 
 			public void Update(Item item)
+			{
+			}
+
+			public void Update(Item item, bool resolveConflicts)
 			{
 			}
 
@@ -275,142 +338,6 @@ namespace SimpleSharing.Tests
 			}
 
 			#endregion
-		}
-
-		public class SyncEngine
-		{
-			IRepository left;
-			IRepository right;
-
-			public SyncEngine(IRepository left, IRepository right)
-			{
-				Guard.ArgumentNotNull(left, "left");
-				Guard.ArgumentNotNull(right, "right");
-
-				this.left = left;
-				this.right = right;
-			}
-
-			private IEnumerable<ItemMergeResult> NullPreviewHandler(IRepository targetRepository,
-				IEnumerable<ItemMergeResult> mergedItems)
-			{
-				return mergedItems;
-			}
-
-			public IList<Item> Synchronize()
-			{
-				return SynchronizeImpl(null, NullPreviewHandler, PreviewBehavior.None);
-			}
-
-			public IList<Item> Synchronize(PreviewImportHandler previewer, PreviewBehavior behavior)
-			{
-				return SynchronizeImpl(null, previewer, behavior);
-			}
-
-			public IList<Item> Synchronize(DateTime? since)
-			{
-				return SynchronizeImpl(since, NullPreviewHandler, PreviewBehavior.None);
-			}
-
-			public IList<Item> Synchronize(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
-			{
-				return SynchronizeImpl(since, previewer, behavior);
-			}
-
-			private IList<Item> SynchronizeImpl(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
-			{
-				Guard.ArgumentNotNull(previewer, "previewer");
-
-				IEnumerable<Item> incomingItems = (since == null) ? right.GetAll() : right.GetAllSince(since);
-
-				// If repository supports its own SSE merge behavior, don't apply it locally.
-				if (!left.SupportsMerge)
-				{
-					IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, left);
-					if (behavior == PreviewBehavior.Left || behavior == PreviewBehavior.Both)
-					{
-						incomingToMerge = previewer(left, incomingToMerge);
-					}
-					Import(incomingToMerge, left);
-				}
-				else
-				{
-					left.Merge(incomingItems);
-				}
-
-				IEnumerable<Item> outgoingItems = (since == null) ? left.GetAll() : left.GetAllSince(since);
-
-				if (!right.SupportsMerge)
-				{
-					IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, right);
-					if (behavior == PreviewBehavior.Right || behavior == PreviewBehavior.Both)
-					{
-						outgoingToMerge = previewer(right, outgoingToMerge);
-					}
-					return Import(outgoingToMerge, right);
-				}
-				else
-				{
-					return right.Merge(outgoingItems);
-				}
-			}
-
-			private IEnumerable<ItemMergeResult> MergeItems(IEnumerable<Item> items, IRepository repository)
-			{
-				foreach (Item incoming in items)
-				{
-					Item original = repository.Get(incoming.Sync.Id);
-					ItemMergeResult result = new MergeBehavior().Merge(original, incoming);
-
-					if (result.Operation != MergeOperation.None)
-						yield return result;
-				}
-			}
-
-			private IList<Item> Import(IEnumerable<ItemMergeResult> items, IRepository repository)
-			{
-				// Straight import of data in merged results. 
-				// Conflicting items are saved and also 
-				// are returned for conflict resolution by the user or 
-				// a custom component. MergeBehavior determines 
-				// the winner element that is saved.
-				// Conflicts are returned in a list because we need 
-				// the full iteration over the merged items to be 
-				// processed. If we returned an IEnumerable, we would 
-				// depend on the client iterating it in order to 
-				// actually import items, which is undesirable.
-				List<Item> conflicts = new List<Item>();
-
-				foreach (ItemMergeResult result in items)
-				{
-					if (result.Operation != MergeOperation.None &&
-						result.Proposed != null &&
-						result.Proposed.Sync.Conflicts.Count > 0)
-					{
-						conflicts.Add(result.Proposed);
-					}
-
-					switch (result.Operation)
-					{
-						case MergeOperation.Added:
-							repository.Add(result.Proposed);
-							break;
-						case MergeOperation.Deleted:
-							repository.Delete(result.Proposed.Sync.Id);
-							break;
-						case MergeOperation.Updated:
-						case MergeOperation.Conflict:
-							repository.Update(result.Proposed);
-							break;
-						case MergeOperation.None:
-							break;
-						default:
-							throw new InvalidOperationException();
-					}
-				}
-
-				return conflicts;
-			}
 		}
 
 		/// <summary>

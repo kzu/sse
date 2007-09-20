@@ -97,7 +97,6 @@
     <Compile Include="RssReaderWriterFixture.cs" />
     <Compile Include="RssWriterFixture.cs" />
     <Compile Include="SerializerXmlItemFixture.cs" />
-    <Compile Include="SyncEngineFixture.cs" />
     <Compile Include="TestFixtureBase.cs" />
     <Compile Include="TimestampFixture.cs" />
     <Compile Include="XmlItemFixture.cs" />
@@ -130,12 +129,15 @@
     <Compile Include="..\Source\Guard.cs">
       <Link>Guard.cs</Link>
     </Compile>
+    <Compile Include="CompoundRepositoryFixture.cs" />
+    <Compile Include="Mocks\MockRepository.cs" />
     <Compile Include="Mocks\MockXmlItem.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SyncEngine2Fixture.cs" />
     <Compile Include="SyncRepositoryFixture.cs" />
     <Compile Include="XmlRepositoryFixture.cs" />
   </ItemGroup>

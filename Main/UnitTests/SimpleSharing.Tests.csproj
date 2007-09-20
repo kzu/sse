@@ -87,10 +87,10 @@
     <Compile Include="ItemEventArgsFixture.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mocks\MockRepository.cs" />
     <Compile Include="Mocks\MockSyncRepository.cs" />
     <Compile Include="Mocks\MockXmlItem.cs" />
     <Compile Include="Mocks\MockXmlRepository.cs" />
-    <Compile Include="MSLiveLabsFixture.cs" />
     <Compile Include="NullXmlItemFixture.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -109,12 +109,10 @@
     <Compile Include="Model\ComparableStackFixture.cs" />
     <Compile Include="Model\ItemFixture.cs" />
     <Compile Include="RssReaderWriterFixture.cs" />
-    <Compile Include="HttpSyncFixture.cs" />
     <Compile Include="DynamicXmlItemFixture.cs" />
     <Compile Include="RssDateTimeFixture.cs" />
     <Compile Include="RssWriterFixture.cs" />
     <Compile Include="SerializerXmlItemFixture.cs" />
-    <Compile Include="SyncEngineFixture.cs" />
     <Compile Include="RssReaderFixture.cs" />
     <Compile Include="Model\HistoryFixture.cs" />
     <Compile Include="Model\RelatedFixture.cs" />

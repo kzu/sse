@@ -18,58 +18,20 @@ namespace SimpleSharing.Tests
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
-		public void MergeShouldThrowIfXmlRepoNull()
+		public void MergeShouldThrowIfIncomingItemNull()
 		{
-			Behaviors.Merge(null, new MockSyncRepository(), new Item(
-				new XmlItem("a", "b", GetElement("<c/>")),
-				new Sync(Guid.NewGuid().ToString())));
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void MergeShouldThrowIfSyncRepoNull()
-		{
-			Behaviors.Merge(new MockXmlRepository(), null, new Item(
-				new XmlItem("a", "b", GetElement("<c/>")),
-				new Sync(Guid.NewGuid().ToString())));
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void MergeShouldThrowIfItemNull()
-		{
-			Behaviors.Merge(new MockXmlRepository(), new MockSyncRepository(), null);
+			Behaviors.Merge(new Item(new NullXmlItem("1"), new Sync("1")), null);
 		}
 
 		[TestMethod]
-		public void MergeShouldUpdateSyncBeforeMerge()
+		public void MergeShouldNotThrowIfOriginalItemNull()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			string id = Guid.NewGuid().ToString();
-			XmlItem xmlItem = new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>"));
-			// Save to xml repo only, as a regular app would do.
-			xmlRepo.Add(xmlItem);
-
-			Sync sync = Behaviors.Create(id, "mypc\\user", DateTime.Now, false);
-			Item remoteItem = new Item(
-				xmlItem, sync);
-
-			Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
-
-			Sync s = syncRepo.Get(id);
-
-			Assert.IsNotNull(s);
+			Behaviors.Merge(null, new Item(new NullXmlItem("1"), new Sync("1")));
 		}
 
 		[TestMethod]
 		public void MergeShouldAddWithoutConflict()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 
 			Item remoteItem = new Item(
@@ -77,7 +39,7 @@ namespace SimpleSharing.Tests
 					GetElement("<foo id='bar'/>")),
 				sync);
 
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
+			ItemMergeResult result = Behaviors.Merge(null, remoteItem);
 
 			Assert.AreEqual(MergeOperation.Added, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -86,28 +48,19 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldUpdateWithoutConflict()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
-			Item item = new Item(
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			Item originalItem = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				sync);
 
-			// Save original item.
-			xmlRepo.Add(item.XmlItem);
-			syncRepo.Save(item.Sync);
-
-			Thread.Sleep(50);
-
 			// Simulate editing.
-			sync = Behaviors.Update(item.Sync, "REMOTE\\kzu", DateTime.Now, false);
-			item = new Item(new XmlItem(sync.Id, "changed", item.XmlItem.Description,
-				item.XmlItem.Payload),
+			sync = Behaviors.Update(originalItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
+			Item incomingItem = new Item(new XmlItem(sync.Id, "changed", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				sync);
 
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, item);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Updated, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -118,27 +71,18 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldDeleteWithoutConflict()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
 			string id = sync.Id;
-			Item item = new Item(
+			Item originalItem = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				sync);
 
-			// Save original item.
-			xmlRepo.Add(item.XmlItem);
-			syncRepo.Save(item.Sync);
-
-			Thread.Sleep(50);
-
 			// Simulate editing.
-			sync = Behaviors.Update(item.Sync, "REMOTE\\kzu", DateTime.Now, true);
-			item = new Item(item.XmlItem, sync);
+			sync = Behaviors.Update(originalItem.Sync, "REMOTE\\kzu", DateTime.Now, true);
+			Item incomingItem = new Item(originalItem.XmlItem, sync);
 
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, item);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Deleted, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -149,40 +93,27 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldConflictOnDeleteWithConflict()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
-			Item localItem = new Item(
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			Item originalItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				localSync);
 
-			// Save original item.
-			xmlRepo.Add(localItem.XmlItem);
-			syncRepo.Save(localItem.Sync);
-
-			Item remoteItem = localItem.Clone();
-
-			Thread.Sleep(50);
+			Item incomingItem = originalItem.Clone();
 
 			// Local editing.
-			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
-			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
-				localItem.XmlItem.Payload),
+			localSync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			originalItem = new Item(new XmlItem(localSync.Id, "changed", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				localSync);
-			xmlRepo.Update(localItem.XmlItem);
-			syncRepo.Save(localItem.Sync);
-
-			Thread.Sleep(50);
 
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(remoteItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
+			Sync remoteSync = Behaviors.Update(incomingItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
 			remoteSync.Deleted = true;
-			remoteItem = new Item(remoteItem.XmlItem, remoteSync);
+			incomingItem = new Item(incomingItem.XmlItem, remoteSync);
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -193,21 +124,14 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldNoOpWithNoChanges()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
 			Item item = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				sync);
 
-			// Save original item.
-			xmlRepo.Add(item.XmlItem);
-			syncRepo.Save(item.Sync);
-
 			// Do a merge with the same item.
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, item);
+			ItemMergeResult result = Behaviors.Merge(item, item);
 
 			Assert.AreEqual(MergeOperation.None, result.Operation);
 			Assert.IsNull(result.Proposed);
@@ -216,36 +140,22 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldNoOpOnUpdatedLocalItemWithUnchangedIncoming()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
-			Item item = new Item(
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			Item originalItem = new Item(
 				new XmlItem(sync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				sync);
 
-			// Save original item.
-			xmlRepo.Add(item.XmlItem);
-			syncRepo.Save(item.Sync);
-
-			Item original = item.Clone();
-
-			Thread.Sleep(50);
+			Item incomingItem = originalItem.Clone();
 
 			// Simulate editing.
-			sync = Behaviors.Update(item.Sync, "mypc\\user", DateTime.Now, false);
-			item = new Item(new XmlItem(sync.Id, "changed", item.XmlItem.Description,
-				item.XmlItem.Payload),
+			sync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now, false);
+			originalItem = new Item(new XmlItem(sync.Id, "changed", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				sync);
 
-			// Save the updated local item.
-            xmlRepo.Update(item.XmlItem);
-			item.Sync.ItemHash = item.XmlItem.GetHashCode();
-			syncRepo.Save(item.Sync);
-
 			// Merge with the older incoming item.
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, item);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.None, result.Operation);
 			Assert.IsNull(result.Proposed);
@@ -254,42 +164,28 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldIncomingWinWithConflict()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
-			Item localItem = new Item(
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			Item originalItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				localSync);
 
-			// Save original item.
-			xmlRepo.Add(localItem.XmlItem);
-			syncRepo.Save(localItem.Sync);
-
-			Item remoteItem = localItem.Clone();
-
-			Thread.Sleep(50);
+			Item incomingItem = originalItem.Clone();
 
 			// Local editing.
-			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
-			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
-				localItem.XmlItem.Payload),
+			localSync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			originalItem = new Item(new XmlItem(localSync.Id, "changed", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				localSync);
-            xmlRepo.Update(localItem.XmlItem);
-			localSync.ItemHash = localItem.XmlItem.GetHashCode();
-			syncRepo.Save(localItem.Sync);
-
-			Thread.Sleep(50);
 
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(remoteItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
-			remoteItem = new Item(new XmlItem(localSync.Id, "changed2", localItem.XmlItem.Description,
-				localItem.XmlItem.Payload),
+			Sync remoteSync = Behaviors.Update(incomingItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
+			incomingItem = new Item(new XmlItem(localSync.Id, "changed2", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				remoteSync);
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -302,38 +198,26 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldLocalWinWithConflict()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			DateTime now = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
-
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
-			Item localItem = new Item(
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			Item originalItem = new Item(
 				new XmlItem(localSync.Id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				localSync);
 
-			// Save original item.
-			xmlRepo.Add(localItem.XmlItem);
-			syncRepo.Save(localItem.Sync);
-
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(localSync, "REMOTE\\kzu", now.AddSeconds(20), false);
-			Item remoteItem = new Item(new XmlItem(localSync.Id, "changed2", localItem.XmlItem.Description,
-				localItem.XmlItem.Payload),
+			Sync remoteSync = Behaviors.Update(localSync, "REMOTE\\kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			Item incomingItem = new Item(new XmlItem(localSync.Id, "changed2", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				remoteSync);
 
 			// Local editing.
-			localSync = Behaviors.Update(localItem.Sync, "mypc\\user", DateTime.Now, false);
-			localItem = new Item(new XmlItem(localSync.Id, "changed", localItem.XmlItem.Description,
-				localItem.XmlItem.Payload),
+			localSync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now, false);
+			originalItem = new Item(new XmlItem(localSync.Id, "changed", originalItem.XmlItem.Description,
+				originalItem.XmlItem.Payload),
 				localSync);
-            xmlRepo.Update(localItem.XmlItem);
-			localSync.ItemHash = localItem.XmlItem.GetHashCode();
-			syncRepo.Save(localItem.Sync);
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -346,34 +230,24 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldConflictWithDeletedLocalItem()
 		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository();
-
-			DateTime now = DateTime.Now.Subtract(TimeSpan.FromMinutes(1));
-
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now, false);
+			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(3)), false);
 			string id = localSync.Id;
-			Item localItem = new Item(
+			Item originalItem = new Item(
 				new XmlItem(id, "foo", "bar",
 					GetElement("<foo id='bar'/>")),
 				localSync);
 
-			// Save original item.
-            xmlRepo.Add(localItem.XmlItem);
-			localItem.Sync.ItemHash = localItem.XmlItem.GetHashCode();
-			syncRepo.Save(localItem.Sync);
-
-			// Delete item from repository from outside of SSE.
-			xmlRepo.Remove(id);
-
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(localItem.Sync, "REMOTE\\kzu", now.AddSeconds(1), false);
-			Item remoteItem = new Item(
-				new XmlItem(id, "changed2", localItem.XmlItem.Description, localItem.XmlItem.Payload),
+			Sync remoteSync = Behaviors.Update(originalItem.Sync, "REMOTE\\kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			Item incomingItem = new Item(
+				new XmlItem(id, "changed2", originalItem.XmlItem.Description, originalItem.XmlItem.Payload),
 				remoteSync);
 
+			localSync = Behaviors.Delete(localSync, DeviceAuthor.Current, DateTime.Now);
+			originalItem = new Item(originalItem.XmlItem, localSync);
+
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(xmlRepo, syncRepo, remoteItem);
+			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -385,7 +259,6 @@ namespace SimpleSharing.Tests
 		}
 
 		// TODO:
-		// ShouldUpdateItemBeforeMergeIfDifferentUnderlyingTimestamp
 		// WinnerPicking missing tests: FirstWinsWithBy and comparison with updates.
 		// FirstWinsWithWhen when lastupdate.when is null
 

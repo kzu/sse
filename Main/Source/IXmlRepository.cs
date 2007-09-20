@@ -9,8 +9,8 @@ namespace SimpleSharing
 		bool Contains(string id);
 		IXmlItem Get(string id);
 		bool Remove(string id);
-        
-        void Update(IXmlItem item);
+
+		void Update(IXmlItem item);
 		IEnumerable<IXmlItem> GetAll();
 		IEnumerable<IXmlItem> GetAllSince(DateTime since);
 	}
