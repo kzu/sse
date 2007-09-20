@@ -97,7 +97,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SyncEngine2Fixture.cs">
+    <Compile Include="SyncEngineFixture.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SyncRepositoryFixture.cs" />

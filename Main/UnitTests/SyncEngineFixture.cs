@@ -11,7 +11,7 @@ using System.Threading;
 namespace SimpleSharing.Tests
 {
 	[TestClass]
-	public class SyncEngine2Fixture : TestFixtureBase
+	public class SyncEngineFixture : TestFixtureBase
 	{
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
@@ -227,6 +227,87 @@ namespace SimpleSharing.Tests
 
 			engine.Synchronize(noneHandler, PreviewBehavior.None);
 			Assert.IsFalse(none);
+		}
+
+		[TestMethod]
+		public void ShouldReportImportProgress()
+		{
+			MockRepository left = new MockRepository();
+			MockRepository right = new MockRepository();
+			SyncEngine engine = new SyncEngine(left, right);
+
+			string id = Guid.NewGuid().ToString();
+			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			Item item = new Item(
+				new XmlItem(id, "foo", "bar",
+					GetElement("<foo id='bar'/>")),
+				sync);
+
+			left.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			item = new Item(
+				new XmlItem(id, "foo", "bar",
+					GetElement("<foo id='bar'/>")),
+				sync);
+
+			right.Add(item);
+
+			int received = 0, sent = 0;
+
+			engine.ItemReceived += delegate { received++; };
+			engine.ItemSent += delegate { sent++; };
+
+			engine.Synchronize();
+
+			Assert.AreEqual(2, left.Items.Count);
+			Assert.AreEqual(2, right.Items.Count);
+
+			Assert.AreEqual(1, received);
+			// Sends the item that was imported plus the existing local one.
+			Assert.AreEqual(2, sent);
+		}
+
+		[TestMethod]
+		public void ShouldNotSendReceivedItemIfModifiedBeforeSince()
+		{
+			MockRepository left = new MockRepository();
+			MockRepository right = new MockRepository();
+			SyncEngine engine = new SyncEngine(left, right);
+
+			string id = Guid.NewGuid().ToString();
+			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
+			Item item = new Item(
+				new XmlItem(id, "foo", "bar",
+					GetElement("<foo id='bar'/>")),
+				sync);
+
+			left.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(2)), false);
+			item = new Item(
+				new XmlItem(id, "foo", "bar",
+					GetElement("<foo id='bar'/>")),
+				sync);
+
+			right.Add(item);
+
+			int received = 0, sent = 0;
+
+			engine.ItemReceived += delegate { received++; };
+			engine.ItemSent += delegate { sent++; };
+
+			engine.Synchronize(DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
+
+			// No new item would have been received from target as it was modified in the past.
+			Assert.AreEqual(1, left.Items.Count);
+			// Local item was sent.
+			Assert.AreEqual(2, right.Items.Count);
+
+			Assert.AreEqual(0, received);
+			Assert.AreEqual(1, sent);
 		}
 
 		//[TestMethod]
