@@ -63,10 +63,10 @@ namespace SimpleSharing
 						{
 							cmd.CommandText = FormatSql(
 								"UPDATE [{0}] " +
-								"SET Sync = {2}, ItemHash = {3}, LastUpdate = '{4}' " +
-								"WHERE Id = {1}", "Sync", "id", "sync", "hash", 
-								Timestamp.Normalize(sync.LastUpdate.When.Value).ToString(System.Globalization.CultureInfo.InvariantCulture)); //Hack: Date/Time problems with Access
-
+								"SET Sync = {2}, ItemHash = {3}, LastUpdate = '" 
+								+ sync.LastUpdate.When.Value.ToString("yyyy-MM-dd HH:mm:ss") + "'" +  //Hack: Date/Time problems with Access
+								" WHERE Id = {1}", "Sync", "id", "sync", "hash");
+								
 							count = ExecuteNonQuery(cmd,
 								//CreateParameter("lastupd", DbType.DateTime, 0, Timestamp.Normalize(sync.LastUpdate.When.Value) ),
 								CreateParameter("id", DbType.String, 254, sync.Id),
