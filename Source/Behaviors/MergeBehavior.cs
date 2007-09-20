@@ -38,78 +38,21 @@ namespace SimpleSharing
 	/// </summary>
 	internal class MergeBehavior
 	{
-		ISyncRepository syncRepository;
-		IXmlRepository xmlRepository;
-
-		public MergeBehavior(IXmlRepository xmlRepository, ISyncRepository syncRepository)
-		{
-			Guard.ArgumentNotNull(syncRepository, "syncRepository");
-			Guard.ArgumentNotNull(xmlRepository, "xmlRepository");
-
-			this.syncRepository = syncRepository;
-			this.xmlRepository = xmlRepository;
-		}
-
-		public ItemMergeResult Execute(Item incomingItem)
+		/// <summary>
+		/// Merges the two items applying the SSE algorithm.
+		/// </summary>
+		public ItemMergeResult Merge(Item originalItem, Item incomingItem)
 		{
 			Guard.ArgumentNotNull(incomingItem, "incomingItem");
-			Guard.ArgumentNotNull(incomingItem.Sync, "incomingItem.Sync");
-			Guard.ArgumentNotNull(incomingItem.XmlItem, "incomingItem.XmlItem");
 
-			// Item IDs match and are globally unique. They 
-			// are the same as the Sync.Id, and if other ID 
-			// mechanism is used by the local store, it 
-			// can provide its own mapper inside its 
-			// IXmlRepository implementation.
-
-			string id = incomingItem.XmlItem.Id;
-			IXmlItem localItem = null;
-			if (xmlRepository.Contains(id))
-				localItem = xmlRepository.Get(id);
-			Sync sync = null;
-
-			if (localItem == null)
-			{
-				// If it was a deletion already synchronized.
-				sync = syncRepository.Get(id);
-				if (sync != null)
-				{
-					if (!sync.Deleted)
-					{
-						sync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, true);
-						syncRepository.Save(sync);
-					}
-				}
-				else
-				{
-					//3.3.1
-					return new ItemMergeResult(null, incomingItem, incomingItem, MergeOperation.Added);
-				}
-			}
-			else
-			{
-				sync = syncRepository.Get(id);
-			}
-
-			// See if Sync info should be sync'ed for local edits.
-			if (sync == null)
-			{
-				sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false);
-				sync.ItemHash = localItem.GetHashCode();
-
-				syncRepository.Save(sync);
-			}
-			else if (localItem != null && 
-                sync.ItemHash != null &&
-				!sync.ItemHash.Equals(localItem.GetHashCode()))
-			{
-				sync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, false);
-				sync.ItemHash = localItem.GetHashCode();
-				syncRepository.Save(sync);
-			}
-
-			Item original = new Item(localItem, sync);
 			Item incoming = incomingItem.Clone();
+
+			if (originalItem == null)
+			{
+				return new ItemMergeResult(null, incoming, incoming, MergeOperation.Added);
+			}
+
+			Item original = originalItem.Clone();
 
 			// History on both elements must have at least one entry
 			if (original.Sync.LastUpdate == null ||
@@ -121,6 +64,9 @@ namespace SimpleSharing
 			Item proposed;
 			MergeOperation operation = MergeItems(original, incoming, out proposed);
 
+			// If the sync are equals and there was no conflict (in these case the Sync might be 
+			// equal as the proposed could be the original item, but with conflicts), then there's 
+			// no merge to perform.
 			if (proposed != null && proposed.Sync.Equals(original.Sync) && operation != MergeOperation.Conflict)
 			{
 				return new ItemMergeResult(original, incoming, null, MergeOperation.None);
@@ -130,7 +76,6 @@ namespace SimpleSharing
 				return new ItemMergeResult(original, incoming, proposed, operation);
 			}
 		}
-
 
 		private MergeOperation MergeItems(Item localItem, Item incomingItem, out Item proposedItem)
 		{

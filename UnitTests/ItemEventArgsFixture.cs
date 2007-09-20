@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace SimpleSharing
+namespace SimpleSharing.Tests
 {
 	[TestClass]
 	public class ItemEventArgsFixture

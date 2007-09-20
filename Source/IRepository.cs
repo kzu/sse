@@ -35,13 +35,18 @@ namespace SimpleSharing
 		IEnumerable<Item> GetAllSince(DateTime? since);
 
 		/// <summary>
+		/// Returns the items with conflicts.
+		/// </summary>
+		IEnumerable<Item> GetConflicts();
+
+		/// <summary>
 		/// Adds an item to the repository.
 		/// </summary>
 		/// <param name="item">The item to add.</param>
 		void Add(Item item);
 
 		/// <summary>
-		/// Deletes the item with the given id, if present in the repository.
+		/// Marks the item with the given id as deleted in the repository.
 		/// </summary>
 		/// <param name="id">The item SSE identifier.</param>
 		void Delete(string id);
@@ -51,6 +56,20 @@ namespace SimpleSharing
 		/// </summary>
 		/// <param name="item">The item to update.</param>
 		void Update(Item item);
+
+		/// <summary>
+		/// Updates the item on the repository, optionally merging the conflicts history 
+		/// depending on the value of <paramref name="resolveConflicts"/>.
+		/// </summary>
+		/// <param name="item">The item to update.</param>
+		/// <param name="resolveConflicts"><see langword="true"/> to apply the 
+		/// conflict resolution algorithm and update the item; <see langword="false"/> to 
+		/// only save the item any potential conflicts it may have.</param>
+		/// <returns>The updated item if conflicts were resolved.</returns>
+		/// <remarks>
+		/// See 3.4 on SSE spec.
+		/// </remarks>
+		void Update(Item item, bool resolveConflicts);
 
 		/// <summary>
 		/// Merges the list of items in the repository, and returns any conflicting 

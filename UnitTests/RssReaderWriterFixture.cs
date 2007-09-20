@@ -75,11 +75,9 @@ namespace SimpleSharing.Tests
 		public void ShouldWriteFeedWithDeletedItem()
 		{
 			IXmlRepository xmlRepo = new MockXmlRepository().AddTwoItems();
-			SyncEngine engine = new SyncEngine(
-				xmlRepo,
-				new MockSyncRepository());
+			IRepository repo = new CompoundRepository(xmlRepo, new MockSyncRepository());
 
-			Item item = GetFirst<Item>(engine.Export());
+			Item item = GetFirst<Item>(repo.GetAll());
 			xmlRepo.Remove(item.XmlItem.Id);
 
 			StringWriter sw = new StringWriter();
@@ -91,7 +89,7 @@ namespace SimpleSharing.Tests
 			feed.Sharing.Related.Add(new Related("http://kzu/full", RelatedType.Complete));
 
 			FeedWriter writer = new RssFeedWriter(xw);
-			engine.Publish(feed, writer);
+			writer.Write(feed, repo.GetAll());
 
 			xw.Flush();
 

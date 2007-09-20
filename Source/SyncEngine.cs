@@ -1,181 +1,128 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Xml.XPath;
 
 namespace SimpleSharing
 {
+	/// <summary>
+	/// Main class that performs synchronization between two repositories.
+	/// </summary>
 	public class SyncEngine
 	{
-		IXmlRepository xmlRepo;
-		ISyncRepository syncRepo;
+		IRepository left;
+		IRepository right;
 
-		public SyncEngine(
-			IXmlRepository xmlRepository,
-			ISyncRepository syncRepository)
+		/// <summary>
+		/// Initializes the engine with the two repositories to synchronize.
+		/// </summary>
+		public SyncEngine(IRepository left, IRepository right)
 		{
-			Guard.ArgumentNotNull(xmlRepository, "xmlRepository");
-			Guard.ArgumentNotNull(syncRepository, "syncRepository");
+			Guard.ArgumentNotNull(left, "left");
+			Guard.ArgumentNotNull(right, "right");
 
-			this.xmlRepo = xmlRepository;
-			this.syncRepo = syncRepository;
+			this.left = left;
+			this.right = right;
 		}
 
-		public IEnumerable<Item> Export()
+		private IEnumerable<ItemMergeResult> NullPreviewHandler(IRepository targetRepository,
+			IEnumerable<ItemMergeResult> mergedItems)
 		{
-			return BuildItems(xmlRepo.GetAll(), DateTime.MinValue);
+			return mergedItems;
 		}
 
-		public IEnumerable<Item> Export(DateTime? since)
+		/// <summary>
+		/// Performs a full sync between the two repositories, automatically 
+		/// incorporating changes in both.
+		/// </summary>
+		/// <returns>The list of items that had conflicts.</returns>
+		public IList<Item> Synchronize()
 		{
-			if (since.HasValue)
+			return SynchronizeImpl(null, NullPreviewHandler, PreviewBehavior.None);
+		}
+
+		/// <summary>
+		/// Performs a full sync between the two repositories, optionally calling the 
+		/// given <paramref name="previewer"/> callback as specified by the <paramref name="behavior"/> argument.
+		/// </summary>
+		/// <returns>The list of items that had conflicts.</returns>
+		public IList<Item> Synchronize(PreviewImportHandler previewer, PreviewBehavior behavior)
+		{
+			return SynchronizeImpl(null, previewer, behavior);
+		}
+
+		/// <summary>
+		/// Performs a partial sync between the two repositories since the specified date, automatically 
+		/// incorporating changes in both.
+		/// </summary>
+		/// <param name="since">Synchronize changes that happened after this date.</param>
+		/// <returns>The list of items that had conflicts.</returns>
+		public IList<Item> Synchronize(DateTime? since)
+		{
+			return SynchronizeImpl(since, NullPreviewHandler, PreviewBehavior.None);
+		}
+
+		/// <summary>
+		/// Performs a partial sync between the two repositories since the specified date, optionally calling the 
+		/// given <paramref name="previewer"/> callback as specified by the <paramref name="behavior"/> argument.
+		/// </summary>
+		/// <param name="since">Synchronize changes that happened after this date.</param>
+		/// <returns>The list of items that had conflicts.</returns>
+		public IList<Item> Synchronize(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
+		{
+			return SynchronizeImpl(since, previewer, behavior);
+		}
+
+		private IList<Item> SynchronizeImpl(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
+		{
+			Guard.ArgumentNotNull(previewer, "previewer");
+
+			IEnumerable<Item> incomingItems = (since == null) ? right.GetAll() : right.GetAllSince(since);
+
+			// If repository supports its own SSE merge behavior, don't apply it locally.
+			if (!left.SupportsMerge)
 			{
-				return BuildItems(xmlRepo.GetAllSince(since.Value), since.Value);
+				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, left);
+				if (behavior == PreviewBehavior.Left || behavior == PreviewBehavior.Both)
+				{
+					incomingToMerge = previewer(left, incomingToMerge);
+				}
+				Import(incomingToMerge, left);
 			}
 			else
 			{
-				return Export();
+				left.Merge(incomingItems);
 			}
-		}
 
-		public IEnumerable<Item> Export(int days)
-		{
-			if (days == -1)
+			IEnumerable<Item> outgoingItems = (since == null) ? left.GetAll() : left.GetAllSince(since);
+
+			if (!right.SupportsMerge)
 			{
-				return Export();
+				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, right);
+				if (behavior == PreviewBehavior.Right || behavior == PreviewBehavior.Both)
+				{
+					outgoingToMerge = previewer(right, outgoingToMerge);
+				}
+				return Import(outgoingToMerge, right);
 			}
 			else
 			{
-				DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(days));
-				return Export(since);
+				return right.Merge(outgoingItems);
 			}
 		}
 
-		private IEnumerable<Item> BuildItems(IEnumerable<IXmlItem> xmlItems, DateTime since)
-		{
-			// Search deleted items.
-			// TODO: Is there a better way than iterating every sync?
-			// Note that we're only iterating all the Sync elements, which 
-			// means we're not actually re-hidrating all entities just 
-			// to find the deleted ones.
-			IEnumerator<Sync> syncEnum = syncRepo.GetAll().GetEnumerator();
-
-			foreach (IXmlItem xml in xmlItems)
-			{
-				Sync sync = syncRepo.Get(xml.Id);
-
-				if (sync == null)
-				{
-					// Add sync on-the-fly.
-					sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
-					sync.ItemHash = xml.GetHashCode();
-					syncRepo.Save(sync);
-				}
-				else
-				{
-					sync = UpdateSyncIfItemHashChanged(xml, sync);
-				}
-
-				if (HasChangedSince(since, xml, sync))
-					yield return new Item(xml, sync);
-
-				// Process deleted items mixed with regular 
-				// items, so that we don't take as much time
-				// at the end of the item building process.
-				// Hopefully, both should finish about the same time.
-
-				if (syncEnum.MoveNext())
-				{
-					if (!xmlRepo.Contains(syncEnum.Current.Id) && !syncEnum.Current.Deleted)
-					{
-						Sync updatedSync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
-						syncRepo.Save(updatedSync);
-
-						yield return new Item(null, updatedSync);
-					}
-				}
-			}
-
-			// If there are remaining items in sync, 
-			// keep processing 'till the end.
-			while (syncEnum.MoveNext())
-			{
-				if (!xmlRepo.Contains(syncEnum.Current.Id) && !syncEnum.Current.Deleted)
-				{
-					Sync updatedSync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
-					syncRepo.Save(updatedSync);
-
-					yield return new Item(null, updatedSync);
-				}
-			}
-		}
-
-		private static bool HasChangedSince(DateTime since, IXmlItem xml, Sync sync)
-		{
-			return sync.LastUpdate.When.Value >= since;
-		}
-
-		public IEnumerable<Item> ExportConflicts()
-		{
-			foreach (Sync sync in syncRepo.GetConflicts())
-			{
-				IXmlItem item = xmlRepo.Get(sync.Id);
-				Sync itemSync = sync;
-				if (item == null)
-				{
-					// Update deletion if necessary.
-					if (!sync.Deleted)
-					{
-						itemSync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, true);
-						syncRepo.Save(itemSync);
-					}
-				}
-				else
-				{
-					itemSync = UpdateSyncIfItemHashChanged(item, sync);
-				}
-				
-				yield return new Item(item, itemSync);
-			}
-		}
-
-		public IEnumerable<ItemMergeResult> PreviewImport(IEnumerable<Item> items)
+		private IEnumerable<ItemMergeResult> MergeItems(IEnumerable<Item> items, IRepository repository)
 		{
 			foreach (Item incoming in items)
 			{
-				yield return Behaviors.Merge(xmlRepo, syncRepo, incoming);
+				Item original = repository.Get(incoming.Sync.Id);
+				ItemMergeResult result = new MergeBehavior().Merge(original, incoming);
+
+				if (result.Operation != MergeOperation.None)
+					yield return result;
 			}
 		}
 
-		[Obsolete("Use Import overloads that do not receive a feedUrl argument.", true)]
-		public IList<Item> Import(string feedUrl, IEnumerable<Item> items)
-		{
-			return Import(PreviewImport(items));
-		}
-
-		[Obsolete("Use Import overloads that do not receive a feedUrl argument.", true)]
-		public IList<Item> Import(string feedUrl, params Item[] items)
-		{
-			return Import(PreviewImport(items));
-		}
-
-		[Obsolete("Use Import overloads that do not receive a feedUrl argument.", true)]
-		public IList<Item> Import(string feedUrl, IEnumerable<ItemMergeResult> items)
-		{
-			return Import(items);
-		}
-
-		public IList<Item> Import(IEnumerable<Item> items)
-		{
-			return Import(PreviewImport(items));
-		}
-
-		public IList<Item> Import(params Item[] items)
-		{
-			return Import(PreviewImport(items));
-		}
-
-		public IList<Item> Import(IEnumerable<ItemMergeResult> items)
+		private IList<Item> Import(IEnumerable<ItemMergeResult> items, IRepository repository)
 		{
 			// Straight import of data in merged results. 
 			// Conflicting items are saved and also 
@@ -187,7 +134,6 @@ namespace SimpleSharing
 			// processed. If we returned an IEnumerable, we would 
 			// depend on the client iterating it in order to 
 			// actually import items, which is undesirable.
-
 			List<Item> conflicts = new List<Item>();
 
 			foreach (ItemMergeResult result in items)
@@ -202,32 +148,14 @@ namespace SimpleSharing
 				switch (result.Operation)
 				{
 					case MergeOperation.Added:
-						if (!result.Proposed.Sync.Deleted)
-						{
-							xmlRepo.Add(result.Proposed.XmlItem);
-                            result.Proposed.Sync.ItemHash = result.Proposed.XmlItem.GetHashCode();
-							syncRepo.Save(result.Proposed.Sync);
-						}
+						repository.Add(result.Proposed);
 						break;
 					case MergeOperation.Deleted:
-						xmlRepo.Remove(result.Proposed.XmlItem.Id);
-						result.Proposed.Sync.ItemHash = null;
-						syncRepo.Save(result.Proposed.Sync);
+						repository.Delete(result.Proposed.Sync.Id);
 						break;
 					case MergeOperation.Updated:
 					case MergeOperation.Conflict:
-						// TODO: if there's a conflict but the winner is a 
-						// delete, should we delete from the xmlRepo?
-						if (!result.Proposed.Sync.Deleted)
-						{
-							xmlRepo.Update(result.Proposed.XmlItem);
-                            result.Proposed.Sync.ItemHash = result.Proposed.XmlItem.GetHashCode();
-						}
-						else
-						{
-							result.Proposed.Sync.ItemHash = null;
-						}
-						syncRepo.Save(result.Proposed.Sync);
+						repository.Update(result.Proposed);
 						break;
 					case MergeOperation.None:
 						break;
@@ -238,130 +166,5 @@ namespace SimpleSharing
 
 			return conflicts;
 		}
-
-		/// <summary>
-		/// Manually saves or updates a new or existing item, 
-		/// optionally merging the conflicts history.
-		/// </summary>
-		/// <remarks>
-		/// See 3.4 on SSE spec.
-		/// </remarks>
-		/// <returns>The saved item and its new timestamp.</returns>
-		public Item Save(Item item)
-		{
-			return Save(item, false);
-		}
-
-		public Item Save(Item item, bool resolveConflicts)
-		{
-			Guard.ArgumentNotNull(item, "item");
-
-			if (resolveConflicts)
-			{
-				item = Behaviors.ResolveConflicts(item, DeviceAuthor.Current, DateTime.Now, false);
-			}
-
-			if (xmlRepo.Contains(item.XmlItem.Id))
-			{
-				xmlRepo.Update(item.XmlItem);
-                item.Sync.ItemHash = item.XmlItem.GetHashCode();
-			}
-			else
-			{
-                xmlRepo.Add(item.XmlItem);
-				item.Sync.ItemHash = item.XmlItem.GetHashCode();
-			}
-				
-			syncRepo.Save(item.Sync);
-
-			return item;
-		}
-
-		[Obsolete("Use Export and write to the FeedWriter directly")]
-		public void Publish(Feed feed, FeedWriter writer)
-		{
-			// Since and Until are optional. We don't use them.
-			IEnumerable<Item> items = Export();
-			writer.Write(feed, items);
-		}
-
-		// Partial feed publishing
-		[Obsolete("Use Export and write to the FeedWriter directly")]
-		public void Publish(Feed feed, FeedWriter writer, int lastDays)
-		{
-			DateTime since = DateTime.Today.Subtract(TimeSpan.FromDays(lastDays));
-
-			IEnumerable<Item> items = Export(lastDays);
-			writer.Write(feed, items);
-		}
-
-		// TODO: Optimize subscribe when caller doesn't care about 
-		// retrieving the conflicts.
-		[Obsolete("Use FeedReader.Read and call Import with the resulting items directly")]
-		public IList<Item> Subscribe(FeedReader reader)
-		{
-			Feed feed;
-			IEnumerable<Item> items;
-
-			// TODO: 5.1
-			reader.Read(out feed, out items);
-
-			return Import(feed.Link, items);
-		}
-
-		public DateTime? GetLastSync(string feed)
-		{
-			DateTime? lastSync = syncRepo.GetLastSync(feed);
-
-			if (lastSync.HasValue)
-			{
-				lastSync = Timestamp.Normalize(lastSync.Value);
-			}
-
-			return lastSync;
-		}
-
-		public void SetLastSync(string feed, DateTime lastSync)
-		{
-			syncRepo.SetLastSync(feed, Timestamp.Normalize(lastSync));
-		}
-
-		/// <summary>
-		/// Ensures the Sync information is current WRT the 
-		/// item actual LastUpdated date. If it's not, a new 
-		/// update will be added. Used when exporting/retrieving 
-		/// items from the local stores.
-		/// </summary>
-		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
-		{
-			if (!item.GetHashCode().ToString().Equals(sync.ItemHash))
-			{
-				Sync updated = Behaviors.Update(sync,
-					DeviceAuthor.Current,
-					DateTime.Now, sync.Deleted);
-				sync.ItemHash = item.GetHashCode();
-				syncRepo.Save(sync);
-				return updated;
-			}
-
-			return sync;
-		}
-
-        ///// <summary>
-        ///// Ensures the LastUpdate property on the <see cref="IXmlItem"/> 
-        ///// matches the Sync last update. This is the opposite of 
-        ///// SynchronizeSyncFromItem, and is used for incoming items
-        ///// being imported.
-        ///// </summary>
-        //private void UpdateItemHashIfSyncHasWhen(Item item)
-        //{
-        //    if (item != null &&
-        //        item.XmlItem != null && 
-        //        item.Sync.LastUpdate != null && 
-        //        item.Sync.LastUpdate.When != null)
-        //    {
-        //        item.XmlItem.Hash = item.Sync.LastUpdate.When.Value; //TODO: What is the correct value here, Ask Kzu ?
-        //    }
-        //}
 	}
 }
