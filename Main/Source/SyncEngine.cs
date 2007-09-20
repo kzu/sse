@@ -9,19 +9,22 @@ namespace SimpleSharing
 	/// </summary>
 	public class SyncEngine
 	{
-		IRepository left;
-		IRepository right;
+		public event EventHandler<ItemEventArgs> ItemReceived;
+		public event EventHandler<ItemEventArgs> ItemSent;
+
+		IRepository source;
+		IRepository target;
 
 		/// <summary>
 		/// Initializes the engine with the two repositories to synchronize.
 		/// </summary>
-		public SyncEngine(IRepository left, IRepository right)
+		public SyncEngine(IRepository source, IRepository target)
 		{
-			Guard.ArgumentNotNull(left, "left");
-			Guard.ArgumentNotNull(right, "right");
+			Guard.ArgumentNotNull(source, "left");
+			Guard.ArgumentNotNull(target, "right");
 
-			this.left = left;
-			this.right = right;
+			this.source = source;
+			this.target = target;
 		}
 
 		private IEnumerable<ItemMergeResult> NullPreviewHandler(IRepository targetRepository,
@@ -76,37 +79,41 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(previewer, "previewer");
 
-			IEnumerable<Item> incomingItems = (since == null) ? right.GetAll() : right.GetAllSince(since);
+			IEnumerable<Item> incomingItems = EnumerateItemsProgress(
+				(since == null) ? target.GetAll() : target.GetAllSince(since),
+				RaiseItemReceived);
 
-			// If repository supports its own SSE merge behavior, don't apply it locally.
-			if (!left.SupportsMerge)
+			if (!source.SupportsMerge)
 			{
-				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, left);
+				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
 				if (behavior == PreviewBehavior.Left || behavior == PreviewBehavior.Both)
 				{
-					incomingToMerge = previewer(left, incomingToMerge);
+					incomingToMerge = previewer(source, incomingToMerge);
 				}
-				Import(incomingToMerge, left);
+				Import(incomingToMerge, source);
 			}
 			else
 			{
-				left.Merge(incomingItems);
+				// If repository supports its own SSE merge behavior, don't apply it locally.
+				source.Merge(incomingItems);
 			}
 
-			IEnumerable<Item> outgoingItems = (since == null) ? left.GetAll() : left.GetAllSince(since);
+			IEnumerable<Item> outgoingItems = EnumerateItemsProgress(
+				(since == null) ? source.GetAll() : source.GetAllSince(since),
+				RaiseItemSent);
 
-			if (!right.SupportsMerge)
+			if (!target.SupportsMerge)
 			{
-				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, right);
+				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, target);
 				if (behavior == PreviewBehavior.Right || behavior == PreviewBehavior.Both)
 				{
-					outgoingToMerge = previewer(right, outgoingToMerge);
+					outgoingToMerge = previewer(target, outgoingToMerge);
 				}
-				return Import(outgoingToMerge, right);
+				return Import(outgoingToMerge, target);
 			}
 			else
 			{
-				return right.Merge(outgoingItems);
+				return target.Merge(outgoingItems);
 			}
 		}
 
@@ -166,5 +173,28 @@ namespace SimpleSharing
 
 			return conflicts;
 		}
+
+		private IEnumerable<Item> EnumerateItemsProgress(IEnumerable<Item> items, RaiseHandler raiser)
+		{
+			foreach (Item item in items)
+			{
+				raiser(item);
+				yield return item;
+			}
+		}
+
+		private void RaiseItemReceived(Item item)
+		{
+			if (ItemReceived != null)
+				ItemReceived(this, new ItemEventArgs(item));
+		}
+
+		private void RaiseItemSent(Item item)
+		{
+			if (ItemSent != null)
+				ItemSent(this, new ItemEventArgs(item));
+		}
+
+		delegate void RaiseHandler(Item item);
 	}
 }
