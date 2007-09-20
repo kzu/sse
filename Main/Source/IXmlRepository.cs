@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace SimpleSharing
 {
+	[Obsolete("Use IRepository interface directly")]
 	public interface IXmlRepository
 	{
 		void Add(IXmlItem item);
