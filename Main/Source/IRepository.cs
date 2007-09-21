@@ -23,16 +23,28 @@ namespace SimpleSharing
 		Item Get(string id);
 
 		/// <summary>
-		/// Gets all the items in the repository.
+		/// Gets all the items in the repository, including deleted ones.
 		/// </summary>
-		/// <returns></returns>
 		IEnumerable<Item> GetAll();
+
+		/// <summary>
+		/// Gets all the items in the repository, including deleted ones, and filters 
+		/// the result using the given filter predicate.
+		/// </summary>
+		IEnumerable<Item> GetAll(Predicate<Item> filter);
 
 		/// <summary>
 		/// Gets all the items in the repository that were added, changed or removed after the given date.
 		/// </summary>
 		/// <param name="since">Optional date to retrieve items since.</param>
 		IEnumerable<Item> GetAllSince(DateTime? since);
+
+		/// <summary>
+		/// Gets all the items in the repository that were added, changed or removed after the given date, 
+		/// and filters the result using the given filter predicate.
+		/// </summary>
+		/// <param name="since">Optional date to retrieve items since.</param>
+		IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter);
 
 		/// <summary>
 		/// Returns the items with conflicts.
@@ -46,9 +58,16 @@ namespace SimpleSharing
 		void Add(Item item);
 
 		/// <summary>
-		/// Marks the item with the given id as deleted in the repository.
+		/// Permanently deletes the item from the repository. 
 		/// </summary>
 		/// <param name="id">The item SSE identifier.</param>
+		/// <remarks>
+		/// In order to perform an SSE delete, use <see cref="Behaviors.Delete"/> on 
+		/// the <see cref="Item.Sync"/>, and perform an <see cref="Update"/>.
+		/// <para>
+		/// Not all repositories support permanently deleting items.
+		/// </para>
+		/// </remarks>
 		void Delete(string id);
 
 		/// <summary>
@@ -78,7 +97,7 @@ namespace SimpleSharing
 		/// <param name="items">The items to merge.</param>
 		/// <returns>List of conflicts resulting from the merge. Items with conflicts are 
 		/// persisted to the repository, and the winner determines the item payload.</returns>
-		IList<Item> Merge(IEnumerable<Item> items);
+		IEnumerable<Item> Merge(IEnumerable<Item> items);
 
 		/// <summary>
 		/// Friendly name of the repository, useful for showing 

@@ -138,8 +138,20 @@
   <data name="Format_BadDateTime" xml:space="preserve">
     <value>Input string '{0}' was not recognized as a valid RSS 2.0 date and time.</value>
   </data>
+  <data name="InitializationBegunAlready" xml:space="preserve">
+    <value>Initialization has already begun.</value>
+  </data>
+  <data name="InitializationNotBegun" xml:space="preserve">
+    <value>Initialization has not been initialized.</value>
+  </data>
+  <data name="InitializedAlready" xml:space="preserve">
+    <value>The object has already been initialized.</value>
+  </data>
   <data name="MustProvideWhenOrBy" xml:space="preserve">
     <value>Either when or by must be provided.</value>
+  </data>
+  <data name="NotInitialized" xml:space="preserve">
+    <value>The object has not been initialized properly.</value>
   </data>
   <data name="SyncHistoryRequired" xml:space="preserve">
     <value>Sync information does not contain any history elements.</value>

@@ -237,7 +237,7 @@ namespace SimpleSharing.Tests
 				Behaviors.Create("1", "kzu", null, false));
 
 			FeedWriter writer = new RssFeedWriter(xw);
-			writer.Write(null, item);
+			writer.Write(item);
 
 			xw.Flush();
 

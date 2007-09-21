@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SimpleSharing.Tests
 {
-	public class MockRepository : IRepository
+	public class MockRepository : Repository
 	{
 		public string name;
 		public Dictionary<string, Item> Items = new Dictionary<string, Item>();
@@ -22,17 +22,22 @@ namespace SimpleSharing.Tests
 			this.name = name;
 		}
 
-		public string FriendlyName
+		public override string FriendlyName
 		{
 			get { return name; }
 		}
 
-		public bool SupportsMerge
+		public override bool SupportsMerge
 		{
 			get { return false; }
 		}
 
-		public Item Get(string id)
+		public override void Add(Item item)
+		{
+			Items.Add(item.Sync.Id, item);
+		}
+
+		public override Item Get(string id)
 		{
 			if (Items.ContainsKey(id))
 				return Items[id].Clone();
@@ -40,58 +45,32 @@ namespace SimpleSharing.Tests
 				return null;
 		}
 
-		public IEnumerable<Item> GetAll()
+		public override IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
 		{
-			return Items.Values;
-		}
+			Guard.ArgumentNotNull(filter, "filter");
 
-		public IEnumerable<Item> GetAllSince(DateTime? since)
-		{
 			foreach (Item i in Items.Values)
 			{
-				if (i.Sync.LastUpdate.When >= since)
+				if ((i.Sync.LastUpdate.When == null || i.Sync.LastUpdate.When >= since)
+					&& filter(i))
 					yield return i.Clone();
 			}
 		}
 
-		public IEnumerable<Item> GetConflicts()
-		{
-			foreach (Item item in Items.Values)
-			{
-				if (item.Sync.Conflicts.Count > 0)
-					yield return item;
-			}
-		}
-
-		public void Delete(string id)
+		public override void Delete(string id)
 		{
 			Items.Remove(id);
 		}
 
-		public void Update(Item item)
+		public override void Update(Item item)
 		{
 			Item i = item.Clone();
 			Items[item.Sync.Id] = i;
 		}
 
-		public void Update(Item item, bool resolveConflicts)
-		{
-			if (resolveConflicts)
-			{
-				item = Behaviors.ResolveConflicts(item, DeviceAuthor.Current, DateTime.Now, item.Sync.Deleted);
-			}
-			Item i = item.Clone();
-			Items[item.Sync.Id] = i;
-		}
-
-		public IList<Item> Merge(IEnumerable<Item> items)
+		public override IEnumerable<Item> Merge(IEnumerable<Item> items)
 		{
 			throw new NotSupportedException();
-		}
-
-		public void Add(Item item)
-		{
-			Items.Add(item.Sync.Id, item);
 		}
 	}
 }

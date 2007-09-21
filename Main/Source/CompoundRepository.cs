@@ -73,7 +73,15 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAll()
 		{
-			return GetAllSince(null);
+			return GetAllImpl(null, NullFilter);
+		}
+
+		/// <summary>
+		/// See <see cref="IRepository.GetAll(Predicate{Item})"/>.
+		/// </summary>
+		public IEnumerable<Item> GetAll(Predicate<Item> filter)
+		{
+			return GetAllImpl(null, filter);
 		}
 
 		/// <summary>
@@ -81,6 +89,26 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since)
 		{
+			return GetAllImpl(since, NullFilter);
+		}
+
+		/// <summary>
+		/// See <see cref="IRepository.GetAllSince(DateTime?, Predicate{Item})"/>.
+		/// </summary>
+		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+		{
+			return GetAllImpl(since, filter);
+		}
+
+		private static bool NullFilter(Item item)
+		{
+			return true;
+		}
+
+		private IEnumerable<Item> GetAllImpl(DateTime? since, Predicate<Item> filter)
+		{
+			Guard.ArgumentNotNull(filter, "filter");
+
 			// Search deleted items.
 			// TODO: Is there a better way than iterating every sync?
 			// Note that we're only iterating all the Sync elements, which 
@@ -114,7 +142,11 @@ namespace SimpleSharing
 				// Hopefully, both should finish about the same time.
 
 				if (HasChangedSince(since.Value, sync))
-					yield return new Item(xml, sync);
+				{
+					Item item = new Item(xml, sync);
+					if (filter(item))
+						yield return item;
+				}
 
 				if (syncEnum.MoveNext())
 				{
@@ -132,7 +164,11 @@ namespace SimpleSharing
 						}
 
 						if (HasChangedSince(since.Value, sync))
-							yield return new Item(new NullXmlItem(syncEnum.Current.Id), sync);
+						{
+							Item item = new Item(new NullXmlItem(syncEnum.Current.Id), sync);
+							if (filter(item))
+								yield return item;
+						}
 					}
 				}
 			}
@@ -155,7 +191,11 @@ namespace SimpleSharing
 					}
 
 					if (HasChangedSince(since.Value, sync))
-						yield return new Item(new NullXmlItem(syncEnum.Current.Id), sync);
+					{
+						Item item = new Item(new NullXmlItem(syncEnum.Current.Id), sync);
+						if (filter(item))
+							yield return item;
+					}
 				}
 			}
 		}
@@ -264,7 +304,7 @@ namespace SimpleSharing
 		/// is not provided by this repository.
 		/// </summary>
 		/// <exception cref="NotSupportedException">Thrown always.</exception>
-		public IList<Item> Merge(IEnumerable<Item> items)
+		public IEnumerable<Item> Merge(IEnumerable<Item> items)
 		{
 			throw new NotSupportedException();
 		}

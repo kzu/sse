@@ -1,0 +1,1284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://sse.liveincubation.com/Service/V1.0" xmlns:s1="http://microsoft.com/wsdl/types/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://sse.liveincubation.com/Service/V1.0" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://sse.liveincubation.com/Service/V1.0">
+      <s:import namespace="http://microsoft.com/wsdl/types/" />
+      <s:element name="GetLoginUrl">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="memberName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLoginUrlResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetLoginUrlResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLoginDataTemplate">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetLoginDataTemplateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetLoginDataTemplateResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VerifyAuthData">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="authData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VerifyAuthDataResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="VerifyAuthDataResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateFeed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="title" type="tns:TextContent" />
+            <s:element minOccurs="0" maxOccurs="1" name="subtitle" type="tns:TextContent" />
+            <s:element minOccurs="0" maxOccurs="1" name="link" type="tns:Link" />
+            <s:element minOccurs="0" maxOccurs="1" name="otherElements" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="format" type="tns:FeedFormat" />
+            <s:element minOccurs="0" maxOccurs="1" name="customItemFieldsBinding" type="tns:NIDBinding" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TextContent">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Data" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Src" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Link">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Rel" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Href" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Hreflang" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Title" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Length" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="FeedFormat">
+        <s:restriction base="s:string">
+          <s:enumeration value="Atom" />
+          <s:enumeration value="RSS" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="NIDBinding">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TitleFieldId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescriptionFieldId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfNIDField" />
+          <s:element minOccurs="0" maxOccurs="1" name="Namespaces" type="tns:ArrayOfNIDNamespace" />
+          <s:element minOccurs="0" maxOccurs="1" name="PickLists" type="tns:ArrayOfNIDPickList" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfNIDField">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="NIDField" nillable="true" type="tns:NIDField" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="NIDField">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PickListId" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ContentType" type="tns:ContentTypes" />
+          <s:element minOccurs="1" maxOccurs="1" name="Type" type="tns:Types" />
+          <s:element minOccurs="0" maxOccurs="1" name="Label" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DefaultValue" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Array" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Required" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="Hidden" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Element" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="ContentTypes">
+        <s:restriction base="s:string">
+          <s:enumeration value="text" />
+          <s:enumeration value="xml" />
+          <s:enumeration value="html" />
+          <s:enumeration value="xhtml" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="Types">
+        <s:restriction base="s:string">
+          <s:enumeration value="none" />
+          <s:enumeration value="number" />
+          <s:enumeration value="floatingpoint" />
+          <s:enumeration value="datetime" />
+          <s:enumeration value="boolean" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfNIDNamespace">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="NIDNamespace" nillable="true" type="tns:NIDNamespace" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="NIDNamespace">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LocalPrefix" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="URI" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfNIDPickList">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="NIDPickList" nillable="true" type="tns:NIDPickList" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="NIDPickList">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PickListItems" type="tns:ArrayOfNIDPickListItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfNIDPickListItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="NIDPickListItem" nillable="true" type="tns:NIDPickListItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="NIDPickListItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CreateFeedResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CreateFeedResult" type="tns:FeedInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FeedInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Title" type="tns:TextContent" />
+          <s:element minOccurs="0" maxOccurs="1" name="Subtitle" type="tns:TextContent" />
+          <s:element minOccurs="0" maxOccurs="1" name="Link" type="tns:Link" />
+          <s:element minOccurs="0" maxOccurs="1" name="OtherElements" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Since" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Until" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Expires" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="SseVersion" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PartialFeedUrl" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CompleteFeedUrl" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EnclosurePostUrl" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfItemInfo" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomItemFieldsBinding" type="tns:NIDBinding" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfItemInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ItemInfo" nillable="true" type="tns:ItemInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Enclosures" type="tns:ArrayOfEnclosureInfo" />
+          <s:element minOccurs="0" maxOccurs="1" name="Sync" type="tns:SyncInfo" />
+          <s:element minOccurs="0" maxOccurs="1" name="OtherElements" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Content" type="tns:Content" />
+          <s:element minOccurs="0" maxOccurs="1" name="Title" type="tns:TextContent" />
+          <s:element minOccurs="0" maxOccurs="1" name="Authors" type="tns:ArrayOfPerson" />
+          <s:element minOccurs="0" maxOccurs="1" name="Categories" type="tns:ArrayOfCategory" />
+          <s:element minOccurs="0" maxOccurs="1" name="Link" type="tns:Link" />
+          <s:element minOccurs="1" maxOccurs="1" name="LastUpdate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomItemFields" type="tns:ArrayOfNIDFieldValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfEnclosureInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="EnclosureInfo" nillable="true" type="tns:EnclosureInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="EnclosureInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Url" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Length" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SyncInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Id" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Version" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Deleted" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="NoConflicts" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="HistoryEntries" type="tns:ArrayOfHistoryInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfHistoryInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="HistoryInfo" nillable="true" type="tns:HistoryInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="HistoryInfo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Sequence" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="When" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="By" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Content">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Data" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Src" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPerson">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Person" nillable="true" type="tns:Person" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Person">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Uri" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfCategory">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Category" nillable="true" type="tns:Category" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Category">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Term" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Label" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Scheme" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfNIDFieldValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="NIDFieldValue" nillable="true" type="tns:NIDFieldValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="NIDFieldValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Values" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AuthenticationHeader" type="tns:AuthenticationHeader" />
+      <s:complexType name="AuthenticationHeader">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Puid" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="MemberName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PartnerKey" type="s:string" />
+        </s:sequence>
+        <s:anyAttribute />
+      </s:complexType>
+      <s:element name="UpdateFeed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="title" type="tns:TextContent" />
+            <s:element minOccurs="0" maxOccurs="1" name="subtitle" type="tns:TextContent" />
+            <s:element minOccurs="0" maxOccurs="1" name="link" type="tns:Link" />
+            <s:element minOccurs="0" maxOccurs="1" name="otherElements" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateFeedResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeleteFeed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteFeedResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ResetFeed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="permissioned" type="s:boolean" />
+            <s:element minOccurs="0" maxOccurs="1" name="title" type="tns:TextContent" />
+            <s:element minOccurs="0" maxOccurs="1" name="subtitle" type="tns:TextContent" />
+            <s:element minOccurs="0" maxOccurs="1" name="link" type="tns:Link" />
+            <s:element minOccurs="0" maxOccurs="1" name="otherElements" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ResetFeedResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetFeed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="since" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="until" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="includeDeleted" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetFeedResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetFeedResult" type="tns:FeedInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnumerateFeeds">
+        <s:complexType />
+      </s:element>
+      <s:element name="EnumerateFeedsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EnumerateFeedsResult" type="tns:ArrayOfFeedInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfFeedInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FeedInfo" nillable="true" type="tns:FeedInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="EnumerateContactFeeds">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="contactPassportName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnumerateContactFeedsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EnumerateContactFeedsResult" type="tns:ArrayOfFeedInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnumeratePermissionedFeeds">
+        <s:complexType />
+      </s:element>
+      <s:element name="EnumeratePermissionedFeedsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EnumeratePermissionedFeedsResult" type="tns:ArrayOfFeedInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnumerateContacts">
+        <s:complexType />
+      </s:element>
+      <s:element name="EnumerateContactsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EnumerateContactsResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrantPermission">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="feedId" type="s1:guid" />
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="canRead" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="canWrite" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="canDelete" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="canGrant" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GrantPermissionResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DenyPermission">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="feedId" type="s1:guid" />
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DenyPermissionResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetPermission">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="feedId" type="s1:guid" />
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPermissionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetPermissionResult" type="tns:PermissionInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PermissionInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CanRead" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CanWrite" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CanDelete" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CanGrant" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="EnumeratePermissions">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="feedId" type="s1:guid" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnumeratePermissionsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EnumeratePermissionsResult" type="tns:ArrayOfPermissionInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfPermissionInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PermissionInfo" type="tns:PermissionInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CreateItem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="itemInfo" type="tns:ItemInfo" />
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateItemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CreateItemResult" type="tns:CreateItemResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CreateItemResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="item" type="tns:ItemInfo" />
+          <s:element minOccurs="1" maxOccurs="1" name="conflict" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="UpdateItem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="itemInfo" type="tns:ItemInfo" />
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateItemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="UpdateItemResult" type="tns:UpdateItemResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="UpdateItemResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="item" type="tns:ItemInfo" />
+          <s:element minOccurs="1" maxOccurs="1" name="conflict" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="DeleteItem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="itemInfo" type="tns:ItemInfo" />
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteItemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteItemResult" type="tns:DeleteItemResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="DeleteItemResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="item" type="tns:ItemInfo" />
+          <s:element minOccurs="1" maxOccurs="1" name="conflict" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetItems">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="since" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="until" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="includeDeleted" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItemsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetItemsResult" type="tns:ArrayOfItemInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="feedUrl" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="itemSyncId" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetItemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetItemResult" type="tns:ItemInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://microsoft.com/wsdl/types/">
+      <s:simpleType name="guid">
+        <s:restriction base="s:string">
+          <s:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" />
+        </s:restriction>
+      </s:simpleType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetLoginUrlSoapIn">
+    <wsdl:part name="parameters" element="tns:GetLoginUrl" />
+  </wsdl:message>
+  <wsdl:message name="GetLoginUrlSoapOut">
+    <wsdl:part name="parameters" element="tns:GetLoginUrlResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetLoginDataTemplateSoapIn">
+    <wsdl:part name="parameters" element="tns:GetLoginDataTemplate" />
+  </wsdl:message>
+  <wsdl:message name="GetLoginDataTemplateSoapOut">
+    <wsdl:part name="parameters" element="tns:GetLoginDataTemplateResponse" />
+  </wsdl:message>
+  <wsdl:message name="VerifyAuthDataSoapIn">
+    <wsdl:part name="parameters" element="tns:VerifyAuthData" />
+  </wsdl:message>
+  <wsdl:message name="VerifyAuthDataSoapOut">
+    <wsdl:part name="parameters" element="tns:VerifyAuthDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateFeedSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateFeed" />
+  </wsdl:message>
+  <wsdl:message name="CreateFeedSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateFeedResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateFeedAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="UpdateFeedSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateFeed" />
+  </wsdl:message>
+  <wsdl:message name="UpdateFeedSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateFeedResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateFeedAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteFeedSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteFeed" />
+  </wsdl:message>
+  <wsdl:message name="DeleteFeedSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteFeedResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteFeedAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="ResetFeedSoapIn">
+    <wsdl:part name="parameters" element="tns:ResetFeed" />
+  </wsdl:message>
+  <wsdl:message name="ResetFeedSoapOut">
+    <wsdl:part name="parameters" element="tns:ResetFeedResponse" />
+  </wsdl:message>
+  <wsdl:message name="ResetFeedAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetFeedSoapIn">
+    <wsdl:part name="parameters" element="tns:GetFeed" />
+  </wsdl:message>
+  <wsdl:message name="GetFeedSoapOut">
+    <wsdl:part name="parameters" element="tns:GetFeedResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetFeedAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateFeedsSoapIn">
+    <wsdl:part name="parameters" element="tns:EnumerateFeeds" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateFeedsSoapOut">
+    <wsdl:part name="parameters" element="tns:EnumerateFeedsResponse" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateFeedsAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateContactFeedsSoapIn">
+    <wsdl:part name="parameters" element="tns:EnumerateContactFeeds" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateContactFeedsSoapOut">
+    <wsdl:part name="parameters" element="tns:EnumerateContactFeedsResponse" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateContactFeedsAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="EnumeratePermissionedFeedsSoapIn">
+    <wsdl:part name="parameters" element="tns:EnumeratePermissionedFeeds" />
+  </wsdl:message>
+  <wsdl:message name="EnumeratePermissionedFeedsSoapOut">
+    <wsdl:part name="parameters" element="tns:EnumeratePermissionedFeedsResponse" />
+  </wsdl:message>
+  <wsdl:message name="EnumeratePermissionedFeedsAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateContactsSoapIn">
+    <wsdl:part name="parameters" element="tns:EnumerateContacts" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateContactsSoapOut">
+    <wsdl:part name="parameters" element="tns:EnumerateContactsResponse" />
+  </wsdl:message>
+  <wsdl:message name="EnumerateContactsAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="GrantPermissionSoapIn">
+    <wsdl:part name="parameters" element="tns:GrantPermission" />
+  </wsdl:message>
+  <wsdl:message name="GrantPermissionSoapOut">
+    <wsdl:part name="parameters" element="tns:GrantPermissionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GrantPermissionAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="DenyPermissionSoapIn">
+    <wsdl:part name="parameters" element="tns:DenyPermission" />
+  </wsdl:message>
+  <wsdl:message name="DenyPermissionSoapOut">
+    <wsdl:part name="parameters" element="tns:DenyPermissionResponse" />
+  </wsdl:message>
+  <wsdl:message name="DenyPermissionAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetPermissionSoapIn">
+    <wsdl:part name="parameters" element="tns:GetPermission" />
+  </wsdl:message>
+  <wsdl:message name="GetPermissionSoapOut">
+    <wsdl:part name="parameters" element="tns:GetPermissionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetPermissionAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="EnumeratePermissionsSoapIn">
+    <wsdl:part name="parameters" element="tns:EnumeratePermissions" />
+  </wsdl:message>
+  <wsdl:message name="EnumeratePermissionsSoapOut">
+    <wsdl:part name="parameters" element="tns:EnumeratePermissionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="EnumeratePermissionsAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateItemSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateItem" />
+  </wsdl:message>
+  <wsdl:message name="CreateItemSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateItemResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateItemAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="UpdateItemSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateItem" />
+  </wsdl:message>
+  <wsdl:message name="UpdateItemSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateItemResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateItemAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteItemSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteItem" />
+  </wsdl:message>
+  <wsdl:message name="DeleteItemSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteItemResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteItemAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetItemsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetItems" />
+  </wsdl:message>
+  <wsdl:message name="GetItemsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetItemsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetItemsAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetItemSoapIn">
+    <wsdl:part name="parameters" element="tns:GetItem" />
+  </wsdl:message>
+  <wsdl:message name="GetItemSoapOut">
+    <wsdl:part name="parameters" element="tns:GetItemResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetItemAuthenticationHeader">
+    <wsdl:part name="AuthenticationHeader" element="tns:AuthenticationHeader" />
+  </wsdl:message>
+  <wsdl:portType name="ManageFeedSoap">
+    <wsdl:operation name="GetLoginUrl">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Gets the URL where the Live ID login data template should be posted to perform authentication</wsdl:documentation>
+      <wsdl:input message="tns:GetLoginUrlSoapIn" />
+      <wsdl:output message="tns:GetLoginUrlSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLoginDataTemplate">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns a parameterized template to fill out and post to the login URL to perform authentication. This string %NAME% and %PASSWORD% should be modified with the actual username and password</wsdl:documentation>
+      <wsdl:input message="tns:GetLoginDataTemplateSoapIn" />
+      <wsdl:output message="tns:GetLoginDataTemplateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VerifyAuthData">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Accepts the string returned in the response to the post of the login data to the login URL. If authentication data is valid, the response to this API request sets the authentication cookies to be included in subsequent API requests.</wsdl:documentation>
+      <wsdl:input message="tns:VerifyAuthDataSoapIn" />
+      <wsdl:output message="tns:VerifyAuthDataSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateFeed">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Create a new feed. otherElements is an XML fragment representing feed level elements (channel in RSS) that aren't mapped to specific named parameters.</wsdl:documentation>
+      <wsdl:input message="tns:CreateFeedSoapIn" />
+      <wsdl:output message="tns:CreateFeedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateFeed">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Update an existing feed. otherElements is an XML fragment representing feed level elements (channel in RSS) that aren't mapped to specific named parameters.</wsdl:documentation>
+      <wsdl:input message="tns:UpdateFeedSoapIn" />
+      <wsdl:output message="tns:UpdateFeedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFeed">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Permanently delete a feed and all of its items, enclosures, and history.</wsdl:documentation>
+      <wsdl:input message="tns:DeleteFeedSoapIn" />
+      <wsdl:output message="tns:DeleteFeedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ResetFeed">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reset a feed to the specified state. Permanently delete all items, enclosures and history. otherElements is an XML fragment representing feed level elements (channel in RSS) that aren't mapped to specific named parameters.</wsdl:documentation>
+      <wsdl:input message="tns:ResetFeedSoapIn" />
+      <wsdl:output message="tns:ResetFeedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFeed">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get specified feed including entries.</wsdl:documentation>
+      <wsdl:input message="tns:GetFeedSoapIn" />
+      <wsdl:output message="tns:GetFeedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateFeeds">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get meta information for all of the caller's feeds, not including entries.</wsdl:documentation>
+      <wsdl:input message="tns:EnumerateFeedsSoapIn" />
+      <wsdl:output message="tns:EnumerateFeedsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateContactFeeds">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get meta information for all of the contact's feeds to which the caller has permission, but does not load items.</wsdl:documentation>
+      <wsdl:input message="tns:EnumerateContactFeedsSoapIn" />
+      <wsdl:output message="tns:EnumerateContactFeedsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnumeratePermissionedFeeds">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get meta information for all of the feeds to which the caller has permission, but does not load items.</wsdl:documentation>
+      <wsdl:input message="tns:EnumeratePermissionedFeedsSoapIn" />
+      <wsdl:output message="tns:EnumeratePermissionedFeedsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateContacts">
+      <wsdl:input message="tns:EnumerateContactsSoapIn" />
+      <wsdl:output message="tns:EnumerateContactsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GrantPermission">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Grant the user with the given Live ID member name the specified permissions to access the feed.</wsdl:documentation>
+      <wsdl:input message="tns:GrantPermissionSoapIn" />
+      <wsdl:output message="tns:GrantPermissionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DenyPermission">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Deny the user with the given Live ID member permission to access the feed.</wsdl:documentation>
+      <wsdl:input message="tns:DenyPermissionSoapIn" />
+      <wsdl:output message="tns:DenyPermissionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPermission">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Return the user's permissions to access the feed.</wsdl:documentation>
+      <wsdl:input message="tns:GetPermissionSoapIn" />
+      <wsdl:output message="tns:GetPermissionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnumeratePermissions">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">List each user's permissions to access the feed.</wsdl:documentation>
+      <wsdl:input message="tns:EnumeratePermissionsSoapIn" />
+      <wsdl:output message="tns:EnumeratePermissionsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateItem">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Create a new entry in the feed. Generate a new Sync ID and insert a history entry with when set to the current time and by set to the Live ID member name of the current user, if signed-in.</wsdl:documentation>
+      <wsdl:input message="tns:CreateItemSoapIn" />
+      <wsdl:output message="tns:CreateItemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateItem">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Update the entry if it's version matches the current version of the entry on the server (optimistic concurrency).  If the versions do not match, do not update the entry and set the conflict property to true in the response. Insert a history entry with when set to the current time and by set to the Live ID member name of the current user, if signed-in.</wsdl:documentation>
+      <wsdl:input message="tns:UpdateItemSoapIn" />
+      <wsdl:output message="tns:UpdateItemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteItem">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Delete the entry if it's version matches the current version of the entry on the server (optimistic concurrency).  If the versions do not match, do not delete the entry and set the conflict property to true in the response. Insert a history entry with when set to the current time and by set to the Live ID member name of the current user, if signed-in.  The deleted item remains in the feed as a tombstone for some period of time.</wsdl:documentation>
+      <wsdl:input message="tns:DeleteItemSoapIn" />
+      <wsdl:output message="tns:DeleteItemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetItems">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Return a list of all entries in the feed that have been updated between the given since and until tokens (all entries if since and until are null).</wsdl:documentation>
+      <wsdl:input message="tns:GetItemsSoapIn" />
+      <wsdl:output message="tns:GetItemsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetItem">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Return the entries with the given SSE sync ID.</wsdl:documentation>
+      <wsdl:input message="tns:GetItemSoapIn" />
+      <wsdl:output message="tns:GetItemSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ManageFeedSoap" type="tns:ManageFeedSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetLoginUrl">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetLoginUrl" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLoginDataTemplate">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetLoginDataTemplate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifyAuthData">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/VerifyAuthData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateFeed">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/CreateFeed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateFeed">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/UpdateFeed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:UpdateFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFeed">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/DeleteFeed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ResetFeed">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/ResetFeed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:ResetFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFeed">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetFeed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateFeeds">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumerateFeeds" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:EnumerateFeedsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateContactFeeds">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumerateContactFeeds" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:EnumerateContactFeedsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumeratePermissionedFeeds">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumeratePermissionedFeeds" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:EnumeratePermissionedFeedsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateContacts">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumerateContacts" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:EnumerateContactsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrantPermission">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GrantPermission" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GrantPermissionAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DenyPermission">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/DenyPermission" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DenyPermissionAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPermission">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetPermission" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetPermissionAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumeratePermissions">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumeratePermissions" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:EnumeratePermissionsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateItem">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/CreateItem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateItem">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/UpdateItem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:UpdateItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteItem">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/DeleteItem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItems">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetItems" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetItemsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItem">
+      <soap:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetItem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ManageFeedSoap12" type="tns:ManageFeedSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetLoginUrl">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetLoginUrl" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLoginDataTemplate">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetLoginDataTemplate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifyAuthData">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/VerifyAuthData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateFeed">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/CreateFeed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:CreateFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateFeed">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/UpdateFeed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:UpdateFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFeed">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/DeleteFeed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:DeleteFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ResetFeed">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/ResetFeed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:ResetFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFeed">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetFeed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetFeedAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateFeeds">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumerateFeeds" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:EnumerateFeedsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateContactFeeds">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumerateContactFeeds" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:EnumerateContactFeedsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumeratePermissionedFeeds">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumeratePermissionedFeeds" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:EnumeratePermissionedFeedsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumerateContacts">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumerateContacts" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:EnumerateContactsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GrantPermission">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GrantPermission" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GrantPermissionAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DenyPermission">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/DenyPermission" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:DenyPermissionAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPermission">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetPermission" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetPermissionAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnumeratePermissions">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/EnumeratePermissions" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:EnumeratePermissionsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateItem">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/CreateItem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:CreateItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateItem">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/UpdateItem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:UpdateItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteItem">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/DeleteItem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:DeleteItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItems">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetItems" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetItemsAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetItem">
+      <soap12:operation soapAction="http://sse.liveincubation.com/Service/V1.0/GetItem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetItemAuthenticationHeader" part="AuthenticationHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ManageFeed">
+    <wsdl:port name="ManageFeedSoap" binding="tns:ManageFeedSoap">
+      <soap:address location="http://sse.mslivelabs.com/service/managefeed.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ManageFeedSoap12" binding="tns:ManageFeedSoap12">
+      <soap12:address location="http://sse.mslivelabs.com/service/managefeed.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

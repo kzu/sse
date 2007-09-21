@@ -79,25 +79,6 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(previewer, "previewer");
 
-			IEnumerable<Item> incomingItems = EnumerateItemsProgress(
-				(since == null) ? target.GetAll() : target.GetAllSince(since),
-				RaiseItemReceived);
-
-			if (!source.SupportsMerge)
-			{
-				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
-				if (behavior == PreviewBehavior.Left || behavior == PreviewBehavior.Both)
-				{
-					incomingToMerge = previewer(source, incomingToMerge);
-				}
-				Import(incomingToMerge, source);
-			}
-			else
-			{
-				// If repository supports its own SSE merge behavior, don't apply it locally.
-				source.Merge(incomingItems);
-			}
-
 			IEnumerable<Item> outgoingItems = EnumerateItemsProgress(
 				(since == null) ? source.GetAll() : source.GetAllSince(since),
 				RaiseItemSent);
@@ -109,11 +90,31 @@ namespace SimpleSharing
 				{
 					outgoingToMerge = previewer(target, outgoingToMerge);
 				}
-				return Import(outgoingToMerge, target);
+				Import(outgoingToMerge, target);
 			}
 			else
 			{
-				return target.Merge(outgoingItems);
+				target.Merge(outgoingItems);
+			}
+
+			IEnumerable<Item> incomingItems = EnumerateItemsProgress(
+				(since == null) ? target.GetAll() : target.GetAllSince(since),
+				RaiseItemReceived);
+
+			if (!source.SupportsMerge)
+			{
+				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
+				if (behavior == PreviewBehavior.Left || behavior == PreviewBehavior.Both)
+				{
+					incomingToMerge = previewer(source, incomingToMerge);
+				}
+				
+				return Import(incomingToMerge, source);
+			}
+			else
+			{
+				// If repository supports its own SSE merge behavior, don't apply it locally.
+				return new List<Item>(source.Merge(incomingItems));
 			}
 		}
 
@@ -156,9 +157,6 @@ namespace SimpleSharing
 				{
 					case MergeOperation.Added:
 						repository.Add(result.Proposed);
-						break;
-					case MergeOperation.Deleted:
-						repository.Delete(result.Proposed.Sync.Id);
 						break;
 					case MergeOperation.Updated:
 					case MergeOperation.Conflict:
