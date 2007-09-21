@@ -21,6 +21,15 @@ namespace SimpleSharing
 		/// Writes the items as an xml fragment of items.
 		/// </summary>
 		/// <param name="items"></param>
+		public void Write(params Item[] items)
+		{
+			Write((IEnumerable<Item>)items);
+		}
+
+		/// <summary>
+		/// Writes the items as an xml fragment of items.
+		/// </summary>
+		/// <param name="items"></param>
 		public void Write(IEnumerable<Item> items)
 		{
 			Write(null, items);

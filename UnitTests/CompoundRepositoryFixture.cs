@@ -169,6 +169,13 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, items.Count);
 		}
 
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowGetAllWithNullFilter()
+		{
+			new CompoundRepository(xmlRepo, syncRepo).GetAll(null);
+		}
+
 		[TestMethod]
 		public void ShouldGetAllWithAutoUpdatesToSync()
 		{
@@ -281,6 +288,13 @@ namespace SimpleSharing.Tests
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
 
 			Assert.AreEqual(1, Count(repo.GetAllSince(null)));
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowGetAllSinceWithNullFilter()
+		{
+			new CompoundRepository(xmlRepo, syncRepo).GetAllSince(DateTime.Now, null);
 		}
 
 		[TestMethod]

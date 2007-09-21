@@ -130,10 +130,6 @@ namespace SimpleSharing
 			{
 				return MergeOperation.Conflict;
 			}
-			else if (W.Sync.Deleted)
-			{
-				return MergeOperation.Deleted;
-			}
 			else
 			{
 				return MergeOperation.Updated;

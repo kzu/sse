@@ -84,7 +84,7 @@ namespace SimpleSharing.Tests
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
 
-			Assert.AreEqual(MergeOperation.Deleted, result.Operation);
+			Assert.AreEqual(MergeOperation.Updated, result.Operation);
 			Assert.IsNotNull(result.Proposed);
 			Assert.AreEqual(true, result.Proposed.Sync.Deleted);
 			Assert.AreEqual("REMOTE\\kzu", result.Proposed.Sync.LastUpdate.By);

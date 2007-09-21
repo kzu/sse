@@ -121,11 +121,47 @@ namespace SimpleSharing.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Initialization has already begun..
+        /// </summary>
+        internal static string InitializationBegunAlready {
+            get {
+                return ResourceManager.GetString("InitializationBegunAlready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Initialization has not been initialized..
+        /// </summary>
+        internal static string InitializationNotBegun {
+            get {
+                return ResourceManager.GetString("InitializationNotBegun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The object has already been initialized..
+        /// </summary>
+        internal static string InitializedAlready {
+            get {
+                return ResourceManager.GetString("InitializedAlready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Either when or by must be provided..
         /// </summary>
         internal static string MustProvideWhenOrBy {
             get {
                 return ResourceManager.GetString("MustProvideWhenOrBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The object has not been initialized properly..
+        /// </summary>
+        internal static string NotInitialized {
+            get {
+                return ResourceManager.GetString("NotInitialized", resourceCulture);
             }
         }
         

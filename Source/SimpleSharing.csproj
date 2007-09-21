@@ -79,6 +79,7 @@
     <Compile Include="ObjectDumper.cs" />
     <Compile Include="PreviewBehavior.cs" />
     <Compile Include="PreviewImportHandler.cs" />
+    <Compile Include="Repository.cs" />
     <Compile Include="RssDateTime.cs" />
     <Compile Include="RssFeedReader.cs">
       <SubType>Code</SubType>
@@ -95,6 +96,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SerializerXmlItem.cs" />
+    <Compile Include="SupportInitialize.cs" />
     <Compile Include="Timestamp.cs" />
     <Compile Include="XmlNamespaceFilteringReader.cs" />
     <Compile Include="XmlItem.cs" />

@@ -7,14 +7,31 @@ using System.Globalization;
 
 namespace SimpleSharing
 {
+	/// <summary>
+	/// Base class for feed readers.
+	/// </summary>
 	public abstract class FeedReader
 	{
 		XmlReader reader;
 		public event EventHandler ItemRead;
 
-		public FeedReader(XmlReader reader)
+		protected FeedReader(XmlReader reader)
 		{
 			this.reader = reader;
+		}
+
+		/// <summary>
+		/// Creates a new feed reader using the given <paramref name="xmlReader"/>.
+		/// </summary>
+		/// <param name="xmlReader">The <see cref="XmlReader"/> containing the actual feed payload.</param>
+		/// <returns></returns>
+		public static FeedReader Create(XmlReader xmlReader)
+		{
+			// TODO: will have a format auto-detecting 
+			// reader in the future.
+#pragma warning disable 618
+			return new RssFeedReader(xmlReader);
+#pragma warning restore 618
 		}
 
 		public void Read(out Feed feed, out IEnumerable<Item> items)
@@ -34,7 +51,10 @@ namespace SimpleSharing
 			SharingXmlReader sharingReader = new SharingXmlReader(reader);
 
 			Feed feed = ReadFeed(sharingReader);
-			feed.Sharing = sharingReader.Sharing;
+			if (feed != null)
+			{
+				feed.Sharing = sharingReader.Sharing;
+			}
 
 			return feed;
 		}

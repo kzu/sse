@@ -130,6 +130,7 @@
       <Link>Guard.cs</Link>
     </Compile>
     <Compile Include="CompoundRepositoryFixture.cs" />
+    <Compile Include="ItemEventArgsFixture.cs" />
     <Compile Include="Mocks\MockRepository.cs" />
     <Compile Include="Mocks\MockXmlItem.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -137,7 +138,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SyncEngine2Fixture.cs" />
+    <Compile Include="RepositoryFixture.cs" />
+    <Compile Include="SupportInitializeFixture.cs" />
+    <Compile Include="SyncEngineFixture.cs" />
     <Compile Include="SyncRepositoryFixture.cs" />
     <Compile Include="XmlRepositoryFixture.cs" />
   </ItemGroup>
