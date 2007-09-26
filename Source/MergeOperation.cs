@@ -9,6 +9,7 @@ namespace SimpleSharing
 		Added,
 		Updated, 
 		Conflict,
+		Removed,
 		None
 	}
 }
