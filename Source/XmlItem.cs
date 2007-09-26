@@ -93,14 +93,12 @@ namespace SimpleSharing
 
         public override int GetHashCode()
         {
-            int hash = id.GetHashCode();
-            if (title != null)
-                hash = hash ^ title.GetHashCode();
-            if (description != null)
-                hash = hash ^ description.GetHashCode();
-            hash = hash ^ payload.OuterXml.GetHashCode();
+			string resultingPayload = id.ToString() +
+				((title != null) ? title : "") +
+				((description != null) ? description : "") +
+				payload.OuterXml;
 
-            return hash;
+			return resultingPayload.GetHashCode();
         }
 
         #endregion
