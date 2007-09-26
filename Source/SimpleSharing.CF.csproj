@@ -109,11 +109,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Repository.cs" />
     <Compile Include="RssDateTime.cs" />
     <Compile Include="RssFeedReader.cs" />
     <Compile Include="RssFeedWriter.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SerializerXmlItem.cs" />
+    <Compile Include="SupportInitialize.cs" />
     <Compile Include="SyncEngine.cs" />
     <Compile Include="Timestamp.cs" />
     <Compile Include="XmlItem.cs" />
