@@ -126,5 +126,7 @@ namespace SimpleSharing.Tests
 
 			Assert.AreEqual(now, repo.GetLastSync("foo"));
 		}
+
+		
 	}
 }

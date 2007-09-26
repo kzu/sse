@@ -107,11 +107,13 @@ namespace SimpleSharing.Tests
 
             repo.Save(s);
 
-            s.ItemHash = "hash";
-            repo.Save(s);
+			Sync s1 = s.Update("me", DateTime.Now, false);
+			s1.ItemHash = "New Hash";
+            repo.Save(s1);
 
-            int count = CountSyncRecords(s.Id);
-            Assert.AreEqual(1, count);
+			Sync s2 = repo.Get(s.Id);
+
+            Assert.AreEqual("New Hash", s2.ItemHash);
         }
 
         private int CountSyncRecords(string syncId)

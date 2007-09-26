@@ -127,12 +127,6 @@
     <Compile Include="XmlRepositoryFixture.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Source\SimpleSharing.csproj">
-      <Project>{5A747B6C-D230-4D59-9321-83B48C4553CF}</Project>
-      <Name>SimpleSharing</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +151,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Source\SimpleSharing.csproj">
+      <Project>{5A747B6C-D230-4D59-9321-83B48C4553CF}</Project>
+      <Name>SimpleSharing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
 </Project>

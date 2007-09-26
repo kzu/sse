@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+#if PocketPC
+using Microsoft.Practices.Mobile.TestTools.UnitTesting;
+#else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#endif
 using System.ComponentModel;
 
 namespace SimpleSharing.Tests
