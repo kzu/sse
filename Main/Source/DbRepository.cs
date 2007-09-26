@@ -77,7 +77,10 @@ namespace SimpleSharing
 			{
 				cmd.Connection = conn;
 				conn.Open();
-				return cmd.ExecuteNonQuery();
+				int count = cmd.ExecuteNonQuery();
+				conn.Close();
+
+				return count;
 			}
 #endif
 		}
@@ -92,8 +95,12 @@ namespace SimpleSharing
 			{
 				command.Connection = conn;
 				conn.Open();
-				return command.ExecuteNonQuery();
+				int count = command.ExecuteNonQuery();
+				conn.Close();
+
+				return count;
 			}
+
 #endif
 		}
 
@@ -121,6 +128,7 @@ namespace SimpleSharing
 			{
 				conn.Open();
 				handler(conn);
+				conn.Close();
 			}
 #endif
 		}

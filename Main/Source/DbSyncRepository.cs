@@ -48,8 +48,6 @@ namespace SimpleSharing
 
 		public void Save(Sync sync)
 		{
-			Guard.ArgumentNotNull(sync.ItemHash, "sync.ItemHash");
-
 			string data = Write(sync);
 
 			ExecuteDb(delegate(DbConnection conn)
@@ -59,31 +57,34 @@ namespace SimpleSharing
 					int count;
 					using (DbCommand cmd = conn.CreateCommand())
 					{
+						object itemHash = DBNull.Value;
+						if (sync.ItemHash != null)
+							itemHash = sync.ItemHash.ToString();
+
 						if (sync.LastUpdate != null && sync.LastUpdate.When.HasValue)
 						{
 							cmd.CommandText = FormatSql(
 								"UPDATE [{0}] " +
-								"SET Sync = {2}, ItemHash = {3}, LastUpdate = '" 
-								+ sync.LastUpdate.When.Value.ToString("yyyy-MM-dd HH:mm:ss") + "'" +  //Hack: Date/Time problems with Access
-								" WHERE Id = {1}", "Sync", "id", "sync", "hash");
-								
+								"SET Sync = {2}, ItemHash = {3}, LastUpdate = {4} " +
+								"WHERE Id = {1}", "Sync", "id", "sync", "itemHash", "lastUpdate");
+
 							count = ExecuteNonQuery(cmd,
-								//CreateParameter("lastupd", DbType.DateTime, 0, Timestamp.Normalize(sync.LastUpdate.When.Value) ),
+								CreateParameter("lastUpdate", DbType.String, 50, Timestamp.Normalize(sync.LastUpdate.When.Value).ToString()),
 								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
-								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
+								CreateParameter("itemHash", DbType.String, 254, itemHash));
 						}
 						else
 						{
 							cmd.CommandText = FormatSql(
 								"UPDATE [{0}] " +
 								"SET Sync = {2}, [ItemHash] = {3} " +
-								"WHERE Id = {1}", "Sync", "id", "sync", "hash");
+								"WHERE Id = {1}", "Sync", "id", "sync", "itemHash");
 
 							count = ExecuteNonQuery(cmd,
 								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
-								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
+								CreateParameter("itemHash", DbType.String, 254, itemHash));
 						}
 					}
 					if (count == 0)
@@ -92,12 +93,12 @@ namespace SimpleSharing
 						{
 							cmd.CommandText = FormatSql(
 								"INSERT INTO [{0}] (Id, Sync, [ItemHash]) " +
-								"VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "hash");
+								"VALUES ({1}, {2}, {3})", "Sync", "id", "sync", "itemHash");
 
 							ExecuteNonQuery(cmd,
 								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
-								CreateParameter("hash", DbType.String, 254, sync.ItemHash.ToString()));
+								CreateParameter("itemHash", DbType.String, 254, sync.ItemHash.ToString()));
 						}
 					}
 					transaction.Commit();

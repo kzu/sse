@@ -30,7 +30,7 @@ namespace SimpleSharing
 				cmd.Connection = cn;
 				cmd.CommandText = FormatSql(@"
 						CREATE TABLE [{0}](
-							[Id] TEXT NOT NULL PRIMARY KEY,
+							[Id] TEXT (254) NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL,
                             [LastUpdate] DATETIME NULL, 
 							[ItemHash] TEXT NOT NULL
