@@ -24,15 +24,19 @@ namespace SimpleSharing.Tests
 		[TestInitialize]
 		public override void Initialize()
 		{
-			database = new GenericDatabase(
-				"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Access2007.accdb;Persist Security Info=False",
-				DbProviderFactories.GetFactory("System.Data.OleDb"));
-			Cleanup();
+			GenericDbFactory factory = new GenericDbFactory();
+			factory = new GenericDbFactory();
+			factory.ConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=Access2007.accdb;Persist Security Info=False";
+			factory.ProviderName = "System.Data.OleDb";
+
+			this.databaseFactory = factory;
 		}
 
 		[TestCleanup]
-		public override void Cleanup()
+		public void Cleanup()
 		{
+			Database database = this.databaseFactory.CreateDatabase();
+
 			using (DbConnection cn = database.CreateConnection())
 			{
 				cn.Open();
@@ -78,9 +82,15 @@ namespace SimpleSharing.Tests
 			}
 		}
 
-		protected override ISyncRepository CreateRepository(Database database, string repositoryId)
+		protected override DbSyncRepository CreateRepository(DbFactory databaseFactory, string repositoryId)
 		{
-			return new AccessSyncRepository(database, repositoryId);
+			DbSyncRepository repo = new AccessSyncRepository();
+			repo.DatabaseFactory = databaseFactory;
+			repo.RepositoryId = repositoryId;
+
+			repo.Initialize();
+
+			return repo;
 		}
 	}
 }

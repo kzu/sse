@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data.Common;
 using System.Data;
+using System.Reflection;
 
 #if !PocketPC
 using Microsoft.Practices.EnterpriseLibrary.Data;
@@ -15,32 +16,44 @@ namespace SimpleSharing
 	public abstract class DbRepository
 	{
 		protected delegate void ExecuteDbHandler(DbConnection connection);
+		
 		Database database;
 		bool isInitialized;
+		DbFactory dbFactory;
 
-		protected DbRepository(Database database)
+		protected DbRepository()
 		{
-			this.database = database;
 		}
 
-		protected void Initialize()
+		public void Initialize()
 		{
 			if (isInitialized) throw new InvalidOperationException();
 
+			Guard.ArgumentNotNull(dbFactory, "DatabaseFactory");
+
 			isInitialized = true;
+
+			database = dbFactory.CreateDatabase();
+
 			ExecuteDb(delegate(DbConnection conn)
 			{
 				InitializeSchema(conn);
 			});
 		}
 
-		protected Database Database
+		public Database Database
 		{
 			get
 			{
 				ThrowIfNotInitialized();
 				return database;
 			}
+		}
+
+		public DbFactory DatabaseFactory
+		{
+			get { return dbFactory; }
+			set { dbFactory = value; }
 		}
 
 		private void ThrowIfNotInitialized()

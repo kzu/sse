@@ -81,6 +81,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAll(Predicate<Item> filter)
 		{
+			Guard.ArgumentNotNull(filter, "filter");
+
 			return GetAllImpl(null, filter);
 		}
 

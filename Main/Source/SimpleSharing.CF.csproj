@@ -75,6 +75,7 @@
     <Compile Include="Behaviors\MergeBehavior.cs" />
     <Compile Include="CompoundRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
+    <Compile Include="DbFactory.cs" />
     <Compile Include="DbRepository.cs" />
     <Compile Include="DbSyncRepository.cs" />
     <Compile Include="DeviceAuthor.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="RssFeedWriter.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SerializerXmlItem.cs" />
+    <Compile Include="SqlDbFactory.cs" />
     <Compile Include="SupportInitialize.cs" />
     <Compile Include="SyncEngine.cs" />
     <Compile Include="Timestamp.cs" />
