@@ -23,53 +23,87 @@ namespace SimpleSharing.Tests
 	public class DbSyncRepositoryFixture : SyncRepositoryFixture
 	{
 		private delegate void ExecuteDbHandler(DbConnection connection);
+		private delegate void CleanupHandler(DbSyncRepository repository);
 
-        protected Database database;
-
+        protected DbFactory databaseFactory;
+		protected string dbFile;
+		
 		[TestInitialize]
 		public virtual void Initialize()
 		{
-			if (File.Exists("SyncDb.sdf"))
-				File.Delete("SyncDb.sdf");
+			dbFile = "SyncDb" + Guid.NewGuid() + ".sdf";
+			string connectionString = "Data Source=" + dbFile;
 
-			new SqlCeEngine("Data Source=SyncDb.sdf").CreateDatabase();
+			if (File.Exists(dbFile))
+				File.Delete(dbFile);
+
+			new SqlCeEngine(connectionString).CreateDatabase();
 #if PocketPC
-			this.database = new SqlDatabase("Data Source=SyncDb.sdf");
+
+
+			this.databaseFactory = new SqlDbFactory();
+			this.databaseFactory.ConnectionString = connectionString;
 #else
-			this.database = new SqlCeDatabase("Data Source=SyncDb.sdf");
+			this.databaseFactory = new SqlCeDbFactory();
+			this.databaseFactory.ConnectionString = connectionString;
 #endif
 		}
 
-		[TestCleanup]
-		public virtual void Cleanup()
+		protected virtual void Cleanup(DbSyncRepository repository)
 		{
+			if (repository != null)
+			{
 #if PocketPC
-			database.GetConnection().Close();
+			repository.Database.GetConnection().Close();
 #else
-			((SqlCeDatabase)database).CloseSharedConnection();
+				if(repository.Database is SqlCeDatabase)
+					((SqlCeDatabase)repository.Database).CloseSharedConnection();
 #endif
+			}
 		}
 
-		protected virtual ISyncRepository CreateRepository(Database database, string repositoryId)
+		protected virtual DbSyncRepository CreateRepository(DbFactory databaseFactory, string repositoryId)
 		{
-			return new DbSyncRepository(database, repositoryId);
+			DbSyncRepository repository = new DbSyncRepository();
+			repository.DatabaseFactory = databaseFactory;
+			repository.RepositoryId = repositoryId;
+
+			repository.Initialize();
+
+			return repository;
 		}
 
 		[TestMethod]
 		public void ShouldAllowNullRepositoryId()
 		{
-			CreateRepository(database, null);
+			DbSyncRepository repository = null;
+			try
+			{
+				repository = CreateRepository(databaseFactory, null);
+			}
+			finally
+			{
+				Cleanup(repository);
+			}
 		}
 
 		[TestMethod]
 		public void ShouldAllowEmptyRepositoryId()
 		{
-			CreateRepository(database, "");
+			DbSyncRepository repository = null;
+			try
+			{
+				CreateRepository(databaseFactory, "");
+			}
+			finally
+			{
+				Cleanup(repository);
+			}
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
-		public void ShouldThrowIfNullDatabase()
+		public void ShouldThrowIfNullDatabaseFactory()
 		{
 			CreateRepository(null, "Foo");
 		}
@@ -78,47 +112,75 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldThrowIfNullItemTimestamp()
 		{
-			ISyncRepository repo = CreateRepository(database, "Foo");
-			Sync s = new Sync(Guid.NewGuid().ToString());
+			DbSyncRepository repo = null;
+			try
+			{
+				repo = CreateRepository(databaseFactory, "Foo");
+				Sync s = new Sync(Guid.NewGuid().ToString());
 
-			repo.Save(s);
+				repo.Save(s);
+			}
+			finally
+			{
+				Cleanup(repo);
+			}
 		}
 
         [TestMethod]
         public void ShouldAddSingleSyncItem()
         {
-            ISyncRepository repo = CreateRepository(database, "Foo");
-            Sync s = new Sync(Guid.NewGuid().ToString());
-            s.ItemHash = "hash";
-            
-            repo.Save(s);
+			DbSyncRepository repo = null;
+			try
+			{
+				repo = CreateRepository(databaseFactory, "Foo");
+				Sync s = new Sync(Guid.NewGuid().ToString());
+				s.ItemHash = "hash";
 
-            int count = CountSyncRecords(s.Id);
+				repo.Save(s);
 
-            Assert.AreEqual(1, count);
+				int count = CountSyncRecords(s.Id);
+
+				Assert.AreEqual(1, count);
+			}
+			finally
+			{
+				Cleanup(repo);
+			}
+
+
         }
 
         [TestMethod]
         public void ShouldModifySingleSyncItem()
         {
-            ISyncRepository repo = CreateRepository(database, "Foo");
-            Sync s = new Sync(Guid.NewGuid().ToString());
-            s.ItemHash = "hash";
+			DbSyncRepository repo = null;
+			try
+			{
+				repo = CreateRepository(databaseFactory, "Foo");
+				Sync s = new Sync(Guid.NewGuid().ToString());
+				s.ItemHash = "hash";
 
-            repo.Save(s);
+				repo.Save(s);
 
-			Sync s1 = s.Update("me", DateTime.Now, false);
-			s1.ItemHash = "New Hash";
-            repo.Save(s1);
+				Sync s1 = s.Update("me", DateTime.Now, false);
+				s1.ItemHash = "New Hash";
+				repo.Save(s1);
 
-			Sync s2 = repo.Get(s.Id);
+				Sync s2 = repo.Get(s.Id);
 
-            Assert.AreEqual("New Hash", s2.ItemHash);
+				Assert.AreEqual("New Hash", s2.ItemHash);
+			}
+			finally
+			{
+				Cleanup(repo);
+			}
         }
 
         private int CountSyncRecords(string syncId)
         {
-            DbConnection connection = null;
+			Database database = this.databaseFactory.CreateDatabase();
+
+			DbConnection connection = null;
             try
             {
 #if PocketPC

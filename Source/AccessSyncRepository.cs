@@ -11,13 +11,8 @@ namespace SimpleSharing
 {
 	public class AccessSyncRepository : DbSyncRepository
 	{
-		public AccessSyncRepository(Database database)
-			: base(database)
-		{
-		}
-
-		public AccessSyncRepository(Database database, string repositoryId)
-			: base(database, repositoryId)
+		public AccessSyncRepository() 
+			: base()
 		{
 		}
 
@@ -33,7 +28,7 @@ namespace SimpleSharing
 							[Id] TEXT (254) NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL,
                             [LastUpdate] DATETIME NULL, 
-							[ItemHash] TEXT NOT NULL
+							[ItemHash] TEXT NULL
 						)", "Sync");
 				cmd.ExecuteNonQuery();
 			}

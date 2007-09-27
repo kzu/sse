@@ -19,18 +19,15 @@ namespace SimpleSharing
 		private const string RepositoryPrefix = "SSE_";
 		string repositoryId;
 
-		public DbSyncRepository(Database database)
-			: this(database, null)
+		public DbSyncRepository() 
+			: base()
 		{
 		}
 
-		public DbSyncRepository(Database database, string repositoryId)
-			: base(database)
+		public string RepositoryId
 		{
-			Guard.ArgumentNotNull(database, "database");
-
-			this.repositoryId = repositoryId;
-			Initialize();
+			get { return repositoryId; }
+			set { repositoryId = value; }
 		}
 
 		public Sync Get(string id)
@@ -54,12 +51,14 @@ namespace SimpleSharing
 			{
 				using (DbTransaction transaction = conn.BeginTransaction())
 				{
+					object itemHash = DBNull.Value;
+					if (sync.ItemHash != null)
+						itemHash = sync.ItemHash.ToString();
+
 					int count;
 					using (DbCommand cmd = conn.CreateCommand())
 					{
-						object itemHash = DBNull.Value;
-						if (sync.ItemHash != null)
-							itemHash = sync.ItemHash.ToString();
+						
 
 						if (sync.LastUpdate != null && sync.LastUpdate.When.HasValue)
 						{
@@ -98,7 +97,7 @@ namespace SimpleSharing
 							ExecuteNonQuery(cmd,
 								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
-								CreateParameter("itemHash", DbType.String, 254, sync.ItemHash.ToString()));
+								CreateParameter("itemHash", DbType.String, 254, itemHash));
 						}
 					}
 					transaction.Commit();
@@ -192,7 +191,7 @@ namespace SimpleSharing
 							[Id] NVARCHAR(254) NOT NULL PRIMARY KEY,
 							[Sync] NTEXT NULL, 
                             [LastUpdate] DATETIME NULL,
-							[ItemHash] NVARCHAR(254) NOT NULL
+							[ItemHash] NVARCHAR(254) NULL
 						)", "Sync"));
 			}
 
