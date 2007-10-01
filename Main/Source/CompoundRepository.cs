@@ -15,6 +15,13 @@ namespace SimpleSharing
 		ISyncRepository syncRepo;
 
 		/// <summary>
+		/// Default constructor
+		/// </summary>
+		public CompoundRepository()
+		{
+		}
+
+		/// <summary>
 		/// Initializes the repository with the two split repositories.
 		/// </summary>
 		/// <param name="xmlRepo">Repository for the actual entity data.</param>
@@ -32,12 +39,20 @@ namespace SimpleSharing
 		/// <summary>
 		/// Gets the repository for the actual entity data.
 		/// </summary>
-		public IXmlRepository XmlRepository { get { return xmlRepo; } }
+		public IXmlRepository XmlRepository 
+		{ 
+			get { return xmlRepo; }
+			set { xmlRepo = value; }
+		}
 
 		/// <summary>
 		/// Gets the repository for the SSE metadata.
 		/// </summary>
-		public ISyncRepository SyncRepository { get { return syncRepo; } }
+		public ISyncRepository SyncRepository 
+		{ 
+			get { return syncRepo; }
+			set { syncRepo = value; }
+		}
 
 		/// <summary>
 		/// Returns <see langword="false"/> as this repository does not provide its own 

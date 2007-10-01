@@ -25,7 +25,7 @@ namespace SimpleSharing
 		{
 		}
 
-		public void Initialize()
+		public virtual void Initialize()
 		{
 			if (isInitialized) throw new InvalidOperationException();
 
