@@ -27,9 +27,9 @@ namespace SimpleSharing.Adapters.MSLive.Properties {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
         [global::System.Configuration.DefaultSettingValueAttribute("http://sse.mslivelabs.com/service/managefeed.asmx")]
-        public string MSLiveAdapter_com_mslivelabs_sse_ManageFeed {
+        public string FeedManagementUrl {
             get {
-                return ((string)(this["MSLiveAdapter_com_mslivelabs_sse_ManageFeed"]));
+                return ((string)(this["FeedManagementUrl"]));
             }
         }
     }
