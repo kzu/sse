@@ -76,8 +76,13 @@
     <Compile Include="CompoundRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbFactory.cs" />
-    <Compile Include="DbRepository.cs" />
-    <Compile Include="DbSyncRepository.cs" />
+    <Compile Include="DbFactory.XamlBinding.cs" />
+    <Compile Include="DbRepository.cs">
+    </Compile>
+    <Compile Include="DbRepository.XamlBinding.cs" />
+    <Compile Include="DbSyncRepository.cs">
+    </Compile>
+    <Compile Include="DbSyncRepository.XamlBinding.cs" />
     <Compile Include="DeviceAuthor.cs" />
     <Compile Include="DynamicXmlItem.cs" />
     <Compile Include="FeedReader.cs" />

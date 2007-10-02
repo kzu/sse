@@ -11,20 +11,28 @@ using Microsoft.Practices.Mobile.DataAccess;
 
 namespace SimpleSharing
 {
-	public abstract class DbFactory
+	public abstract partial class DbFactory
 	{
 		string connectionString;
 
 		public DbFactory()
 		{
+
 		}
 
 		public string ConnectionString
 		{
 			get { return connectionString; }
-			set { connectionString = value; }
+			set { connectionString = value; RaiseConnectionStringChanged(); }
 		}
 
 		public abstract Database CreateDatabase();
+
+		// TODO: XamlBinding - Implement instance validation here
+		private void DoValidate()
+		{
+			if (String.IsNullOrEmpty(connectionString))
+				throw new ArgumentNullException("ConnectionString", Properties.Resources.UnitializedConnectionString);
+		}
 	}
 }

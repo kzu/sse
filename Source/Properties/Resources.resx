@@ -159,4 +159,10 @@
   <data name="UninitializedRepository" xml:space="preserve">
     <value>The Initialize method has not been called on the repository.</value>
   </data>
+  <data name="UnitializedConnectionString" xml:space="preserve">
+    <value>The connection string has not been set for the adapter</value>
+  </data>
+  <data name="UnitializedDbFactory" xml:space="preserve">
+    <value>A Database factory has not been set for this repository</value>
+  </data>
 </root>

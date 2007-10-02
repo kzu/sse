@@ -13,53 +13,35 @@ using Microsoft.Practices.Mobile.DataAccess;
 
 namespace SimpleSharing
 {
-	public abstract class DbRepository
+	public abstract partial class DbRepository
 	{
 		protected delegate void ExecuteDbHandler(DbConnection connection);
 		
 		Database database;
-		bool isInitialized;
 		DbFactory dbFactory;
 
 		protected DbRepository()
 		{
 		}
 
-		public virtual void Initialize()
-		{
-			if (isInitialized) throw new InvalidOperationException();
-
-			Guard.ArgumentNotNull(dbFactory, "DatabaseFactory");
-
-			isInitialized = true;
-
-			database = dbFactory.CreateDatabase();
-
-			ExecuteDb(delegate(DbConnection conn)
-			{
-				InitializeSchema(conn);
-			});
-		}
-
 		public Database Database
 		{
 			get
 			{
-				ThrowIfNotInitialized();
 				return database;
 			}
 		}
 
+
 		public DbFactory DatabaseFactory
 		{
 			get { return dbFactory; }
-			set { dbFactory = value; }
-		}
-
-		private void ThrowIfNotInitialized()
-		{
-			if (!isInitialized)
-				throw new InvalidOperationException(Properties.Resources.UninitializedRepository);
+			set 
+			{ 
+				dbFactory = value;
+				database = value.CreateDatabase();
+				RaiseDatabaseFactoryChanged(); 
+			}
 		}
 
 		protected DbDataReader ExecuteReader(string sqlCommand, params DbParameter[] parameters)
@@ -146,8 +128,6 @@ namespace SimpleSharing
 #endif
 		}
 
-		protected abstract void InitializeSchema(DbConnection openedConnection);
-
 		/// <summary>
 		/// Checks if the given table exist.
 		/// </summary>
@@ -188,6 +168,13 @@ namespace SimpleSharing
 				}
 			}
 #endif
+		}
+
+		// TODO: XamlBinding - Implement instance validation here
+		private void DoValidate()
+		{
+			if (dbFactory == null)
+				throw new ArgumentNullException("DatabaseFactory", Properties.Resources.UnitializedDbFactory);
 		}
 	}
 }

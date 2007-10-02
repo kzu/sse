@@ -66,9 +66,33 @@
     <Compile Include="AccessSyncRepository.cs" />
     <Compile Include="CompoundRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
-    <Compile Include="DbFactory.cs" />
-    <Compile Include="DbRepository.cs" />
-    <Compile Include="DbSyncRepository.cs" />
+    <Compile Include="DbFactory.cs">
+      <Generator>XamlBinding</Generator>
+      <LastGenOutput>DbFactory.XamlBinding.cs</LastGenOutput>
+    </Compile>
+    <Compile Include="DbFactory.XamlBinding.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DbFactory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DbRepository.cs">
+      <Generator>XamlBinding</Generator>
+      <LastGenOutput>DbRepository.XamlBinding.cs</LastGenOutput>
+    </Compile>
+    <Compile Include="DbRepository.XamlBinding.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DbRepository.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DbSyncRepository.cs">
+      <Generator>XamlBinding</Generator>
+      <LastGenOutput>DbSyncRepository.XamlBinding.cs</LastGenOutput>
+    </Compile>
+    <Compile Include="DbSyncRepository.XamlBinding.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DbSyncRepository.cs</DependentUpon>
+    </Compile>
     <Compile Include="FeedReader.cs">
       <SubType>Code</SubType>
     </Compile>
