@@ -41,10 +41,6 @@ namespace SimpleSharing.Adapters.MSLive
         
         public event EventHandler TimeoutSecondsChanged;
         
-        public event EventHandler SupportsMergeChanged;
-        
-        public event EventHandler FriendlyNameChanged;
-        
         private void Initialize()
         {
             ISupportInitialize init = ((ISupportInitialize)(this));
@@ -147,22 +143,6 @@ namespace SimpleSharing.Adapters.MSLive
             if ((this.TimeoutSecondsChanged != null))
             {
                 this.TimeoutSecondsChanged(this, EventArgs.Empty);
-            }
-        }
-        
-        private void RaiseSupportsMergeChanged()
-        {
-            if ((this.SupportsMergeChanged != null))
-            {
-                this.SupportsMergeChanged(this, EventArgs.Empty);
-            }
-        }
-        
-        private void RaiseFriendlyNameChanged()
-        {
-            if ((this.FriendlyNameChanged != null))
-            {
-                this.FriendlyNameChanged(this, EventArgs.Empty);
             }
         }
     }

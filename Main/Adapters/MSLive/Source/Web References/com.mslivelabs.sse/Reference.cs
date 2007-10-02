@@ -77,7 +77,7 @@ namespace SimpleSharing.Adapters.MSLive.com.mslivelabs.sse {
         
         /// <remarks/>
         public ManageFeed() {
-            this.Url = global::SimpleSharing.Adapters.MSLive.Properties.Settings.Default.MSLiveAdapter_com_mslivelabs_sse_ManageFeed;
+            this.Url = global::SimpleSharing.Adapters.MSLive.Properties.Settings.Default.FeedManagementUrl;
             if ((this.IsLocalFileSystemWebService(this.Url) == true)) {
                 this.UseDefaultCredentials = true;
                 this.useDefaultCredentialsSetExplicitly = false;

@@ -239,5 +239,61 @@ namespace SimpleSharing.Adapters.MSLive.Tests
 			Assert.AreEqual("NoChanges", items[item2.Sync.Id].XmlItem.Title);
 			Assert.AreEqual("New", items[item3.Sync.Id].XmlItem.Title);
 		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedAdd()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.Add(new Item(new MockXmlItem(), new Sync(Guid.NewGuid().ToString())));
+		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedGet()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.Get(Guid.NewGuid().ToString());
+		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedGetAll()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.GetAll();
+		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedGetAllSince()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.GetAllSince(DateTime.Now);
+		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedGetConflicts()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.GetConflicts();
+		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedMerge()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.Merge(new Item[0]);
+		}
+
+		[ExpectedException(typeof(InvalidOperationException))]
+		[TestMethod]
+		public void ShouldThrowNotInitializedUpdate()
+		{
+			MSLiveRepository repo = new MSLiveRepository();
+			repo.Update(new Item(new MockXmlItem(), new Sync("foo")));
+		}
 	}
 }

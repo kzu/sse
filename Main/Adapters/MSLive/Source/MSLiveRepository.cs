@@ -6,10 +6,16 @@ using System.Net;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
+using System.ComponentModel;
+using Microsoft.Practices.EnterpriseLibrary.Validation;
+using Microsoft.Practices.EnterpriseLibrary.Validation.Validators;
 
 namespace SimpleSharing.Adapters.MSLive
 {
-	public class MSLiveRepository : Repository
+	/// <summary>
+	/// Repository that exposes the SSE service on MSLiveLabs.
+	/// </summary>
+	public partial class MSLiveRepository : Repository
 	{
 		TraceSource trace = new TraceSource(typeof(MSLiveRepository).Namespace, SourceLevels.Error);
 		Uri feedUrl;
@@ -26,24 +32,49 @@ namespace SimpleSharing.Adapters.MSLive
 			Guard.ArgumentNotNullOrEmptyString(feedUrl, "feedUrl");
 
 			this.feedUrl = new Uri(feedUrl);
+
+			Initialize();
 		}
 
+		/// <summary>
+		/// Parameterless constructor used for XAML serialization.
+		/// </summary>
+		public MSLiveRepository()
+		{
+		}
+
+		/// <summary>
+		/// Gets/Sets the <see cref="Uri"/> of the feed.
+		/// </summary>
+		[NotNullValidator]
+		public Uri FeedUrl
+		{
+			get { return feedUrl; }
+			set { feedUrl = value; RaiseFeedUrlChanged(); }
+		}
+
+		/// <summary>
+		/// Gets/Sets the timeout in seconds for the network connection 
+		/// to the service.
+		/// </summary>
 		public int TimeoutSeconds
 		{
 			get { return timeoutSeconds; }
-			set { timeoutSeconds = value; }
+			set { timeoutSeconds = value; RaiseTimeoutSecondsChanged(); }
 		}
 
 		public override bool SupportsMerge
 		{
-			get { return true; }
+			get { return true; } 
 		}
 
 		public override Item Get(string id)
 		{
+			EnsureValid();
+
 			Uri itemUri = new Uri(feedUrl.ToString() + "&item=" + id);
 			trace.TraceInformation("Retrieving single item from url: " + itemUri.ToString());
-			
+
 			MSLiveRequest req = new MSLiveRequest(itemUri);
 			try
 			{
@@ -63,7 +94,7 @@ namespace SimpleSharing.Adapters.MSLive
 			catch (WebException wex)
 			{
 				HttpWebResponse resp = wex.Response as HttpWebResponse;
-				if (resp.StatusCode == HttpStatusCode.NotFound)
+				if (resp != null && resp.StatusCode == HttpStatusCode.NotFound)
 				{
 					trace.TraceInformation("Item with id " + id + " not found");
 					return null;
@@ -79,6 +110,7 @@ namespace SimpleSharing.Adapters.MSLive
 		public override IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
+			EnsureValid();
 
 			Stream response = GetResponse(since);
 
@@ -103,6 +135,8 @@ namespace SimpleSharing.Adapters.MSLive
 
 		public override void Update(Item item)
 		{
+			EnsureValid();
+
 			MSLiveRequest req = new MSLiveRequest(feedUrl);
 			req.Method = "POST";
 			using (Stream s = req.GetRequestStream())
@@ -113,11 +147,13 @@ namespace SimpleSharing.Adapters.MSLive
 			}
 
 			// Commit change.
-			req.GetResponse().Close();			
+			req.GetResponse().Close();
 		}
 
 		public override IEnumerable<Item> Merge(IEnumerable<Item> items)
 		{
+			EnsureValid();
+
 			bool publishedItems = false;
 			XmlWriterSettings fragmentSettings = new XmlWriterSettings();
 			fragmentSettings.ConformanceLevel = ConformanceLevel.Fragment;
@@ -182,6 +218,12 @@ namespace SimpleSharing.Adapters.MSLive
 			{
 				disposable.Dispose();
 			}
+		}
+
+		// TODO: XamlBinding - Implement instance validation here
+		private void DoValidate()
+		{
+			Validation.ValidateThrow(this);
 		}
 	}
 }
