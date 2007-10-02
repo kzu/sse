@@ -15,6 +15,7 @@ using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
 using Microsoft.Practices.EnterpriseLibrary.Data.Sql;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using System.Data;
+using System.ComponentModel;
 
 namespace SimpleSharing.Tests
 {
@@ -88,7 +89,8 @@ namespace SimpleSharing.Tests
 			repo.DatabaseFactory = databaseFactory;
 			repo.RepositoryId = repositoryId;
 
-			repo.Initialize();
+			((ISupportInitialize)repo).BeginInit();
+			((ISupportInitialize)repo).EndInit();
 
 			return repo;
 		}

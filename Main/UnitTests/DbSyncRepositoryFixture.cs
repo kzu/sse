@@ -16,6 +16,7 @@ using System.IO;
 using System.Data.Common;
 
 using System.Data;
+using System.ComponentModel;
 
 namespace SimpleSharing.Tests
 {
@@ -68,7 +69,8 @@ namespace SimpleSharing.Tests
 			repository.DatabaseFactory = databaseFactory;
 			repository.RepositoryId = repositoryId;
 
-			repository.Initialize();
+			((ISupportInitialize)repository).BeginInit();
+			((ISupportInitialize)repository).EndInit();
 
 			return repository;
 		}

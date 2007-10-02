@@ -14,7 +14,7 @@ using System.Globalization;
 
 namespace SimpleSharing
 {
-	public class DbSyncRepository : DbRepository, ISyncRepository
+	public partial class DbSyncRepository : DbRepository, ISyncRepository
 	{
 		private const string RepositoryPrefix = "SSE_";
 		string repositoryId;
@@ -27,11 +27,13 @@ namespace SimpleSharing
 		public string RepositoryId
 		{
 			get { return repositoryId; }
-			set { repositoryId = value; }
+			set { repositoryId = value; RaiseRepositoryIdChanged(); }
 		}
 
 		public Sync Get(string id)
 		{
+			EnsureValid();
+
 			using (DbDataReader reader = ExecuteReader(
 				FormatSql(@"SELECT * FROM [{0}] WHERE Id = {1}", "Sync", "id"),
 				CreateParameter("id", DbType.String, 254, id)))
@@ -45,6 +47,8 @@ namespace SimpleSharing
 
 		public void Save(Sync sync)
 		{
+			EnsureValid();
+
 			string data = Write(sync);
 
 			ExecuteDb(delegate(DbConnection conn)
@@ -107,6 +111,8 @@ namespace SimpleSharing
 
 		public DateTime? GetLastSync(string feed)
 		{
+			EnsureValid();
+
 			using (DbDataReader reader = ExecuteReader(
 				FormatSql(@"SELECT LastSync FROM [{0}] WHERE Feed = {1}", "LastSync", "feed"),
 				CreateParameter("feed", DbType.String, 1000, feed)))
@@ -120,6 +126,8 @@ namespace SimpleSharing
 
 		public void SetLastSync(string feed, DateTime date)
 		{
+			EnsureValid();
+
 			ExecuteDb(delegate(DbConnection conn)
 			{
 				using (DbTransaction transaction = conn.BeginTransaction())
@@ -151,6 +159,8 @@ namespace SimpleSharing
 
 		public IEnumerable<Sync> GetAll()
 		{
+			EnsureValid();
+
 			using (DbDataReader reader = ExecuteReader(FormatSql("SELECT * FROM [{0}]", "Sync")))
 			{
 				while (reader.Read())
@@ -162,6 +172,8 @@ namespace SimpleSharing
 
 		public IEnumerable<Sync> GetConflicts()
 		{
+			EnsureValid();
+
 			// TODO: sub-optimal.
 			foreach (Sync sync in GetAll())
 			{
@@ -182,7 +194,7 @@ namespace SimpleSharing
 			return sync;
 		}
 
-		protected override void InitializeSchema(DbConnection cn)
+		protected virtual void InitializeSchema(DbConnection cn)
 		{
 			if (!TableExists(cn, FormatTableName(repositoryId, "Sync")))
 			{
@@ -243,6 +255,15 @@ namespace SimpleSharing
 				new RssFeedWriter(xw).WriteSync(sync);
 			}
 			return sw.ToString();
+		}
+
+		// TODO: XamlBinding - Implement instance validation here
+		private void DoValidate()
+		{
+			ExecuteDb(delegate(DbConnection cn)
+			{
+				InitializeSchema(cn);
+			});
 		}
 	}
 }
