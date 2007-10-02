@@ -9,7 +9,7 @@ namespace SimpleSharing
 	/// Base implementation of <see cref="IRepository"/> that provides support for 
 	/// <see cref="ISupportInitialize"/> for XAML-friendly serialization and validation.
 	/// </summary>
-	public abstract class Repository : SupportInitialize, IRepository
+	public abstract class Repository : IRepository
 	{
 		/// <summary>
 		/// See <see cref="IRepository.SupportsMerge"/>.

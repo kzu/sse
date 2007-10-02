@@ -98,7 +98,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RepositoryFixture.cs" />
-    <Compile Include="SupportInitializeFixture.cs" />
     <Compile Include="SyncEngineFixture.cs">
       <SubType>Code</SubType>
     </Compile>
