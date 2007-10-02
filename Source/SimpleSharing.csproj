@@ -101,7 +101,6 @@
     <Compile Include="SerializerXmlItem.cs" />
     <Compile Include="SqlCeDbFactory.cs" />
     <Compile Include="SqlDbFactory.cs" />
-    <Compile Include="SupportInitialize.cs" />
     <Compile Include="Timestamp.cs" />
     <Compile Include="XmlNamespaceFilteringReader.cs" />
     <Compile Include="XmlItem.cs" />

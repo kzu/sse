@@ -117,7 +117,6 @@
     <Compile Include="Schema.cs" />
     <Compile Include="SerializerXmlItem.cs" />
     <Compile Include="SqlDbFactory.cs" />
-    <Compile Include="SupportInitialize.cs" />
     <Compile Include="SyncEngine.cs" />
     <Compile Include="Timestamp.cs" />
     <Compile Include="XmlItem.cs" />
