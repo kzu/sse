@@ -202,5 +202,23 @@ namespace SimpleSharing.Properties {
                 return ResourceManager.GetString("UnitializedDbFactory", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An SyncRepository has not been set for this repository.
+        /// </summary>
+        internal static string UnitializedSyncRepository {
+            get {
+                return ResourceManager.GetString("UnitializedSyncRepository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An XmlRepository has not been set for this repository.
+        /// </summary>
+        internal static string UnitializedXmlRepository {
+            get {
+                return ResourceManager.GetString("UnitializedXmlRepository", resourceCulture);
+            }
+        }
     }
 }

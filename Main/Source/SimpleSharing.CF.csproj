@@ -74,6 +74,7 @@
     <Compile Include="Behaviors\Behaviors.cs" />
     <Compile Include="Behaviors\MergeBehavior.cs" />
     <Compile Include="CompoundRepository.cs" />
+    <Compile Include="CompoundRepository.XamlBinding.cs" />
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbFactory.cs" />
     <Compile Include="DbFactory.XamlBinding.cs" />

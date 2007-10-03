@@ -165,4 +165,10 @@
   <data name="UnitializedDbFactory" xml:space="preserve">
     <value>A Database factory has not been set for this repository</value>
   </data>
+  <data name="UnitializedSyncRepository" xml:space="preserve">
+    <value>An SyncRepository has not been set for this repository</value>
+  </data>
+  <data name="UnitializedXmlRepository" xml:space="preserve">
+    <value>An XmlRepository has not been set for this repository</value>
+  </data>
 </root>
