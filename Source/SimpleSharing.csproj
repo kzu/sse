@@ -64,7 +64,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AccessSyncRepository.cs" />
-    <Compile Include="CompoundRepository.cs" />
+    <Compile Include="CompoundRepository.cs">
+      <Generator>XamlBinding</Generator>
+      <LastGenOutput>CompoundRepository.XamlBinding.cs</LastGenOutput>
+    </Compile>
+    <Compile Include="CompoundRepository.XamlBinding.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CompoundRepository.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbFactory.cs">
       <Generator>XamlBinding</Generator>

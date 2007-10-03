@@ -9,7 +9,7 @@ namespace SimpleSharing
 	/// the actual data, and an <see cref="ISyncRepository"/> containing the SSE metadata.
 	/// </summary>
 	[Obsolete("Use IRepository interface directly")]
-	public class CompoundRepository : IRepository
+	public partial class CompoundRepository : IRepository
 	{
 		IXmlRepository xmlRepo;
 		ISyncRepository syncRepo;
@@ -42,7 +42,7 @@ namespace SimpleSharing
 		public IXmlRepository XmlRepository 
 		{ 
 			get { return xmlRepo; }
-			set { xmlRepo = value; }
+			set { xmlRepo = value; RaiseXmlRepositoryChanged(); }
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace SimpleSharing
 		public ISyncRepository SyncRepository 
 		{ 
 			get { return syncRepo; }
-			set { syncRepo = value; }
+			set { syncRepo = value; RaiseSyncRepositoryChanged(); }
 		}
 
 		/// <summary>
@@ -69,6 +69,8 @@ namespace SimpleSharing
 		public Item Get(string id)
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
+
+			EnsureValid();
 
 			Sync sync = syncRepo.Get(id);
 			IXmlItem xml = xmlRepo.Get(id);
@@ -88,6 +90,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAll()
 		{
+			EnsureValid();
+
 			return GetAllImpl(null, NullFilter);
 		}
 
@@ -98,6 +102,8 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
+			EnsureValid();
+
 			return GetAllImpl(null, filter);
 		}
 
@@ -106,6 +112,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since)
 		{
+			EnsureValid();
+
 			return GetAllImpl(since, NullFilter);
 		}
 
@@ -114,6 +122,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
 		{
+			EnsureValid();
+
 			return GetAllImpl(since, filter);
 		}
 
@@ -125,6 +135,8 @@ namespace SimpleSharing
 		private IEnumerable<Item> GetAllImpl(DateTime? since, Predicate<Item> filter)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
+
+			EnsureValid();
 
 			// Search deleted items.
 			// TODO: Is there a better way than iterating every sync?
@@ -222,6 +234,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetConflicts()
 		{
+			EnsureValid();
+
 			foreach (Sync sync in syncRepo.GetConflicts())
 			{
 				IXmlItem item = xmlRepo.Get(sync.Id);
@@ -252,6 +266,8 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(item, "item");
 
+			EnsureValid();
+
 			if (!item.Sync.Deleted)
 			{
 				xmlRepo.Add(item.XmlItem);
@@ -269,6 +285,8 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
+			EnsureValid();
+
 			xmlRepo.Remove(id);
 			Sync sync = syncRepo.Get(id);
 			if (sync != null)
@@ -284,6 +302,8 @@ namespace SimpleSharing
 		public void Update(Item item)
 		{
 			Guard.ArgumentNotNull(item, "item");
+
+			EnsureValid();
 
 			if (item.Sync.Deleted)
 			{
@@ -305,6 +325,8 @@ namespace SimpleSharing
 		public void Update(Item item, bool resolveConflicts)
 		{
 			Guard.ArgumentNotNull(item, "item");
+
+			EnsureValid();
 
 			if (resolveConflicts)
 			{
@@ -388,6 +410,16 @@ namespace SimpleSharing
 				return true;
 			else
 				return sync.LastUpdate.When.Value >= since;
+		}
+
+		// TODO: XamlBinding - Implement instance validation here
+		private void DoValidate()
+		{
+			if (xmlRepo == null)
+				throw new ArgumentNullException("XmlRepository", Properties.Resources.UnitializedXmlRepository);
+
+			if (syncRepo == null)
+				throw new ArgumentNullException("SyncRepository", Properties.Resources.UnitializedSyncRepository);
 		}
 	}
 }
