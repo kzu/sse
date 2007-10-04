@@ -51,7 +51,7 @@ namespace SimpleSharing.Tests
 
 			foreach (Item i in Items.Values)
 			{
-				if ((i.Sync.LastUpdate.When == null || i.Sync.LastUpdate.When >= since)
+				if ((since == null || i.Sync.LastUpdate.When == null || i.Sync.LastUpdate.When >= since)
 					&& filter(i))
 					yield return i.Clone();
 			}

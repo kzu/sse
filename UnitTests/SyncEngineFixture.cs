@@ -263,9 +263,9 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, left.Items.Count);
 			Assert.AreEqual(2, right.Items.Count);
 
-			Assert.AreEqual(1, received);
-			// Sends the item that was imported plus the existing local one.
-			Assert.AreEqual(2, sent);
+			// Receives the item that was sent first plus the existing remote one.
+			Assert.AreEqual(2, received);
+			Assert.AreEqual(1, sent);
 		}
 
 		[TestMethod]
@@ -304,8 +304,9 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(1, left.Items.Count);
 			// Local item was sent.
 			Assert.AreEqual(2, right.Items.Count);
-
-			Assert.AreEqual(0, received);
+			// We would have received the same item we sent, as we're first 
+			// sending and then receiving.
+			Assert.AreEqual(1, received);
 			Assert.AreEqual(1, sent);
 		}
 

@@ -4,12 +4,13 @@ namespace SimpleSharing
     using System.ComponentModel;
     
     
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("XamlBindingTool", "1.0.0.0")]
     public partial class DbRepository : ISupportInitialize, ISupportInitializeNotification, IChangeTracking, INotifyPropertyChanged
     {
         
         const string InitializationNotBegun = "Initialization has not been started.";
         
-        const string NotInitialized = "The object has not been initialized properly.";
+        const string NotInitialized = "The object has not been initialized properly. Call Initialize prior to use.";
         
         private bool _beginCalled;
         
@@ -17,11 +18,30 @@ namespace SimpleSharing
         
         private bool _isChanged;
         
+        private bool RequiresInitialize
+        {
+            get
+            {
+                return ((((ISupportInitializeNotification)(this)).IsInitialized == false) 
+                            || ((IChangeTracking)(this)).IsChanged);
+            }
+        }
+        
         bool ISupportInitializeNotification.IsInitialized
         {
             get
             {
-                return (this._isInitialized && this.IsChildInitialized(((ISupportInitializeNotification)(this.DatabaseFactory))));
+                return (this._isInitialized && this.AreNestedInitialized);
+            }
+        }
+        
+        ///  <summary>Gets whether the object properties that support <see cref='ISupportInitializeNotification'/> are initialized.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected virtual bool AreNestedInitialized
+        {
+            get
+            {
+                return (true && this.IsValueInitialized(((ISupportInitializeNotification)(this.DatabaseFactory))));
             }
         }
         
@@ -29,23 +49,57 @@ namespace SimpleSharing
         {
             get
             {
-                return (this._isChanged || this.IsChildChanged(((IChangeTracking)(this.DatabaseFactory))));
+                return (this._isChanged || this.HasNestedChanges);
             }
         }
         
+        /// <summary>Gets whether the object properties that support <see cref='IChangeTracking'/> report changes.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected virtual bool HasNestedChanges
+        {
+            get
+            {
+                return (false || this.IsValueChanged(((IChangeTracking)(this.DatabaseFactory))));
+            }
+        }
+        
+        /// <summary>Signals that the object has been initialized.</summary>
         public event EventHandler Initialized;
         
+        /// <summary>Signals that a property has changed.</summary>
         public event PropertyChangedEventHandler PropertyChanged;
         
-        public event EventHandler DatabaseChanged;
-        
+        /// <summary>Signals that the property <see cref='DatabaseFactory'/> has changed.</summary>
         public event EventHandler DatabaseFactoryChanged;
         
-        private void Initialize()
+        /// <summary>Validates object properties and initializes it for use.</summary>
+        public void Initialize()
         {
-            ISupportInitialize init = ((ISupportInitialize)(this));
-            init.BeginInit();
-            init.EndInit();
+            if (this.RequiresInitialize)
+            {
+                this.DoValidate();
+                this._isChanged = false;
+                this.InitializeNested();
+                this.DoInitialize();
+                this._isInitialized = true;
+                if ((this.Initialized != null))
+                {
+                    this.Initialized(this, EventArgs.Empty);
+                }
+            }
+        }
+        
+        /// <summary>Initializes the nested properties that support <see cref='ISupportInitialize'/>.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected virtual void InitializeNested()
+        {
+            ISupportInitialize initializable;
+            initializable = ((ISupportInitialize)(this.DatabaseFactory));
+            if ((initializable != null))
+            {
+                initializable.BeginInit();
+                initializable.EndInit();
+            }
         }
         
         void ISupportInitialize.BeginInit()
@@ -59,15 +113,14 @@ namespace SimpleSharing
             {
                 throw new InvalidOperationException(DbRepository.InitializationNotBegun);
             }
-            this.DoValidate();
-            this._isInitialized = true;
-            if ((this.Initialized != null))
-            {
-                this.Initialized(this, EventArgs.Empty);
-            }
+            this.Initialize();
         }
         
-        private bool IsChildInitialized(ISupportInitializeNotification child)
+        /// <summary>Determines whether the value is null or its 
+        ///				<see cref='ISupportInitializeNotification.IsInitialized'/> is <see langword='true' />.
+        ///				</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected bool IsValueInitialized(ISupportInitializeNotification child)
         {
             return ((child == null) 
                         || child.IsInitialized);
@@ -75,16 +128,21 @@ namespace SimpleSharing
         
         void IChangeTracking.AcceptChanges()
         {
-            this.Validate();
+            this.Initialize();
         }
         
-        private bool IsChildChanged(IChangeTracking child)
+        /// <summary>Determines whether the value is not null and has changed.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected bool IsValueChanged(IChangeTracking value)
         {
-            return ((child != null) 
-                        && child.IsChanged);
+            return ((value != null) 
+                        && value.IsChanged);
         }
         
-        private void RaisePropertyChanged(string property)
+        /// <summary>Raises the <see cref='PropertyChanged'/> event.</summary>
+        ///				  <param name='property'>Name of the property that changed.</param>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected void RaisePropertyChanged(string property)
         {
             if ((this.PropertyChanged != null))
             {
@@ -98,52 +156,23 @@ namespace SimpleSharing
         ///calls to <see cref='ISupportInitialize.BeginInit'/> and 
         ///<see cref='ISupportInitialize.EndInit'/> or the <see cref='Initialize'/> method.
         ///</summary>
-        ///<exception cref='InvalidOperationException'>The object was not initialized 
-        ///using the <see cref='ISupportInitialize'/> methods 
-        ///<see cref='ISupportInitialize.BeginInit'/> and <see cref='ISupportInitialize.EndInit'/> or 
-        ///by calling <see cref='Initialize'/> from the constructor.</exception>
-        private void EnsureValid()
+        ///<exception cref='InvalidOperationException'>The object was not initialized.</exception>
+        protected void EnsureInitialized()
         {
-            if ((this._isInitialized == false))
+            if (this.RequiresInitialize)
             {
                 throw new InvalidOperationException(DbRepository.NotInitialized);
             }
-            if (((IChangeTracking)(this)).IsChanged)
-            {
-                this.Validate();
-            }
         }
         
-        /// <summary>
-        ///Validates the object properties and throws if some are not valid.
-        ///</summary>
-        public virtual void Validate()
-        {
-            try
-            {
-                this.DoValidate();
-                this._isChanged = false;
-            }
-            catch (System.Exception )
-            {
-                throw;
-            }
-        }
-        
-        private void RaiseDatabaseChanged()
-        {
-            if ((this.DatabaseChanged != null))
-            {
-                this.DatabaseChanged(this, EventArgs.Empty);
-            }
-        }
-        
+        /// <summary>Raises the <see cref='DatabaseFactoryChanged'/> event.</summary>
         private void RaiseDatabaseFactoryChanged()
         {
             if ((this.DatabaseFactoryChanged != null))
             {
                 this.DatabaseFactoryChanged(this, EventArgs.Empty);
             }
+            this.RaisePropertyChanged("DatabaseFactory");
         }
     }
 }

@@ -294,7 +294,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldThrowGetAllSinceWithNullFilter()
 		{
-			new CompoundRepository(xmlRepo, syncRepo).GetAllSince(DateTime.Now, null);
+			Count(new CompoundRepository(xmlRepo, syncRepo).GetAllSince(DateTime.Now, null));
 		}
 
 		[TestMethod]

@@ -93,30 +93,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Adapters", "Adapters", "{8A
 		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSLive", "MSLive", "{09C7BAD8-7BAA-4DCC-8701-567E7B208BB0}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-	ProjectSection(FolderStartupServices) = postProject
-		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSLive", "Adapters\MSLive\Source\MSLive.csproj", "{78DF4698-488A-4D66-926C-D29701DA3B0B}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSLive.Tests", "Adapters\MSLive\UnitTests\MSLive.Tests.csproj", "{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 10
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs03.codeplex.com/
 		SccLocalPath0 = .
@@ -148,17 +127,12 @@ Global
 		SccProjectTopLevelParentUniqueName7 = SimpleSharing.sln
 		SccProjectName7 = UnitTests
 		SccLocalPath7 = UnitTests
-		SccProjectUniqueName8 = Adapters\\MSLive\\Source\\MSLive.csproj
-		SccProjectTopLevelParentUniqueName8 = SimpleSharing.sln
-		SccProjectName8 = Adapters/MSLive/Source
-		SccLocalPath8 = Adapters\\MSLive\\Source
-		SccProjectUniqueName9 = Adapters\\MSLive\\UnitTests\\MSLive.Tests.csproj
-		SccProjectTopLevelParentUniqueName9 = SimpleSharing.sln
-		SccProjectName9 = Adapters/MSLive/UnitTests
-		SccLocalPath9 = Adapters\\MSLive\\UnitTests
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SimpleSharing1.vsmdi
+	EndGlobalSection
+	GlobalSection(TextTemplating) = postSolution
+		TextTemplating = 1
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -243,26 +217,6 @@ Global
 		{F3D077E0-0FD6-4914-A55C-3FC14F36276A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F3D077E0-0FD6-4914-A55C-3FC14F36276A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F3D077E0-0FD6-4914-A55C-3FC14F36276A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Release|.NET.ActiveCfg = Release|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{78DF4698-488A-4D66-926C-D29701DA3B0B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Release|.NET.ActiveCfg = Release|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -276,11 +230,5 @@ Global
 		{3385C4E6-0657-48E3-8437-6BF4A51B2315} = {AECE55BB-0B4C-412E-9D3B-2938EB616A73}
 		{1C9AE3CD-C7F3-4A1D-9096-646549157B1A} = {AECE55BB-0B4C-412E-9D3B-2938EB616A73}
 		{EDD25FDB-37FD-4365-B2A8-BE0C6D395BDC} = {AECE55BB-0B4C-412E-9D3B-2938EB616A73}
-		{09C7BAD8-7BAA-4DCC-8701-567E7B208BB0} = {8A09B63E-A938-428A-A806-FCB518472DF3}
-		{78DF4698-488A-4D66-926C-D29701DA3B0B} = {09C7BAD8-7BAA-4DCC-8701-567E7B208BB0}
-		{1EB79CFE-2F2B-4AB5-90D1-20B186AE1B25} = {09C7BAD8-7BAA-4DCC-8701-567E7B208BB0}
-	EndGlobalSection
-	GlobalSection(TextTemplating) = postSolution
-		TextTemplating = 1
 	EndGlobalSection
 EndGlobal

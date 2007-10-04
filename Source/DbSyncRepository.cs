@@ -19,9 +19,19 @@ namespace SimpleSharing
 		private const string RepositoryPrefix = "SSE_";
 		string repositoryId;
 
-		public DbSyncRepository() 
-			: base()
+		public DbSyncRepository()
 		{
+		}
+
+		public DbSyncRepository(DbFactory factory) : base(factory)
+		{
+		}
+
+		public DbSyncRepository(DbFactory factory, string repositoryId) 
+			: base(factory)
+		{
+			this.repositoryId = repositoryId;
+			Initialize();
 		}
 
 		public string RepositoryId
@@ -32,7 +42,7 @@ namespace SimpleSharing
 
 		public Sync Get(string id)
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			using (DbDataReader reader = ExecuteReader(
 				FormatSql(@"SELECT * FROM [{0}] WHERE Id = {1}", "Sync", "id"),
@@ -47,7 +57,7 @@ namespace SimpleSharing
 
 		public void Save(Sync sync)
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			string data = Write(sync);
 
@@ -62,7 +72,7 @@ namespace SimpleSharing
 					int count;
 					using (DbCommand cmd = conn.CreateCommand())
 					{
-						
+
 
 						if (sync.LastUpdate != null && sync.LastUpdate.When.HasValue)
 						{
@@ -111,7 +121,7 @@ namespace SimpleSharing
 
 		public DateTime? GetLastSync(string feed)
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			using (DbDataReader reader = ExecuteReader(
 				FormatSql(@"SELECT LastSync FROM [{0}] WHERE Feed = {1}", "LastSync", "feed"),
@@ -126,7 +136,7 @@ namespace SimpleSharing
 
 		public void SetLastSync(string feed, DateTime date)
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			ExecuteDb(delegate(DbConnection conn)
 			{
@@ -159,7 +169,7 @@ namespace SimpleSharing
 
 		public IEnumerable<Sync> GetAll()
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			using (DbDataReader reader = ExecuteReader(FormatSql("SELECT * FROM [{0}]", "Sync")))
 			{
@@ -172,7 +182,7 @@ namespace SimpleSharing
 
 		public IEnumerable<Sync> GetConflicts()
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			// TODO: sub-optimal.
 			foreach (Sync sync in GetAll())
@@ -258,8 +268,17 @@ namespace SimpleSharing
 		}
 
 		// TODO: XamlBinding - Implement instance validation here
-		private void DoValidate()
+		protected override void DoValidate()
 		{
+			base.DoValidate();
+
+		}
+
+		// TODO: XamlBinding - Implement initialization here
+		protected override void DoInitialize()
+		{
+			base.DoInitialize();
+
 			ExecuteDb(delegate(DbConnection cn)
 			{
 				InitializeSchema(cn);

@@ -4,136 +4,49 @@ namespace SimpleSharing
     using System.ComponentModel;
     
     
-    public partial class DbSyncRepository : ISupportInitialize, ISupportInitializeNotification, IChangeTracking, INotifyPropertyChanged
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("XamlBindingTool", "1.0.0.0")]
+    public partial class DbSyncRepository
     {
         
-        const string InitializationNotBegun = "Initialization has not been started.";
-        
-        const string NotInitialized = "The object has not been initialized properly.";
-        
-        private bool _beginCalled;
-        
-        private bool _isInitialized;
-        
-        private bool _isChanged;
-        
-        bool ISupportInitializeNotification.IsInitialized
+        /// <summary>Gets whether the object properties that support <see cref='IChangeTracking'/> report changes.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected override bool HasNestedChanges
         {
             get
             {
-                return this._isInitialized;
+                return base.HasNestedChanges;
             }
         }
         
-        bool IChangeTracking.IsChanged
+        ///  <summary>Gets whether the object properties that support <see cref='ISupportInitializeNotification'/> are initialized.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected override bool AreNestedInitialized
         {
             get
             {
-                return this._isChanged;
+                return base.AreNestedInitialized;
             }
         }
         
-        public event EventHandler Initialized;
-        
-        public event PropertyChangedEventHandler PropertyChanged;
-        
+        /// <summary>Signals that the property <see cref='RepositoryId'/> has changed.</summary>
         public event EventHandler RepositoryIdChanged;
         
-        private void Initialize()
+        /// <summary>Initializes the nested properties that support <see cref='ISupportInitialize'/>.</summary>
+        [EditorBrowsableAttribute(EditorBrowsableState.Never)]
+        protected override void InitializeNested()
         {
-            ISupportInitialize init = ((ISupportInitialize)(this));
-            init.BeginInit();
-            init.EndInit();
+            base.InitializeNested();
+            ISupportInitialize initializable;
         }
         
-        void ISupportInitialize.BeginInit()
-        {
-            this._beginCalled = true;
-        }
-        
-        void ISupportInitialize.EndInit()
-        {
-            if ((this._beginCalled == false))
-            {
-                throw new InvalidOperationException(DbSyncRepository.InitializationNotBegun);
-            }
-            this.DoValidate();
-            this._isInitialized = true;
-            if ((this.Initialized != null))
-            {
-                this.Initialized(this, EventArgs.Empty);
-            }
-        }
-        
-        private bool IsChildInitialized(ISupportInitializeNotification child)
-        {
-            return ((child == null) 
-                        || child.IsInitialized);
-        }
-        
-        void IChangeTracking.AcceptChanges()
-        {
-            this.Validate();
-        }
-        
-        private bool IsChildChanged(IChangeTracking child)
-        {
-            return ((child != null) 
-                        && child.IsChanged);
-        }
-        
-        private void RaisePropertyChanged(string property)
-        {
-            if ((this.PropertyChanged != null))
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(property));
-            }
-            this._isChanged = true;
-        }
-        
-        /// <summary>
-        ///Checks that the object has been properly initialized through 
-        ///calls to <see cref='ISupportInitialize.BeginInit'/> and 
-        ///<see cref='ISupportInitialize.EndInit'/> or the <see cref='Initialize'/> method.
-        ///</summary>
-        ///<exception cref='InvalidOperationException'>The object was not initialized 
-        ///using the <see cref='ISupportInitialize'/> methods 
-        ///<see cref='ISupportInitialize.BeginInit'/> and <see cref='ISupportInitialize.EndInit'/> or 
-        ///by calling <see cref='Initialize'/> from the constructor.</exception>
-        private void EnsureValid()
-        {
-            if ((this._isInitialized == false))
-            {
-                throw new InvalidOperationException(DbSyncRepository.NotInitialized);
-            }
-            if (((IChangeTracking)(this)).IsChanged)
-            {
-                this.Validate();
-            }
-        }
-        
-        /// <summary>
-        ///Validates the object properties and throws if some are not valid.
-        ///</summary>
-        public virtual void Validate()
-        {
-            try
-            {
-                this.DoValidate();
-                this._isChanged = false;
-            }
-            catch (System.Exception )
-            {
-                throw;
-            }
-        }
-        
+        /// <summary>Raises the <see cref='RepositoryIdChanged'/> event.</summary>
         private void RaiseRepositoryIdChanged()
         {
             if ((this.RepositoryIdChanged != null))
             {
                 this.RepositoryIdChanged(this, EventArgs.Empty);
             }
+            this.RaisePropertyChanged("RepositoryId");
         }
     }
 }
