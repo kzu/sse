@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
-  <contractRef ref="http://sse.mslivelabs.com/service/managefeed.asmx?wsdl" docRef="http://sse.mslivelabs.com/service/managefeed.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
-  <soap address="http://sse.mslivelabs.com/service/managefeed.asmx" xmlns:q1="http://sse.liveincubation.com/Service/V1.0" binding="q1:ManageFeedSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
-  <soap address="http://sse.mslivelabs.com/service/managefeed.asmx" xmlns:q2="http://sse.liveincubation.com/Service/V1.0" binding="q2:ManageFeedSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
-</discovery>

@@ -37,6 +37,10 @@ namespace SimpleSharing
 		/// Performs a full sync between the two repositories, automatically 
 		/// incorporating changes in both.
 		/// </summary>
+		/// <remarks>
+		/// Items on the source repository are sent first, and then the 
+		/// changes from the target repository are incorporated into the source.
+		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize()
 		{
@@ -47,6 +51,10 @@ namespace SimpleSharing
 		/// Performs a full sync between the two repositories, optionally calling the 
 		/// given <paramref name="previewer"/> callback as specified by the <paramref name="behavior"/> argument.
 		/// </summary>
+		/// <remarks>
+		/// Items on the source repository are sent first, and then the 
+		/// changes from the target repository are incorporated into the source.
+		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize(PreviewImportHandler previewer, PreviewBehavior behavior)
 		{
@@ -58,6 +66,10 @@ namespace SimpleSharing
 		/// incorporating changes in both.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
+		/// <remarks>
+		/// Items on the source repository are sent first, and then the 
+		/// changes from the target repository are incorporated into the source.
+		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize(DateTime? since)
 		{
@@ -69,6 +81,10 @@ namespace SimpleSharing
 		/// given <paramref name="previewer"/> callback as specified by the <paramref name="behavior"/> argument.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
+		/// <remarks>
+		/// Items on the source repository are sent first, and then the 
+		/// changes from the target repository are incorporated into the source.
+		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
 		{

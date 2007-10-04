@@ -28,11 +28,15 @@ namespace SimpleSharing
 
 		public abstract Database CreateDatabase();
 
-		// TODO: XamlBinding - Implement instance validation here
-		private void DoValidate()
+		protected virtual void DoValidate()
 		{
 			if (String.IsNullOrEmpty(connectionString))
 				throw new ArgumentNullException("ConnectionString", Properties.Resources.UnitializedConnectionString);
+		}
+
+		protected virtual void DoInitialize()
+		{
+
 		}
 	}
 }

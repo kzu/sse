@@ -16,12 +16,17 @@ namespace SimpleSharing
 	public abstract partial class DbRepository
 	{
 		protected delegate void ExecuteDbHandler(DbConnection connection);
-		
+
 		Database database;
 		DbFactory dbFactory;
 
 		protected DbRepository()
 		{
+		}
+
+		protected DbRepository(DbFactory factory)
+		{
+			this.dbFactory = factory;
 		}
 
 		public Database Database
@@ -36,11 +41,10 @@ namespace SimpleSharing
 		public DbFactory DatabaseFactory
 		{
 			get { return dbFactory; }
-			set 
-			{ 
+			set
+			{
 				dbFactory = value;
-				database = value.CreateDatabase();
-				RaiseDatabaseFactoryChanged(); 
+				RaiseDatabaseFactoryChanged();
 			}
 		}
 
@@ -171,10 +175,17 @@ namespace SimpleSharing
 		}
 
 		// TODO: XamlBinding - Implement instance validation here
-		private void DoValidate()
+		protected virtual void DoValidate()
 		{
 			if (dbFactory == null)
 				throw new ArgumentNullException("DatabaseFactory", Properties.Resources.UnitializedDbFactory);
 		}
+
+		// TODO: XamlBinding - Implement initialization here
+		protected virtual void DoInitialize()
+		{
+			database = dbFactory.CreateDatabase();
+		}
+
 	}
 }

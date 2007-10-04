@@ -74,17 +74,33 @@
     <Compile Include="Behaviors\Behaviors.cs" />
     <Compile Include="Behaviors\MergeBehavior.cs" />
     <Compile Include="CompoundRepository.cs" />
-    <Compile Include="CompoundRepository.XamlBinding.cs" />
     <Compile Include="DataEventArgs.cs" />
     <Compile Include="DbFactory.cs" />
-    <Compile Include="DbFactory.XamlBinding.cs" />
     <Compile Include="DbRepository.cs">
     </Compile>
-    <Compile Include="DbRepository.XamlBinding.cs" />
     <Compile Include="DbSyncRepository.cs">
     </Compile>
-    <Compile Include="DbSyncRepository.XamlBinding.cs" />
-    <Compile Include="DeviceAuthor.cs" />
+		<Compile Include="CompoundRepository.XamlBinding.cs">
+			<AutoGen>True</AutoGen>
+			<DesignTime>True</DesignTime>
+			<DependentUpon>CompoundRepository.cs</DependentUpon>
+		</Compile>
+		<Compile Include="DbFactory.XamlBinding.cs">
+			<AutoGen>True</AutoGen>
+			<DesignTime>True</DesignTime>
+			<DependentUpon>DbFactory.cs</DependentUpon>
+		</Compile>
+		<Compile Include="DbRepository.XamlBinding.cs">
+			<AutoGen>True</AutoGen>
+			<DesignTime>True</DesignTime>
+			<DependentUpon>DbRepository.cs</DependentUpon>
+		</Compile>
+		<Compile Include="DbSyncRepository.XamlBinding.cs">
+			<AutoGen>True</AutoGen>
+			<DesignTime>True</DesignTime>
+			<DependentUpon>DbSyncRepository.cs</DependentUpon>
+		</Compile>
+		<Compile Include="DeviceAuthor.cs" />
     <Compile Include="DynamicXmlItem.cs" />
     <Compile Include="FeedReader.cs" />
     <Compile Include="FeedWriter.cs" />

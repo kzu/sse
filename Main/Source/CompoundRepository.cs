@@ -34,6 +34,7 @@ namespace SimpleSharing
 
 			this.xmlRepo = xmlRepo;
 			this.syncRepo = syncRepo;
+			Initialize();
 		}
 
 		/// <summary>
@@ -70,7 +71,7 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
-			EnsureValid();
+			EnsureInitialized();
 
 			Sync sync = syncRepo.Get(id);
 			IXmlItem xml = xmlRepo.Get(id);
@@ -90,8 +91,6 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAll()
 		{
-			EnsureValid();
-
 			return GetAllImpl(null, NullFilter);
 		}
 
@@ -102,8 +101,6 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
-			EnsureValid();
-
 			return GetAllImpl(null, filter);
 		}
 
@@ -112,8 +109,6 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since)
 		{
-			EnsureValid();
-
 			return GetAllImpl(since, NullFilter);
 		}
 
@@ -122,8 +117,6 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
 		{
-			EnsureValid();
-
 			return GetAllImpl(since, filter);
 		}
 
@@ -136,7 +129,7 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
-			EnsureValid();
+			EnsureInitialized();
 
 			// Search deleted items.
 			// TODO: Is there a better way than iterating every sync?
@@ -234,7 +227,7 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetConflicts()
 		{
-			EnsureValid();
+			EnsureInitialized();
 
 			foreach (Sync sync in syncRepo.GetConflicts())
 			{
@@ -266,7 +259,7 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(item, "item");
 
-			EnsureValid();
+			EnsureInitialized();
 
 			if (!item.Sync.Deleted)
 			{
@@ -285,7 +278,7 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
-			EnsureValid();
+			EnsureInitialized();
 
 			xmlRepo.Remove(id);
 			Sync sync = syncRepo.Get(id);
@@ -303,7 +296,7 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(item, "item");
 
-			EnsureValid();
+			EnsureInitialized();
 
 			if (item.Sync.Deleted)
 			{
@@ -326,7 +319,7 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(item, "item");
 
-			EnsureValid();
+			EnsureInitialized();
 
 			if (resolveConflicts)
 			{
@@ -420,6 +413,12 @@ namespace SimpleSharing
 
 			if (syncRepo == null)
 				throw new ArgumentNullException("SyncRepository", Properties.Resources.UnitializedSyncRepository);
+		}
+
+		// TODO: XamlBinding - Implement initialization here
+		protected virtual void DoInitialize()
+		{
+
 		}
 	}
 }

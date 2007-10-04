@@ -26,9 +26,9 @@ namespace SimpleSharing.Tests
 		private delegate void ExecuteDbHandler(DbConnection connection);
 		private delegate void CleanupHandler(DbSyncRepository repository);
 
-        protected DbFactory databaseFactory;
+		protected DbFactory databaseFactory;
 		protected string dbFile;
-		
+
 		[TestInitialize]
 		public virtual void Initialize()
 		{
@@ -57,7 +57,7 @@ namespace SimpleSharing.Tests
 #if PocketPC
 			repository.Database.GetConnection().Close();
 #else
-				if(repository.Database is SqlCeDatabase)
+				if (repository.Database is SqlCeDatabase)
 					((SqlCeDatabase)repository.Database).CloseSharedConnection();
 #endif
 			}
@@ -128,9 +128,9 @@ namespace SimpleSharing.Tests
 			}
 		}
 
-        [TestMethod]
-        public void ShouldAddSingleSyncItem()
-        {
+		[TestMethod]
+		public void ShouldAddSingleSyncItem()
+		{
 			DbSyncRepository repo = null;
 			try
 			{
@@ -150,11 +150,11 @@ namespace SimpleSharing.Tests
 			}
 
 
-        }
+		}
 
-        [TestMethod]
-        public void ShouldModifySingleSyncItem()
-        {
+		[TestMethod]
+		public void ShouldModifySingleSyncItem()
+		{
 			DbSyncRepository repo = null;
 			try
 			{
@@ -176,38 +176,38 @@ namespace SimpleSharing.Tests
 			{
 				Cleanup(repo);
 			}
-        }
+		}
 
-        private int CountSyncRecords(string syncId)
-        {
+		private int CountSyncRecords(string syncId)
+		{
 			Database database = this.databaseFactory.CreateDatabase();
 
 			DbConnection connection = null;
-            try
-            {
+			try
+			{
 #if PocketPC
                 connection = database.GetConnection();
 #else
-                connection = database.CreateConnection();
+				connection = database.CreateConnection();
 #endif
-                connection.Open();
-                DbCommand command = connection.CreateCommand();
-                command.CommandText = "SELECT COUNT(*) FROM SSE_Foo_Sync WHERE ID = id";
+				connection.Open();
+				DbCommand command = connection.CreateCommand();
+				command.CommandText = "SELECT COUNT(*) FROM SSE_Foo_Sync WHERE ID = id";
 
-                DbParameter parameter = command.CreateParameter();
-                parameter.ParameterName = database.BuildParameterName("id");
-                parameter.DbType = DbType.String;
-                parameter.Size = 254;
-                parameter.Value = syncId;
+				DbParameter parameter = command.CreateParameter();
+				parameter.ParameterName = database.BuildParameterName("id");
+				parameter.DbType = DbType.String;
+				parameter.Size = 254;
+				parameter.Value = syncId;
 
-                return (int)command.ExecuteScalar();
-            }
-            finally
-            {
+				return (int)command.ExecuteScalar();
+			}
+			finally
+			{
 #if !PocketPC
-                connection.Close();
+				connection.Close();
 #endif
-            }
-        }
+			}
+		}
 	}
 }
