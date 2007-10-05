@@ -17,7 +17,7 @@ using Microsoft.Practices.EnterpriseLibrary.Data;
 using System.Data;
 using System.ComponentModel;
 
-namespace SimpleSharing.Tests
+namespace SimpleSharing.Data.Tests
 {
 	[TestClass]
 	public class AccessSyncRepositoryFixture : DbSyncRepositoryFixture

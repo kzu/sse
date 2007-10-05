@@ -57,14 +57,6 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Practices.Mobile.Configuration, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6ead800d778c9b9f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Lib\MCSF\Microsoft.Practices.Mobile.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Mobile.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6ead800d778c9b9f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Lib\MCSF\Microsoft.Practices.Mobile.DataAccess.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -75,32 +67,12 @@
     <Compile Include="Behaviors\MergeBehavior.cs" />
     <Compile Include="CompoundRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
-    <Compile Include="DbFactory.cs" />
-    <Compile Include="DbRepository.cs">
+    <Compile Include="CompoundRepository.XamlBinding.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CompoundRepository.cs</DependentUpon>
     </Compile>
-    <Compile Include="DbSyncRepository.cs">
-    </Compile>
-		<Compile Include="CompoundRepository.XamlBinding.cs">
-			<AutoGen>True</AutoGen>
-			<DesignTime>True</DesignTime>
-			<DependentUpon>CompoundRepository.cs</DependentUpon>
-		</Compile>
-		<Compile Include="DbFactory.XamlBinding.cs">
-			<AutoGen>True</AutoGen>
-			<DesignTime>True</DesignTime>
-			<DependentUpon>DbFactory.cs</DependentUpon>
-		</Compile>
-		<Compile Include="DbRepository.XamlBinding.cs">
-			<AutoGen>True</AutoGen>
-			<DesignTime>True</DesignTime>
-			<DependentUpon>DbRepository.cs</DependentUpon>
-		</Compile>
-		<Compile Include="DbSyncRepository.XamlBinding.cs">
-			<AutoGen>True</AutoGen>
-			<DesignTime>True</DesignTime>
-			<DependentUpon>DbSyncRepository.cs</DependentUpon>
-		</Compile>
-		<Compile Include="DeviceAuthor.cs" />
+    <Compile Include="DeviceAuthor.cs" />
     <Compile Include="DynamicXmlItem.cs" />
     <Compile Include="FeedReader.cs" />
     <Compile Include="FeedWriter.cs" />
@@ -138,7 +110,6 @@
     <Compile Include="RssFeedWriter.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SerializerXmlItem.cs" />
-    <Compile Include="SqlDbFactory.cs" />
     <Compile Include="SyncEngine.cs" />
     <Compile Include="Timestamp.cs" />
     <Compile Include="XmlItem.cs" />

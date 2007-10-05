@@ -225,7 +225,7 @@ namespace SimpleSharing
 				return read;
 			}
 
-			internal Sync ReadSync()
+			public Sync ReadSync()
 			{
 				XmlQualifiedName itemName = feedReader.ItemName;
 				Sync newSync = null;

@@ -9,7 +9,7 @@ using Microsoft.Practices.EnterpriseLibrary.Data.Sql;
 using Microsoft.Practices.Mobile.DataAccess;
 #endif
 
-namespace SimpleSharing
+namespace SimpleSharing.Data
 {
 	public class SqlDbFactory : DbFactory
 	{

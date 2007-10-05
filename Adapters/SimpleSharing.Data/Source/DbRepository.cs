@@ -11,7 +11,7 @@ using Microsoft.Practices.EnterpriseLibrary.Data;
 using Microsoft.Practices.Mobile.DataAccess;
 #endif
 
-namespace SimpleSharing
+namespace SimpleSharing.Data
 {
 	public abstract partial class DbRepository
 	{
