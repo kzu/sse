@@ -69,6 +69,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+		<Compile Include="..\Source\Properties\AssemblyInfo.cs">
+			<Link>Properties\AssemblyInfo.cs</Link>
+		</Compile>
+		<Compile Include="..\..\..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="..\Source\DbFactory.cs">
       <Link>DbFactory.cs</Link>
     </Compile>
@@ -96,7 +102,6 @@
     <Compile Include="..\Source\SqlDbFactory.cs">
       <Link>SqlDbFactory.cs</Link>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
