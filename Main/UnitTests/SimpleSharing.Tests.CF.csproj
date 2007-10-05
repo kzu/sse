@@ -113,6 +113,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="..\Source\Guard.cs">
       <Link>Guard.cs</Link>
     </Compile>
