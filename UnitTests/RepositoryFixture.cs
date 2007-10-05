@@ -12,12 +12,244 @@ namespace SimpleSharing.Tests
 	[TestClass]
 	public class RepositoryFixture : TestFixtureBase
 	{
+		protected virtual IRepository CreateRepository()
+		{
+			return new MockRepository();
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowGetNullId()
+		{
+			CreateRepository().Get(null);
+		}
+
+		[ExpectedException(typeof(ArgumentException))]
+		[TestMethod]
+		public void ShouldThrowGetEmptyId()
+		{
+			CreateRepository().Get("");
+		}
+
+		[TestMethod]
+		public void ShouldGetNullIfNotExists()
+		{
+			IRepository repo = CreateRepository();
+
+			Item i = repo.Get(Guid.NewGuid().ToString());
+
+			Assert.IsNull(i);
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowAddNullItem()
+		{
+			CreateRepository().Add(null);
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowDeleteNullId()
+		{
+			CreateRepository().Delete(null);
+		}
+
+		[ExpectedException(typeof(ArgumentException))]
+		[TestMethod]
+		public void ShouldThrowDeleteEmptyId()
+		{
+			CreateRepository().Delete("");
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowUpdateNullItem()
+		{
+			CreateRepository().Update(null);
+		}
+
+		[TestMethod]
+		public void ShouldAddAndGetItem()
+		{
+			IRepository repo = CreateRepository();
+			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
+			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now, false);
+			sync.ItemHash = xml.GetHashCode();
+			Item item = new Item(xml, sync);
+
+			repo.Add(item);
+
+			Item saved = repo.Get(xml.Id);
+
+			Assert.IsNotNull(saved);
+			Assert.IsTrue(item.Equals(saved));
+		}
+
+		[TestMethod]
+		public void ShouldGetAllItems()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			Assert.AreEqual(2, Count(repo.GetAll()));
+		}
+
+		[ExpectedException(typeof(ArgumentException))]
+		[TestMethod]
+		public void ShouldThrowAddDuplicateItemId()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+		}
+
+		[TestMethod]
+		public void ShouldGetAllSinceDate()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(1)), false));
+			repo.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			Assert.AreEqual(1, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
+		}
+
+		[TestMethod]
+		public void ShouldGetAllIfNullSince()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(1)), false));
+			repo.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			Assert.AreEqual(2, Count(repo.GetAllSince(null)));
+		}
+
+		[TestMethod]
+		public void ShouldGetAllIfNullWhen()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, null, false));
+			repo.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			Assert.AreEqual(2, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
+		}
+
+		[TestMethod]
+		public void ShouldGetAllIfNullLastUpdate()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")), new Sync(id));
+			repo.Add(item);
+
+			id = Guid.NewGuid().ToString();
+			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			Assert.AreEqual(2, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowGetAllNullFilter()
+		{
+			IRepository repo = CreateRepository();
+
+			Count(repo.GetAll(null));
+		}
+
+		[ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
+		public void ShouldThrowGetAllSinceWithNullFilter()
+		{
+			Count(CreateRepository().GetAllSince(DateTime.Now, null));
+		}
+
+		[TestMethod]
+		public void ShouldGetAllPassFilter()
+		{
+			IRepository repo = CreateRepository();
+
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")), new Sync(id));
+			repo.Add(item);
+
+			Predicate<Item> filter = delegate(Item i) { return i.Sync.Id == id; };
+
+			string id2 = Guid.NewGuid().ToString();
+			item = new Item(new XmlItem(id2, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id2, DeviceAuthor.Current, DateTime.Now, false));
+			repo.Add(item);
+
+			Assert.AreEqual(1, Count(repo.GetAll(filter)));
+			Item saved = GetFirst<Item>(repo.GetAll(filter));
+			Assert.AreEqual(id, saved.Sync.Id);
+		}
+
+		[TestMethod]
+		public void ShouldGetAllSinceRemoveMilliseconds()
+		{
+			DateTime created = new DateTime(2007, 9, 18, 12, 56, 23, 500);
+			DateTime since = new DateTime(2007, 9, 18, 12, 56, 23, 0);
+
+			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
+			Sync sync = Behaviors.Create(item.Id, "kzu", created, false);
+			sync.ItemHash = item.GetHashCode();
+
+			IRepository repo = CreateRepository();
+			repo.Add(new Item(item, sync));
+
+			Assert.AreEqual(1, Count(repo.GetAllSince(since)));
+		}
+
 		[TestMethod]
 		public void ShouldGetAllCallGetAllSinceWithNullSince()
 		{
 			SimpleRepository repo = new SimpleRepository();
 
-			repo.GetAll();
+			Count(repo.GetAll());
 
 			Assert.AreEqual(null, repo.Since);
 		}
@@ -27,7 +259,7 @@ namespace SimpleSharing.Tests
 		{
 			SimpleRepository repo = new SimpleRepository();
 
-			repo.GetAll(MyFilter);
+			Count(repo.GetAll(MyFilter));
 
 			Assert.AreEqual(new Predicate<Item>(MyFilter), repo.Filter);
 		}
@@ -56,6 +288,82 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(0, item.Sync.Conflicts.Count);
 		}
 
+		[TestMethod]
+		public void ShouldSaveUpdatedItemOnResolveConflicts()
+		{
+			IRepository repo = CreateRepository();
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload/>")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false));
+			repo.Add(item);
+
+			// Introduce a conflict.
+			IXmlItem xml = item.XmlItem.Clone();
+			xml.Title = "Conflict";
+			Sync updatedSync = Behaviors.Update(item.Sync, "Conflict", DateTime.Now, false);
+			item.Sync.Conflicts.Add(new Item(xml, updatedSync));
+
+			item.XmlItem.Title = "Resolved";
+
+			repo.Update(item, true);
+
+			IXmlItem storedXml = repo.Get(item.XmlItem.Id).XmlItem;
+
+			Assert.AreEqual("Resolved", storedXml.Title);
+		}
+
+		[TestMethod]
+		public void ShouldSaveUpdatedItemOnResolveConflicts2()
+		{
+			IRepository repo = CreateRepository();
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload/>")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false));
+			repo.Add(item);
+
+			// Introduce a conflict.
+			IXmlItem xml = item.XmlItem.Clone();
+			xml.Title = "Conflict";
+			Sync updatedSync = Behaviors.Update(item.Sync, "Conflict", DateTime.Now, false);
+			item.Sync.Conflicts.Add(new Item(xml, updatedSync));
+
+			item.XmlItem.Title = "Resolved";
+
+			repo.Update(item, true);
+
+			IXmlItem storedXml = repo.Get(item.XmlItem.Id).XmlItem;
+
+			Assert.AreEqual("Resolved", storedXml.Title, "An update with resolve conflicts was issued, but the stored item Title was not the updated one from the resolved conflict.");
+		}
+
+		[TestMethod]
+		public void ShouldResolveConflictsPreserveDeletedState()
+		{
+			IRepository repo = CreateRepository();
+			string id = Guid.NewGuid().ToString();
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload/>")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false));
+			repo.Add(item);
+
+			// Introduce a conflict.
+			IXmlItem xml = item.XmlItem.Clone();
+			xml.Title = "Conflict";
+			Sync updatedSync = Behaviors.Update(item.Sync, "Conflict", DateTime.Now, false);
+			item.Sync.Conflicts.Add(new Item(xml, updatedSync));
+
+			item.XmlItem.Title = "Resolved";
+
+			Sync deletedSync = Behaviors.Delete(item.Sync, "Deleted", DateTime.Now);
+
+			repo.Update(new Item(item.XmlItem, deletedSync), true);
+
+			Item saved = repo.Get(item.XmlItem.Id);
+
+			Assert.IsTrue(saved.XmlItem == null || saved.XmlItem is NullXmlItem, 
+				"An update to delete an item was issued. The repository should either return null for the Item.XmlItem or an instance of a NullXmlItem");
+			Assert.IsTrue(saved.Sync.Deleted, "An update to delete an item was issued but its Sync.Deleted was not true.");
+		}
+
 		private bool MyFilter(Item item)
 		{
 			return true;
@@ -76,7 +384,7 @@ namespace SimpleSharing.Tests
 				throw new NotImplementedException("The method or operation is not implemented.");
 			}
 
-			public override IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+			protected override IEnumerable<Item> GetAll(DateTime? since, Predicate<Item> filter)
 			{
 				Since = since;
 				Filter = filter;

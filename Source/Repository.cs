@@ -53,7 +53,12 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAllSince(DateTime?, Predicate{Item})"/>.
 		/// </summary>
-		public abstract IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter);
+		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+		{
+			return GetAll(since == null ? since : Timestamp.Normalize(since.Value), filter);
+		}
+
+		protected abstract IEnumerable<Item> GetAll(DateTime? since, Predicate<Item> filter);
 
 		/// <summary>
 		/// See <see cref="IRepository.GetConflicts"/>. Default implementation retrieves 
