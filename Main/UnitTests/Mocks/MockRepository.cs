@@ -34,24 +34,31 @@ namespace SimpleSharing.Tests
 
 		public override void Add(Item item)
 		{
+			Guard.ArgumentNotNull(item, "item");
+
+			if (Items.ContainsKey(item.Sync.Id))
+				throw new ArgumentException();
+
 			Items.Add(item.Sync.Id, item);
 		}
 
 		public override Item Get(string id)
 		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
+
 			if (Items.ContainsKey(id))
 				return Items[id].Clone();
 			else
 				return null;
 		}
 
-		public override IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+		protected override IEnumerable<Item> GetAll(DateTime? since, Predicate<Item> filter)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
 			foreach (Item i in Items.Values)
 			{
-				if ((since == null || i.Sync.LastUpdate.When == null || i.Sync.LastUpdate.When >= since)
+				if ((since == null || i.Sync.LastUpdate != null || i.Sync.LastUpdate.When == null || i.Sync.LastUpdate.When >= since)
 					&& filter(i))
 					yield return i.Clone();
 			}
@@ -59,11 +66,15 @@ namespace SimpleSharing.Tests
 
 		public override void Delete(string id)
 		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
+
 			Items.Remove(id);
 		}
 
 		public override void Update(Item item)
 		{
+			Guard.ArgumentNotNull(item, "item");
+
 			Item i = item.Clone();
 			Items[item.Sync.Id] = i;
 		}

@@ -11,7 +11,7 @@ using System.Threading;
 namespace SimpleSharing.Tests
 {
 	[TestClass]
-	public class CompoundRepositoryFixture : TestFixtureBase
+	public class CompoundRepositoryFixture : RepositoryFixture
 	{
 		IXmlRepository xmlRepo;
 		ISyncRepository syncRepo;
@@ -21,6 +21,11 @@ namespace SimpleSharing.Tests
 		{
 			xmlRepo = new MockXmlRepository();
 			syncRepo = new MockSyncRepository();
+		}
+
+		protected override IRepository CreateRepository()
+		{
+			return new CompoundRepository(xmlRepo, syncRepo);
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
@@ -124,30 +129,6 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldGetNullIfNotExists()
-		{
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			Item i = repo.Get(Guid.NewGuid().ToString());
-
-			Assert.IsNull(i);
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void ShouldThrowGetNullId()
-		{
-			new CompoundRepository(xmlRepo, syncRepo).Get(null);
-		}
-
-		[ExpectedException(typeof(ArgumentException))]
-		[TestMethod]
-		public void ShouldThrowGetEmptyId()
-		{
-			new CompoundRepository(xmlRepo, syncRepo).Get("");
-		}
-
-		[TestMethod]
 		public void ShouldGetAll()
 		{
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
@@ -167,13 +148,6 @@ namespace SimpleSharing.Tests
 			List<Item> items = new List<Item>(repo.GetAll());
 
 			Assert.AreEqual(2, items.Count);
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void ShouldThrowGetAllWithNullFilter()
-		{
-			new CompoundRepository(xmlRepo, syncRepo).GetAll(null);
 		}
 
 		[TestMethod]
@@ -246,74 +220,6 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldGetAllWithNullSyncWhen()
-		{
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
-			Sync sync = Behaviors.Create(item.Id, "kzu", null, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
-			syncRepo.Save(sync);
-
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			Assert.AreEqual(1, Count(repo.GetAll()));
-		}
-
-		[TestMethod]
-		public void ShouldGetAlwaysItemWithNullWhenLastUpdate()
-		{
-			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
-			Sync sync = Behaviors.Create(xml.Id, "kzu", null, false);
-
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			repo.Add(new Item(xml, sync));
-
-			sync = Behaviors.Update(sync, "kzu", null, false);
-
-			repo.Update(new Item(xml, sync));
-
-			Assert.AreEqual(1, Count(repo.GetAllSince(DateTime.Now)));
-		}
-
-		[TestMethod]
-		public void ShouldGetAllWithNullSince()
-		{
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
-			Sync sync = Behaviors.Create(item.Id, "kzu", null, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
-			syncRepo.Save(sync);
-
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			Assert.AreEqual(1, Count(repo.GetAllSince(null)));
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void ShouldThrowGetAllSinceWithNullFilter()
-		{
-			Count(new CompoundRepository(xmlRepo, syncRepo).GetAllSince(DateTime.Now, null));
-		}
-
-		[TestMethod]
-		public void ShouldGetAllSinceRemoveMilliseconds()
-		{
-			DateTime since = new DateTime(2007, 9, 18, 12, 56, 23, 500);
-
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
-			Sync sync = Behaviors.Create(item.Id, "kzu", since, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
-			syncRepo.Save(sync);
-
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			Assert.AreEqual(1, Count(repo.GetAllSince(since)));
-		}
-		
-		[TestMethod]
 		public void ShouldGetAddedAfterSince()
 		{
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
@@ -366,13 +272,6 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(1, items.Count);
 		}
 
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void ShouldThrowIfNullItem()
-		{
-			new CompoundRepository(xmlRepo, syncRepo).Add(null);
-		}
-
 		[TestMethod]
 		public void ShouldAddItem()
 		{
@@ -423,20 +322,6 @@ namespace SimpleSharing.Tests
 
 			Assert.IsNull(xmlRepo.Get(xml.Id));
 			Assert.AreEqual(sync.GetHashCode(), syncRepo.Get(sync.Id).GetHashCode());
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
-		public void ShouldThrowDeleteNullId()
-		{
-			new CompoundRepository(xmlRepo, syncRepo).Delete(null);
-		}
-
-		[ExpectedException(typeof(ArgumentException))]
-		[TestMethod]
-		public void ShouldThrowDeleteEmptyId()
-		{
-			new CompoundRepository(xmlRepo, syncRepo).Delete("");
 		}
 
 		[TestMethod]
@@ -619,84 +504,5 @@ namespace SimpleSharing.Tests
 			Item conflict = GetFirst<Item>(repo.GetConflicts());
 			Assert.IsNotNull(conflict);
 		}
-
-		[TestMethod]
-		public void ShouldSaveUpdatedItemOnResolveConflicts()
-		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository().AddOneItem();
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			// Cause the item to be Sync'ed.
-			Item item = GetFirst<Item>(repo.GetAll());
-
-			// Introduce a conflict.
-			IXmlItem xml = item.XmlItem.Clone();
-			xml.Title = "Conflict";
-			Sync updatedSync = Behaviors.Update(item.Sync, "Conflict", DateTime.Now, false);
-			item.Sync.Conflicts.Add(new Item(xml, updatedSync));
-
-			item.XmlItem.Title = "Resolved";
-
-			repo.Update(item, true);
-
-			IXmlItem storedXml = xmlRepo.Get(item.XmlItem.Id);
-
-			Assert.AreEqual("Resolved", storedXml.Title);
-		}
-
-		[TestMethod]
-		public void ShouldSaveUpdatedItemOnResolveConflicts2()
-		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository().AddOneItem();
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			// Cause the item to be Sync'ed.
-			Item item = GetFirst<Item>(repo.GetAll());
-
-			// Introduce a conflict.
-			IXmlItem xml = item.XmlItem.Clone();
-			xml.Title = "Conflict";
-			Sync updatedSync = Behaviors.Update(item.Sync, "Conflict", DateTime.Now, false);
-			item.Sync.Conflicts.Add(new Item(xml, updatedSync));
-
-			item.XmlItem.Title = "Resolved";
-
-			repo.Update(item, true);
-
-			IXmlItem storedXml = xmlRepo.Get(item.XmlItem.Id);
-
-			Assert.AreEqual("Resolved", storedXml.Title);
-		}
-
-		[TestMethod]
-		public void ShouldResolveConflictsPreserveDeletedState()
-		{
-			ISyncRepository syncRepo = new MockSyncRepository();
-			IXmlRepository xmlRepo = new MockXmlRepository().AddOneItem();
-			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
-
-			// Cause the item to be Sync'ed.
-			Item item = GetFirst<Item>(repo.GetAll());
-
-			// Introduce a conflict.
-			IXmlItem xml = item.XmlItem.Clone();
-			xml.Title = "Conflict";
-			Sync updatedSync = Behaviors.Update(item.Sync, "Conflict", DateTime.Now, false);
-			item.Sync.Conflicts.Add(new Item(xml, updatedSync));
-
-			item.XmlItem.Title = "Resolved";
-
-			Sync deletedSync = Behaviors.Delete(item.Sync, "Deleted", DateTime.Now);
-
-			repo.Update(new Item(item.XmlItem, deletedSync), true);
-
-			IXmlItem storedXml = xmlRepo.Get(item.XmlItem.Id);
-
-			Assert.IsNull(storedXml);
-			Assert.IsTrue(syncRepo.Get(item.Sync.Id).Deleted);
-		}
-
 	}
 }
