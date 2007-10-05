@@ -19,7 +19,6 @@ namespace SimpleSharing.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     internal class Resources {
         
@@ -27,7 +26,6 @@ namespace SimpleSharing.Properties {
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
         
@@ -182,24 +180,6 @@ namespace SimpleSharing.Properties {
         internal static string UninitializedRepository {
             get {
                 return ResourceManager.GetString("UninitializedRepository", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The connection string has not been set for the adapter.
-        /// </summary>
-        internal static string UnitializedConnectionString {
-            get {
-                return ResourceManager.GetString("UnitializedConnectionString", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A Database factory has not been set for this repository.
-        /// </summary>
-        internal static string UnitializedDbFactory {
-            get {
-                return ResourceManager.GetString("UnitializedDbFactory", resourceCulture);
             }
         }
         

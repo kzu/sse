@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using Microsoft.Practices.EnterpriseLibrary.Data.SqlCe;
 
-namespace SimpleSharing
+namespace SimpleSharing.Data
 {
 	public class SqlCeDbFactory : DbFactory
 	{

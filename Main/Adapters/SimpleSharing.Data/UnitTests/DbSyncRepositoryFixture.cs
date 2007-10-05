@@ -17,8 +17,9 @@ using System.Data.Common;
 
 using System.Data;
 using System.ComponentModel;
+using SimpleSharing.Tests;
 
-namespace SimpleSharing.Tests
+namespace SimpleSharing.Data.Tests
 {
 	[TestClass]
 	public class DbSyncRepositoryFixture : SyncRepositoryFixture

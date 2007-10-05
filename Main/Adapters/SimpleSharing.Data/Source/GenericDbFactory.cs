@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using System.Data.Common;
 
-namespace SimpleSharing
+namespace SimpleSharing.Data
 {
 	public class GenericDbFactory : DbFactory
 	{

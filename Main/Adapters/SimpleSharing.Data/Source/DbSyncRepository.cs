@@ -12,7 +12,7 @@ using Microsoft.Practices.Mobile.DataAccess;
 using System.Globalization;
 #endif
 
-namespace SimpleSharing
+namespace SimpleSharing.Data
 {
 	public partial class DbSyncRepository : DbRepository, ISyncRepository
 	{

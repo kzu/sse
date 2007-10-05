@@ -1,4 +1,4 @@
-namespace SimpleSharing
+namespace SimpleSharing.Data
 {
     using System;
     using System.ComponentModel;

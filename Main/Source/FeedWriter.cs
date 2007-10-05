@@ -84,7 +84,7 @@ namespace SimpleSharing
 			WriteEndItem(item, writer);
 		}
 
-		internal void WriteSync(Sync sync)
+		public void WriteSync(Sync sync)
 		{
 			// <sx:sync>
 			writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Sync, Schema.Namespace);
