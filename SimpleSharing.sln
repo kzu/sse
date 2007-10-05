@@ -126,24 +126,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleSharing.Data.Tests.CF
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Memory", "Memory", "{57CC8A34-601D-4C78-A5BC-0C30F9B2308A}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-	ProjectSection(FolderStartupServices) = postProject
-		{B4F97281-0DBD-4835-9ED8-7DFB966E87FF} = {B4F97281-0DBD-4835-9ED8-7DFB966E87FF}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleSharing.Adapters.Memory", "Adapters\Memory\Source\SimpleSharing.Adapters.Memory.csproj", "{3DF037F4-8D40-4379-B809-91D4413B4563}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 13
+		SccNumberOfProjects = 12
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs03.codeplex.com/
 		SccLocalPath0 = .
@@ -191,10 +176,6 @@ Global
 		SccProjectTopLevelParentUniqueName11 = SimpleSharing.sln
 		SccProjectName11 = Adapters/SimpleSharing.Data/UnitTests.CF
 		SccLocalPath11 = Adapters\\SimpleSharing.Data\\UnitTests.CF
-		SccProjectUniqueName12 = Adapters\\Memory\\Source\\SimpleSharing.Adapters.Memory.csproj
-		SccProjectTopLevelParentUniqueName12 = SimpleSharing.sln
-		SccProjectName12 = Adapters/Memory/Source
-		SccLocalPath12 = Adapters\\Memory\\Source
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SimpleSharing1.vsmdi
@@ -325,16 +306,6 @@ Global
 		{B03988C0-5E00-42A0-BA58-53DE73157208}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B03988C0-5E00-42A0-BA58-53DE73157208}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{B03988C0-5E00-42A0-BA58-53DE73157208}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Release|.NET.ActiveCfg = Release|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{3DF037F4-8D40-4379-B809-91D4413B4563}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -349,11 +320,9 @@ Global
 		{1C9AE3CD-C7F3-4A1D-9096-646549157B1A} = {AECE55BB-0B4C-412E-9D3B-2938EB616A73}
 		{EDD25FDB-37FD-4365-B2A8-BE0C6D395BDC} = {AECE55BB-0B4C-412E-9D3B-2938EB616A73}
 		{02D69D88-C646-439D-A9D7-77C81B454F77} = {8A09B63E-A938-428A-A806-FCB518472DF3}
-		{57CC8A34-601D-4C78-A5BC-0C30F9B2308A} = {8A09B63E-A938-428A-A806-FCB518472DF3}
 		{9F77C3B0-5DD7-4B75-816E-69BCB44AA29E} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{1D2752BC-65DB-4CA0-BAF0-3CB45C1AAD67} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{99CD956C-0F9E-4BA3-9A88-3E4489864378} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{B03988C0-5E00-42A0-BA58-53DE73157208} = {02D69D88-C646-439D-A9D7-77C81B454F77}
-		{3DF037F4-8D40-4379-B809-91D4413B4563} = {57CC8A34-601D-4C78-A5BC-0C30F9B2308A}
 	EndGlobalSection
 EndGlobal
