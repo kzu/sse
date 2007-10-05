@@ -45,8 +45,8 @@ namespace SimpleSharing.Data
 			EnsureInitialized();
 
 			using (DbDataReader reader = ExecuteReader(
-				FormatSql(@"SELECT * FROM [{0}] WHERE Id = {1}", "Sync", "id"),
-				CreateParameter("id", DbType.String, 254, id)))
+				FormatSql(@"SELECT * FROM [{0}] WHERE Id = {1}", "Sync", "pid"),
+				CreateParameter("pid", DbType.String, 254, id)))
 			{
 				if (reader.Read())
 					return Read(reader);
