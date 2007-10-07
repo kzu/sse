@@ -83,7 +83,10 @@ namespace SimpleSharing.Tests
 			Item saved = repo.Get(xml.Id);
 
 			Assert.IsNotNull(saved);
-			Assert.IsTrue(item.Equals(saved));
+			Assert.AreEqual(item.XmlItem.Title, saved.XmlItem.Title);
+			Assert.AreEqual(item.XmlItem.Description, saved.XmlItem.Description);
+			Assert.AreEqual(item.XmlItem.Id, saved.XmlItem.Id);
+			Assert.IsTrue(item.Sync.Equals(saved.Sync));
 		}
 
 		[TestMethod]
@@ -174,23 +177,6 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
 		}
 
-		[TestMethod]
-		public void ShouldGetAllIfNullLastUpdate()
-		{
-			IRepository repo = CreateRepository();
-
-			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")), new Sync(id));
-			repo.Add(item);
-
-			id = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
-				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
-			repo.Add(item);
-
-			Assert.AreEqual(2, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
-		}
-
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
 		public void ShouldThrowGetAllNullFilter()
@@ -213,7 +199,8 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")), new Sync(id));
+			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
 			Predicate<Item> filter = delegate(Item i) { return i.Sync.Id == id; };
@@ -231,8 +218,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetAllSinceRemoveMilliseconds()
 		{
-			DateTime created = new DateTime(2007, 9, 18, 12, 56, 23, 500);
-			DateTime since = new DateTime(2007, 9, 18, 12, 56, 23, 0);
+			DateTime created = new DateTime(2007, 9, 18, 12, 56, 23);
+			DateTime since = new DateTime(2007, 9, 18, 12, 56, 23, 500);
 
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", created, false);
@@ -359,7 +346,7 @@ namespace SimpleSharing.Tests
 
 			Item saved = repo.Get(item.XmlItem.Id);
 
-			Assert.IsTrue(saved.XmlItem == null || saved.XmlItem is NullXmlItem, 
+			Assert.IsTrue(saved.XmlItem == null || saved.XmlItem is NullXmlItem,
 				"An update to delete an item was issued. The repository should either return null for the Item.XmlItem or an instance of a NullXmlItem");
 			Assert.IsTrue(saved.Sync.Deleted, "An update to delete an item was issued but its Sync.Deleted was not true.");
 		}
