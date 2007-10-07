@@ -58,7 +58,10 @@ namespace SimpleSharing.Tests
 
 			foreach (Item i in Items.Values)
 			{
-				if ((since == null || i.Sync.LastUpdate != null || i.Sync.LastUpdate.When == null || i.Sync.LastUpdate.When >= since)
+				if ((since == null || 
+					i.Sync.LastUpdate == null || 
+					i.Sync.LastUpdate.When == null || 
+					i.Sync.LastUpdate.When >= since)
 					&& filter(i))
 					yield return i.Clone();
 			}
@@ -75,7 +78,12 @@ namespace SimpleSharing.Tests
 		{
 			Guard.ArgumentNotNull(item, "item");
 
-			Item i = item.Clone();
+			Item i;
+			if (item.Sync.Deleted)
+				i = new Item(new NullXmlItem(item.Sync.Id), item.Sync.Clone());
+			else
+				i = item.Clone();
+
 			Items[item.Sync.Id] = i;
 		}
 
