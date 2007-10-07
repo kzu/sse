@@ -174,23 +174,6 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual(2, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
 		}
 
-		[TestMethod]
-		public void ShouldGetAllIfNullLastUpdate()
-		{
-			IRepository repo = CreateRepository();
-
-			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")), new Sync(id));
-			repo.Add(item);
-
-			id = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
-				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
-			repo.Add(item);
-
-			Assert.AreEqual(2, Count(repo.GetAllSince(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))));
-		}
-
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
 		public void ShouldThrowGetAllNullFilter()
