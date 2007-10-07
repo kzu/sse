@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("0.94.1.*")]
+[assembly: AssemblyVersion("0.94.2.*")]
 #if !PocketPC
-[assembly: AssemblyFileVersion("0.94.1.*")]
+[assembly: AssemblyFileVersion("0.94.2.*")]
 #endif
