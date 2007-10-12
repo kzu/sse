@@ -5,26 +5,27 @@ using System.Text;
 namespace SimpleSharing
 {
 	/// <summary>
-	/// Specifies when the <see cref="FilterHandler"/> delegate should 
+	/// Flags that specify when the <see cref="FilterHandler"/> delegate should 
 	/// be called while synchronizing.
 	/// </summary>
-	public enum FilterBehavior
+	[Flags]
+	public enum FilterBehaviors
 	{
-		/// <summary>
-		/// Call filter when merging items into the left repository.
-		/// </summary>
-		Left,
-		/// <summary>
-		/// Call filter when merging items into the right repository.
-		/// </summary>
-		Right,
-		/// <summary>
-		/// Call filter when merging items into both repositories.
-		/// </summary>
-		Both,
 		/// <summary>
 		/// Do not apply filter behavior to any repository.
 		/// </summary>
-		None,
+		None = 0,
+		/// <summary>
+		/// Call filter when merging items into the left repository.
+		/// </summary>
+		Left = 1,
+		/// <summary>
+		/// Call filter when merging items into the right repository.
+		/// </summary>
+		Right = 2,
+		/// <summary>
+		/// Call filter when merging items into both repositories.
+		/// </summary>
+		Both = Right | Left,
 	}
 }

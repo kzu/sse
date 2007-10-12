@@ -215,16 +215,16 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(new MockRepository("left"), new MockRepository("right"));
 
-			engine.Synchronize(leftHandler, FilterBehavior.Left);
+			engine.Synchronize(leftHandler, FilterBehaviors.Left);
 			Assert.IsTrue(left);
 
-			engine.Synchronize(rightHandler, FilterBehavior.Right);
+			engine.Synchronize(rightHandler, FilterBehaviors.Right);
 			Assert.IsTrue(right);
 
-			engine.Synchronize(bothHandler, FilterBehavior.Both);
+			engine.Synchronize(bothHandler, FilterBehaviors.Both);
 			Assert.AreEqual(2, both);
 
-			engine.Synchronize(noneHandler, FilterBehavior.None);
+			engine.Synchronize(noneHandler, FilterBehaviors.None);
 			Assert.IsFalse(none);
 		}
 
