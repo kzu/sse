@@ -72,7 +72,7 @@ namespace SimpleSharing
 					if (ItemRead != null)
 						ItemRead(this, EventArgs.Empty);
 				}
-				else if (reader.NodeType == XmlNodeType.Element)
+				else if (reader.NodeType == XmlNodeType.Element && feed != null && feed.Payload != null)
 				{
 					XmlElement el = feed.Payload.OwnerDocument.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
 					el.InnerXml = reader.ReadInnerXml();
