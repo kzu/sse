@@ -82,7 +82,7 @@
     <Compile Include="FeedReader.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FilterBehavior.cs" />
+    <Compile Include="FilterBehaviors.cs" />
     <Compile Include="FilterHandler.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ItemEventArgs.cs">

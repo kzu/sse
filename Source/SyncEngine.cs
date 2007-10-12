@@ -44,21 +44,21 @@ namespace SimpleSharing
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize()
 		{
-			return SynchronizeImpl(null, NullFilterHandler, FilterBehavior.None);
+			return SynchronizeImpl(null, NullFilterHandler, FilterBehaviors.None);
 		}
 
 		/// <summary>
 		/// Performs a full sync between the two repositories, optionally calling the 
-		/// given <paramref name="filter"/> callback as specified by the <paramref name="behavior"/> argument.
+		/// given <paramref name="filter"/> callback as specified by the <paramref name="behaviors"/> argument.
 		/// </summary>
 		/// <remarks>
 		/// Items on the source repository are sent first, and then the 
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(FilterHandler filter, FilterBehavior behavior)
+		public IList<Item> Synchronize(FilterHandler filter, FilterBehaviors behaviors)
 		{
-			return SynchronizeImpl(null, filter, behavior);
+			return SynchronizeImpl(null, filter, behaviors);
 		}
 
 		/// <summary>
@@ -73,12 +73,12 @@ namespace SimpleSharing
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize(DateTime? since)
 		{
-			return SynchronizeImpl(since, NullFilterHandler, FilterBehavior.None);
+			return SynchronizeImpl(since, NullFilterHandler, FilterBehaviors.None);
 		}
 
 		/// <summary>
 		/// Performs a partial sync between the two repositories since the specified date, optionally calling the 
-		/// given <paramref name="filter"/> callback as specified by the <paramref name="behavior"/> argument.
+		/// given <paramref name="filter"/> callback as specified by the <paramref name="behaviors"/> argument.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
 		/// <remarks>
@@ -86,12 +86,12 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, FilterHandler filter, FilterBehavior behavior)
+		public IList<Item> Synchronize(DateTime? since, FilterHandler filter, FilterBehaviors behaviors)
 		{
-			return SynchronizeImpl(since, filter, behavior);
+			return SynchronizeImpl(since, filter, behaviors);
 		}
 
-		private IList<Item> SynchronizeImpl(DateTime? since, FilterHandler filter, FilterBehavior behavior)
+		private IList<Item> SynchronizeImpl(DateTime? since, FilterHandler filter, FilterBehaviors behaviors)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
@@ -102,7 +102,7 @@ namespace SimpleSharing
 			if (!target.SupportsMerge)
 			{
 				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, target);
-				if (behavior == FilterBehavior.Right || behavior == FilterBehavior.Both)
+				if ((behaviors & FilterBehaviors.Right) == FilterBehaviors.Right)
 				{
 					outgoingToMerge = filter(target, outgoingToMerge);
 				}
@@ -120,7 +120,7 @@ namespace SimpleSharing
 			if (!source.SupportsMerge)
 			{
 				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
-				if (behavior == FilterBehavior.Left || behavior == FilterBehavior.Both)
+				if ((behaviors & FilterBehaviors.Left) == FilterBehaviors.Left)
 				{
 					incomingToMerge = filter(source, incomingToMerge);
 				}
