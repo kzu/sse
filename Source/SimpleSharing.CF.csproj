@@ -99,8 +99,8 @@
     <Compile Include="Model\Sync.cs" />
     <Compile Include="NullXmlItem.cs" />
     <Compile Include="ObjectDumper.cs" />
-    <Compile Include="PreviewBehavior.cs" />
-    <Compile Include="PreviewImportHandler.cs" />
+    <Compile Include="FilterBehavior.cs" />
+    <Compile Include="FilterHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

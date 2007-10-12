@@ -190,24 +190,24 @@ namespace SimpleSharing.Tests
 			bool right = false;
 			bool none = false;
 			int both = 0;
-			PreviewImportHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			FilterHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				Assert.AreEqual("left", targetRepository.FriendlyName);
 				left = true;
 				return mergedItems;
 			};
-			PreviewImportHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			FilterHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				Assert.AreEqual("right", targetRepository.FriendlyName);
 				right = true;
 				return mergedItems;
 			};
-			PreviewImportHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			FilterHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				both++;
 				return mergedItems;
 			};
-			PreviewImportHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			FilterHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				none = true;
 				return mergedItems;
@@ -215,16 +215,16 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(new MockRepository("left"), new MockRepository("right"));
 
-			engine.Synchronize(leftHandler, PreviewBehavior.Left);
+			engine.Synchronize(leftHandler, FilterBehavior.Left);
 			Assert.IsTrue(left);
 
-			engine.Synchronize(rightHandler, PreviewBehavior.Right);
+			engine.Synchronize(rightHandler, FilterBehavior.Right);
 			Assert.IsTrue(right);
 
-			engine.Synchronize(bothHandler, PreviewBehavior.Both);
+			engine.Synchronize(bothHandler, FilterBehavior.Both);
 			Assert.AreEqual(2, both);
 
-			engine.Synchronize(noneHandler, PreviewBehavior.None);
+			engine.Synchronize(noneHandler, FilterBehavior.None);
 			Assert.IsFalse(none);
 		}
 
