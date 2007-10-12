@@ -27,7 +27,7 @@ namespace SimpleSharing
 			this.target = target;
 		}
 
-		private IEnumerable<ItemMergeResult> NullPreviewHandler(IRepository targetRepository,
+		private IEnumerable<ItemMergeResult> NullFilterHandler(IRepository targetRepository,
 			IEnumerable<ItemMergeResult> mergedItems)
 		{
 			return mergedItems;
@@ -44,21 +44,21 @@ namespace SimpleSharing
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize()
 		{
-			return SynchronizeImpl(null, NullPreviewHandler, PreviewBehavior.None);
+			return SynchronizeImpl(null, NullFilterHandler, FilterBehavior.None);
 		}
 
 		/// <summary>
 		/// Performs a full sync between the two repositories, optionally calling the 
-		/// given <paramref name="previewer"/> callback as specified by the <paramref name="behavior"/> argument.
+		/// given <paramref name="filter"/> callback as specified by the <paramref name="behavior"/> argument.
 		/// </summary>
 		/// <remarks>
 		/// Items on the source repository are sent first, and then the 
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(PreviewImportHandler previewer, PreviewBehavior behavior)
+		public IList<Item> Synchronize(FilterHandler filter, FilterBehavior behavior)
 		{
-			return SynchronizeImpl(null, previewer, behavior);
+			return SynchronizeImpl(null, filter, behavior);
 		}
 
 		/// <summary>
@@ -73,12 +73,12 @@ namespace SimpleSharing
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize(DateTime? since)
 		{
-			return SynchronizeImpl(since, NullPreviewHandler, PreviewBehavior.None);
+			return SynchronizeImpl(since, NullFilterHandler, FilterBehavior.None);
 		}
 
 		/// <summary>
 		/// Performs a partial sync between the two repositories since the specified date, optionally calling the 
-		/// given <paramref name="previewer"/> callback as specified by the <paramref name="behavior"/> argument.
+		/// given <paramref name="filter"/> callback as specified by the <paramref name="behavior"/> argument.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
 		/// <remarks>
@@ -86,14 +86,14 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
+		public IList<Item> Synchronize(DateTime? since, FilterHandler filter, FilterBehavior behavior)
 		{
-			return SynchronizeImpl(since, previewer, behavior);
+			return SynchronizeImpl(since, filter, behavior);
 		}
 
-		private IList<Item> SynchronizeImpl(DateTime? since, PreviewImportHandler previewer, PreviewBehavior behavior)
+		private IList<Item> SynchronizeImpl(DateTime? since, FilterHandler filter, FilterBehavior behavior)
 		{
-			Guard.ArgumentNotNull(previewer, "previewer");
+			Guard.ArgumentNotNull(filter, "filter");
 
 			IEnumerable<Item> outgoingItems = EnumerateItemsProgress(
 				(since == null) ? source.GetAll() : source.GetAllSince(since),
@@ -102,9 +102,9 @@ namespace SimpleSharing
 			if (!target.SupportsMerge)
 			{
 				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, target);
-				if (behavior == PreviewBehavior.Right || behavior == PreviewBehavior.Both)
+				if (behavior == FilterBehavior.Right || behavior == FilterBehavior.Both)
 				{
-					outgoingToMerge = previewer(target, outgoingToMerge);
+					outgoingToMerge = filter(target, outgoingToMerge);
 				}
 				Import(outgoingToMerge, target);
 			}
@@ -120,9 +120,9 @@ namespace SimpleSharing
 			if (!source.SupportsMerge)
 			{
 				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
-				if (behavior == PreviewBehavior.Left || behavior == PreviewBehavior.Both)
+				if (behavior == FilterBehavior.Left || behavior == FilterBehavior.Both)
 				{
-					incomingToMerge = previewer(source, incomingToMerge);
+					incomingToMerge = filter(source, incomingToMerge);
 				}
 				
 				return Import(incomingToMerge, source);

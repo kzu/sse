@@ -82,6 +82,8 @@
     <Compile Include="FeedReader.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FilterBehavior.cs" />
+    <Compile Include="FilterHandler.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ItemEventArgs.cs">
       <SubType>Code</SubType>
@@ -89,8 +91,6 @@
     <Compile Include="Model\ComparableStack.cs" />
     <Compile Include="NullXmlItem.cs" />
     <Compile Include="ObjectDumper.cs" />
-    <Compile Include="PreviewBehavior.cs" />
-    <Compile Include="PreviewImportHandler.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="RssDateTime.cs" />
     <Compile Include="RssFeedReader.cs">
