@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="FilterBehaviors.cs" />
     <Compile Include="FilterHandler.cs" />
+    <Compile Include="Flag.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ItemEventArgs.cs">
       <SubType>Code</SubType>

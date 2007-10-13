@@ -48,6 +48,7 @@
       <HintPath>..\..\Lib\NMock2.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -66,6 +67,7 @@
     </Compile>
     <Compile Include="CompoundRepositoryFixture.cs" />
     <Compile Include="FeedReaderFixture.cs" />
+    <Compile Include="FlagFixture.cs" />
     <Compile Include="ItemEventArgsFixture.cs">
       <SubType>Code</SubType>
     </Compile>
