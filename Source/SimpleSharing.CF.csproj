@@ -79,6 +79,7 @@
     <Compile Include="DynamicXmlItem.cs" />
     <Compile Include="FeedReader.cs" />
     <Compile Include="FeedWriter.cs" />
+    <Compile Include="Flag.cs" />
     <Compile Include="Guard.cs" />
     <Compile Include="ICloneable.cs" />
     <Compile Include="IRepository.cs" />
