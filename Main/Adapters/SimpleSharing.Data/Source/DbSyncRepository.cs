@@ -199,7 +199,7 @@ namespace SimpleSharing.Data
 			xr.MoveToContent();
 
 			Sync sync = new FeedReader.SyncXmlReader(xr, new RssFeedReader(xr)).ReadSync();
-			sync.ItemHash = (String)reader["ItemHash"];
+			sync.ItemHash = reader["ItemHash"] as string;
 
 			return sync;
 		}
