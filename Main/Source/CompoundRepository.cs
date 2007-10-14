@@ -344,7 +344,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.FriendlyName"/>.
 		/// </summary>
-		public string FriendlyName
+		public virtual string FriendlyName
 		{
 			// TODO: return friendly name of xml repo (add to IXmlRepository interface)
 			get { return this.GetType().Name; }
