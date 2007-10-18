@@ -513,6 +513,74 @@ namespace SimpleSharing.Tests
 
 		#endregion
 
+		#region SparsePurge
+
+		[TestMethod]
+		public void PurgeShouldRemoveOlderSequence()
+		{
+			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false);
+			s = Behaviors.Update(s, "kzu", DateTime.Now, false);
+
+			Assert.AreEqual(2, Count(s.UpdatesHistory));
+			Assert.AreEqual(2, s.Updates);
+
+			Sync purged = Behaviors.SparsePurge(s);
+
+			Assert.AreEqual(1, Count(purged.UpdatesHistory));
+		}
+
+		[TestMethod]
+		public void PurgeShouldPreserveHistoryOrder()
+		{
+			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false);
+			s = Behaviors.Update(s, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)), false);
+			s = Behaviors.Update(s, "vga", DateTime.Now, false);
+
+			Sync purged = Behaviors.SparsePurge(s);
+
+			Assert.AreEqual(2, Count(purged.UpdatesHistory));
+			Assert.AreEqual("vga", purged.LastUpdate.By);
+		}
+
+		[TestMethod]
+		public void PurgeShouldPreserveHistoryNoBy()
+		{
+			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false);
+			s = Behaviors.Update(s, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)), false);
+			s = Behaviors.Update(s, null, DateTime.Now.Subtract(TimeSpan.FromMinutes(10)), false);
+			DateTime lastWhen = Timestamp.Normalize(DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
+			s = Behaviors.Update(s, null, lastWhen, false);
+
+			Sync purged = Behaviors.SparsePurge(s);
+
+			Assert.AreEqual(3, Count(purged.UpdatesHistory));
+			Assert.AreEqual(null, purged.LastUpdate.By);
+			Assert.AreEqual(lastWhen, purged.LastUpdate.When);
+		}
+
+		[TestMethod]
+		public void PurgeShouldPreserveOtherSyncProperties()
+		{
+			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), true);
+			s = Behaviors.Update(s, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)), false);
+			s = Behaviors.Update(s, "vga", DateTime.Now, false);
+
+			// TODO: set other properties
+			s.ItemHash = 5;
+			s.NoConflicts = true;
+			s.Conflicts.Add(new Item(new XmlItem("foo", "bar", GetElement("<payload/>")), new Sync("foo")));
+
+			Sync purged = Behaviors.SparsePurge(s);
+
+			Assert.AreEqual(2, Count(purged.UpdatesHistory));
+			Assert.AreEqual("vga", purged.LastUpdate.By);
+			Assert.AreEqual(5, purged.ItemHash);
+			Assert.IsTrue(purged.NoConflicts);
+			Assert.AreEqual(1, purged.Conflicts.Count);
+		}
+
+		#endregion
+
 		private static void DatesEqualWithoutMillisecond(DateTime d1, DateTime d2)
 		{
 			Assert.AreEqual(d1.Year, d2.Year);
