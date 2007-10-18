@@ -9,5 +9,5 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: AssemblyVersion("0.94.2.*")]
 #if !PocketPC
-[assembly: AssemblyFileVersion("0.94.2.0")]
+[assembly: AssemblyFileVersion("0.94.2.2")]
 #endif
