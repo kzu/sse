@@ -102,5 +102,64 @@ namespace SimpleSharing
 
 			return new Item(R.XmlItem, updatedSync);
 		}
+
+		/// <summary>
+		/// Purges the <paramref name="Sync.UpdatesHistory"/> by retaining the sx:history sub-elements 
+		/// of sx:sync having the highest ‘sequence’ for a given ‘by’, and removing all other 
+		/// sx:history sub-elements of sx:sync that have lower ‘sequence’ values for the same given ‘by’.
+		/// </summary>
+		/// <param name="sync"></param>
+		/// <returns></returns>
+		public static Sync SparsePurge(Sync sync)
+		{
+			List<History> purgedHistory = new List<History>();
+
+			Dictionary<string, History> latest = new Dictionary<string, History>();
+
+			foreach (History history in sync.UpdatesHistory)
+			{
+				// By may be null or empty if not specified.
+				// SSE allows either By or When to be specified.
+				if (String.IsNullOrEmpty(history.By))
+				{
+					// Can't purge without a By
+					purgedHistory.Add(history);
+				}
+				else
+				{
+					History last;
+					if (latest.TryGetValue(history.By, out last))
+					{
+						if (history.Sequence > last.Sequence)
+						{
+							// Replace the item we added before.
+							purgedHistory.Remove(last);
+							latest.Add(history.By, history);
+						}
+					}
+					else
+					{
+						latest.Add(history.By, history);
+						purgedHistory.Add(history);
+					}
+				}
+			}
+
+			purgedHistory.Reverse();
+			Sync purged = new Sync(sync.Id, sync.Updates);
+			purged.Conflicts.AddRange(sync.Conflicts);
+			purged.Deleted = sync.Deleted;
+			purged.ItemHash = sync.ItemHash;
+			purged.NoConflicts = sync.NoConflicts;
+			purged.Updates = sync.Updates;
+
+			foreach (History history in purgedHistory)
+			{
+				purged.AddHistory(history);
+			}
+
+			return purged;
+		}
+	
 	}
 }

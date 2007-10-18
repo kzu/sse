@@ -172,11 +172,17 @@ namespace SimpleSharing
 				switch (result.Operation)
 				{
 					case MergeOperation.Added:
-						repository.Add(result.Proposed);
+						// Clean history before adding
+						repository.Add(
+							new Item(result.Proposed.XmlItem, 
+							Behaviors.SparsePurge(result.Proposed.Sync)));
 						break;
 					case MergeOperation.Updated:
 					case MergeOperation.Conflict:
-						repository.Update(result.Proposed);
+						// Clean history before updating
+						repository.Update(
+							new Item(result.Proposed.XmlItem,
+							Behaviors.SparsePurge(result.Proposed.Sync)));
 						break;
 					case MergeOperation.None:
 						break;
