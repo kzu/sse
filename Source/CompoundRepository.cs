@@ -356,6 +356,7 @@ namespace SimpleSharing
 			{
 				// Add sync on-the-fly.
 				sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
+				sync.ItemHash = xml.GetHashCode();
 				syncRepo.Save(sync);
 			}
 			else if (xml == null && sync != null)
@@ -386,7 +387,7 @@ namespace SimpleSharing
 			{
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
-					DateTime.Now, sync.Deleted);
+					DateTime.Now, false);
 				sync.ItemHash = item.GetHashCode();
 				syncRepo.Save(sync);
 				return updated;
