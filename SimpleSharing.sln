@@ -131,39 +131,39 @@ Global
 		SccNumberOfProjects = 12
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs03.codeplex.com/
-		SccProjectUniqueName0 = ..\\Tools\\CFUnitTester\\TestRunner\\TestRunner.csproj
-		SccProjectTopLevelParentUniqueName0 = SimpleSharing.sln
-		SccProjectName0 = ../Tools/CFUnitTester/TestRunner
-		SccLocalPath0 = ..\\Tools\\CFUnitTester\\TestRunner
-		SccProjectUniqueName1 = ..\\Tools\\CFUnitTester\\GuiTestRunner\\GuiTestRunner.csproj
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = ..\\Tools\\CFUnitTester\\TestRunner\\TestRunner.csproj
 		SccProjectTopLevelParentUniqueName1 = SimpleSharing.sln
-		SccProjectName1 = ../Tools/CFUnitTester/GuiTestRunner
-		SccLocalPath1 = ..\\Tools\\CFUnitTester\\GuiTestRunner
-		SccProjectUniqueName2 = Source\\SimpleSharing.CF.csproj
+		SccProjectName1 = ../Tools/CFUnitTester/TestRunner
+		SccLocalPath1 = ..\\Tools\\CFUnitTester\\TestRunner
+		SccProjectUniqueName2 = ..\\Tools\\CFUnitTester\\GuiTestRunner\\GuiTestRunner.csproj
 		SccProjectTopLevelParentUniqueName2 = SimpleSharing.sln
-		SccProjectName2 = Source
-		SccLocalPath2 = Source
-		SccProjectUniqueName3 = UnitTests\\SimpleSharing.Tests.CF.csproj
+		SccProjectName2 = ../Tools/CFUnitTester/GuiTestRunner
+		SccLocalPath2 = ..\\Tools\\CFUnitTester\\GuiTestRunner
+		SccProjectUniqueName3 = Source\\SimpleSharing.CF.csproj
 		SccProjectTopLevelParentUniqueName3 = SimpleSharing.sln
-		SccProjectName3 = UnitTests
-		SccLocalPath3 = UnitTests
-		SccProjectUniqueName4 = Adapters\\SimpleSharing.Data\\Source\\SimpleSharing.Data.csproj
+		SccProjectName3 = Source
+		SccLocalPath3 = Source
+		SccProjectUniqueName4 = UnitTests\\SimpleSharing.Tests.CF.csproj
 		SccProjectTopLevelParentUniqueName4 = SimpleSharing.sln
-		SccProjectName4 = Adapters/SimpleSharing.Data/Source
-		SccLocalPath4 = Adapters\\SimpleSharing.Data\\Source
-		SccProjectUniqueName5 = Adapters\\SimpleSharing.Data\\UnitTests\\SimpleSharing.Data.Tests.csproj
+		SccProjectName4 = UnitTests
+		SccLocalPath4 = UnitTests
+		SccProjectUniqueName5 = Adapters\\SimpleSharing.Data\\Source\\SimpleSharing.Data.csproj
 		SccProjectTopLevelParentUniqueName5 = SimpleSharing.sln
-		SccProjectName5 = Adapters/SimpleSharing.Data/UnitTests
-		SccLocalPath5 = Adapters\\SimpleSharing.Data\\UnitTests
-		SccProjectUniqueName6 = Adapters\\SimpleSharing.Data\\Source.CF\\SimpleSharing.Data.CF.csproj
+		SccProjectName5 = Adapters/SimpleSharing.Data/Source
+		SccLocalPath5 = Adapters\\SimpleSharing.Data\\Source
+		SccProjectUniqueName6 = Adapters\\SimpleSharing.Data\\UnitTests\\SimpleSharing.Data.Tests.csproj
 		SccProjectTopLevelParentUniqueName6 = SimpleSharing.sln
-		SccProjectName6 = Adapters/SimpleSharing.Data/Source.CF
-		SccLocalPath6 = Adapters\\SimpleSharing.Data\\Source.CF
-		SccProjectUniqueName7 = Adapters\\SimpleSharing.Data\\UnitTests.CF\\SimpleSharing.Data.Tests.CF.csproj
+		SccProjectName6 = Adapters/SimpleSharing.Data/UnitTests
+		SccLocalPath6 = Adapters\\SimpleSharing.Data\\UnitTests
+		SccProjectUniqueName7 = Adapters\\SimpleSharing.Data\\Source.CF\\SimpleSharing.Data.CF.csproj
 		SccProjectTopLevelParentUniqueName7 = SimpleSharing.sln
-		SccProjectName7 = Adapters/SimpleSharing.Data/UnitTests.CF
-		SccLocalPath7 = Adapters\\SimpleSharing.Data\\UnitTests.CF
-		SccLocalPath8 = .
+		SccProjectName7 = Adapters/SimpleSharing.Data/Source.CF
+		SccLocalPath7 = Adapters\\SimpleSharing.Data\\Source.CF
+		SccProjectUniqueName8 = Adapters\\SimpleSharing.Data\\UnitTests.CF\\SimpleSharing.Data.Tests.CF.csproj
+		SccProjectTopLevelParentUniqueName8 = SimpleSharing.sln
+		SccProjectName8 = Adapters/SimpleSharing.Data/UnitTests.CF
+		SccLocalPath8 = Adapters\\SimpleSharing.Data\\UnitTests.CF
 		SccProjectUniqueName9 = Source\\SimpleSharing.csproj
 		SccProjectTopLevelParentUniqueName9 = SimpleSharing.sln
 		SccProjectName9 = Source
@@ -179,9 +179,6 @@ Global
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SimpleSharing1.vsmdi
-	EndGlobalSection
-	GlobalSection(TextTemplating) = postSolution
-		TextTemplating = 1
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -324,5 +321,8 @@ Global
 		{1D2752BC-65DB-4CA0-BAF0-3CB45C1AAD67} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{99CD956C-0F9E-4BA3-9A88-3E4489864378} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{B03988C0-5E00-42A0-BA58-53DE73157208} = {02D69D88-C646-439D-A9D7-77C81B454F77}
+	EndGlobalSection
+	GlobalSection(TextTemplating) = postSolution
+		TextTemplating = 1
 	EndGlobalSection
 EndGlobal

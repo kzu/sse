@@ -20,7 +20,7 @@ namespace SimpleSharing
 			Guard.ArgumentNotNull(sync, "sync");
 			Guard.ArgumentNotNullOrEmptyString(by, "by");
 			Guard.ArgumentNotNull(when, "when");
-			
+
 			//Deleted attribute set to true because it is a deletion (3.2.4 from spec)
 			return Update(sync, by, when, true);
 		}
@@ -39,7 +39,7 @@ namespace SimpleSharing
 			updated.Updates++;
 
 			// 3.2.2 & 3.2.2.a.i
-			History history = new History(by, when, updated.Updates); 
+			History history = new History(by, when, updated.Updates);
 
 			// 3.2.3
 			updated.AddHistory(history);
@@ -149,7 +149,7 @@ namespace SimpleSharing
 			Sync purged = new Sync(sync.Id, sync.Updates);
 			purged.Conflicts.AddRange(sync.Conflicts);
 			purged.Deleted = sync.Deleted;
-			purged.Tag = sync.Tag;
+			purged.ItemHash = sync.ItemHash;
 			purged.NoConflicts = sync.NoConflicts;
 			purged.Updates = sync.Updates;
 
@@ -160,6 +160,6 @@ namespace SimpleSharing
 
 			return purged;
 		}
-	
+
 	}
 }
