@@ -149,7 +149,7 @@ namespace SimpleSharing
 			Sync purged = new Sync(sync.Id, sync.Updates);
 			purged.Conflicts.AddRange(sync.Conflicts);
 			purged.Deleted = sync.Deleted;
-			purged.ItemHash = sync.ItemHash;
+			purged.Tag = sync.Tag;
 			purged.NoConflicts = sync.NoConflicts;
 			purged.Updates = sync.Updates;
 

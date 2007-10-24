@@ -70,11 +70,6 @@
     <Compile Include="Behaviors\MergeBehavior.cs" />
     <Compile Include="CompoundRepository.cs" />
     <Compile Include="DataEventArgs.cs" />
-    <Compile Include="CompoundRepository.XamlBinding.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CompoundRepository.cs</DependentUpon>
-    </Compile>
     <Compile Include="DeviceAuthor.cs" />
     <Compile Include="DynamicXmlItem.cs" />
     <Compile Include="FeedReader.cs" />
