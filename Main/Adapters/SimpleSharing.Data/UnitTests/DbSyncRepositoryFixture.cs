@@ -154,6 +154,37 @@ namespace SimpleSharing.Data.Tests
 		}
 
 		[TestMethod]
+		public void ShouldGetAllSyncItems()
+		{
+			DbSyncRepository repo = null;
+			try
+			{
+				repo = CreateRepository(databaseFactory, "Foo");
+				Sync s = new Sync(Guid.NewGuid().ToString());
+				s.ItemHash = "hash";
+				repo.Save(s);
+
+				s = new Sync(Guid.NewGuid().ToString());
+				s.ItemHash = "hash1";
+				repo.Save(s);
+
+				int count = 0;
+				foreach (Sync sync in repo.GetAll())
+				{
+					count++;
+				}
+
+				Assert.AreEqual(2, count);
+			}
+			finally
+			{
+				Cleanup(repo);
+			}
+
+
+		}
+
+		[TestMethod]
 		public void ShouldModifySingleSyncItem()
 		{
 			DbSyncRepository repo = null;
