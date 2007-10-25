@@ -78,26 +78,26 @@ namespace SimpleSharing.Data
 						{
 							cmd.CommandText = FormatSql(
 								"UPDATE [{0}] " +
-								"SET Sync = {2}, ItemHash = {3}, LastUpdate = {4} " +
-								"WHERE Id = {1}", "Sync", "id", "sync", "itemHash", "lastUpdate");
+								"SET Sync = {1}, ItemHash = {2}, LastUpdate = {3} " +
+								"WHERE Id = {4}", "Sync", "sync", "itemHash", "lastUpdate", "id");
 
 							count = ExecuteNonQuery(cmd,
-								CreateParameter("lastUpdate", DbType.String, 50, Timestamp.Normalize(sync.LastUpdate.When.Value).ToString()),
-								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
-								CreateParameter("itemHash", DbType.String, 254, itemHash));
+								CreateParameter("itemHash", DbType.String, 254, itemHash),
+								CreateParameter("lastUpdate", DbType.String, 50, Timestamp.Normalize(sync.LastUpdate.When.Value).ToString()),
+								CreateParameter("id", DbType.String, 254, sync.Id));
 						}
 						else
 						{
 							cmd.CommandText = FormatSql(
 								"UPDATE [{0}] " +
-								"SET Sync = {2}, [ItemHash] = {3} " +
-								"WHERE Id = {1}", "Sync", "id", "sync", "itemHash");
+								"SET Sync = {1}, [ItemHash] = {2} " +
+								"WHERE Id = {3}", "Sync", "sync", "itemHash", "id");
 
 							count = ExecuteNonQuery(cmd,
-								CreateParameter("id", DbType.String, 254, sync.Id),
 								CreateParameter("sync", DbType.String, 0, data),
-								CreateParameter("itemHash", DbType.String, 254, itemHash));
+								CreateParameter("itemHash", DbType.String, 254, itemHash),
+								CreateParameter("id", DbType.String, 254, sync.Id));
 						}
 					}
 					if (count == 0)
@@ -251,8 +251,23 @@ namespace SimpleSharing.Data
 			if (parms != null)
 			{
 				int index = 1;
+				
+#if !PocketPC
+				if (this.Database is GenericDatabase)
+				{
+					for (index = 1; index < parms.Length + 1; index++ )
+						names[index] = "?";
+				}
+				else
+				{
+					foreach (string parm in parms)
+						names[index++] = this.Database.BuildParameterName(parm);
+				}
+#else
 				foreach (string parm in parms)
-					names[index++] = this.Database.BuildParameterName(parm);
+						names[index++] = this.Database.BuildParameterName(parm);
+#endif
+
 			}
 			return String.Format(cmd, names);
 		}
