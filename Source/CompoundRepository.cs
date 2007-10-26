@@ -315,7 +315,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Update(Item, bool)"/>.
 		/// </summary>
-		public void Update(Item item, bool resolveConflicts)
+		public Item Update(Item item, bool resolveConflicts)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
@@ -329,6 +329,7 @@ namespace SimpleSharing
 			}
 
 			Update(item);
+            return item;
 		}
 
 		/// <summary>

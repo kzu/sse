@@ -85,11 +85,11 @@ namespace SimpleSharing
 		/// <param name="resolveConflicts"><see langword="true"/> to apply the 
 		/// conflict resolution algorithm and update the item; <see langword="false"/> to 
 		/// only save the item any potential conflicts it may have.</param>
-		/// <returns>The updated item if conflicts were resolved.</returns>
+		/// <returns>The updated item if conflicts were resolved, otherwise, the same <paramref name="item"/>.</returns>
 		/// <remarks>
 		/// See 3.4 on SSE spec.
 		/// </remarks>
-		void Update(Item item, bool resolveConflicts);
+		Item Update(Item item, bool resolveConflicts);
 
 		/// <summary>
 		/// Merges the list of items in the repository, and returns any conflicting 
