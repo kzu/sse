@@ -388,7 +388,7 @@ namespace SimpleSharing
 			{
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
-					DateTime.Now, false);
+					DateTime.Now, sync.Deleted);
 				sync.ItemHash = item.GetHashCode();
 				syncRepo.Save(sync);
 				return updated;
