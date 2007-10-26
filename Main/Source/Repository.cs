@@ -93,7 +93,7 @@ namespace SimpleSharing
 		/// that resolves all conflicts, with the <see cref="DeviceAuthor.Current"/> and 
 		/// <see cref="DateTime.Now"/> as the by/when information.
 		/// </summary>
-		public virtual void Update(Item item, bool resolveConflicts)
+		public virtual Item Update(Item item, bool resolveConflicts)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
@@ -103,6 +103,8 @@ namespace SimpleSharing
 			}
 			
 			Update(item);
+
+            return item;
 		}
 
 		/// <summary>

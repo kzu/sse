@@ -268,11 +268,12 @@ namespace SimpleSharing.Tests
 
 			repo.Add(item);
 
-			repo.Update(item, true);
+			Item updated = repo.Update(item, true);
 
 			item = repo.Get(id);
 
 			Assert.AreEqual(0, item.Sync.Conflicts.Count);
+            Assert.AreEqual(item, updated);
 		}
 
 		[TestMethod]

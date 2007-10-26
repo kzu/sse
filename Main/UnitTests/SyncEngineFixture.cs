@@ -404,8 +404,9 @@ namespace SimpleSharing.Tests
 			{
 			}
 
-			public void Update(Item item, bool resolveConflicts)
+			public Item Update(Item item, bool resolveConflicts)
 			{
+                return item;
 			}
 
 			public IEnumerable<Item> Merge(IEnumerable<Item> items)
@@ -433,6 +434,6 @@ namespace SimpleSharing.Tests
 			}
 
 			#endregion
-		}
+        }
 	}
 }
