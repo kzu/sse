@@ -12,7 +12,7 @@ namespace SimpleSharing
 		private bool noConflicts = false;
 		private ComparableStack<History> updatesHistory = new ComparableStack<History>();
 		private ComparableList<Item> conflicts = new ComparableList<Item>();
-		private object itemHash;
+		private object tag;
 
 		public Sync(string id, int updates)
 		{
@@ -65,12 +65,12 @@ namespace SimpleSharing
 		}
 
 		/// <summary>
-		/// Hash of the item information.
+		/// Tag value that univoquely identifies the item
 		/// </summary>
-		public object ItemHash
+		public object Tag
 		{
-			get { return itemHash; }
-			set { itemHash = value; }
+			get { return tag; }
+			set { tag = value; }
 		}
 
 		public Sync Update(string by, DateTime? when)
@@ -118,7 +118,7 @@ namespace SimpleSharing
 				newSync.Conflicts.Add(conflict.Clone());
 			}
 
-			newSync.itemHash = this.itemHash;
+			newSync.tag = this.tag;
 
 			return newSync;
 		}

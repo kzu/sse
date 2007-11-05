@@ -186,7 +186,7 @@ namespace SimpleSharing.Tests
 			payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 			Item item = new Item(
-				new XmlItem("foo", "bar", payload),
+				new XmlItem("foo", "bar", payload, DateTime.Now),
 				Behaviors.Create("1", "kzu", DateTime.Now, false));
 
 			FeedWriter writer = new RssFeedWriter(xw);
@@ -210,7 +210,7 @@ namespace SimpleSharing.Tests
 			payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 			Item item = new Item(
-				new XmlItem("foo", "bar", payload),
+				new XmlItem("foo", "bar", payload, DateTime.Now),
 				Behaviors.Create("1", "kzu", DateTime.Now, false));
 
 			FeedWriter writer = new RssFeedWriter(xw);
@@ -233,7 +233,7 @@ namespace SimpleSharing.Tests
 			payload.InnerXml = "<title>title</title><description>description</description><geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 			Item item = new Item(
-				new XmlItem("foo", "bar", payload),
+				new XmlItem("foo", "bar", payload, DateTime.Now),
 				Behaviors.Create("1", "kzu", null, false));
 
 			FeedWriter writer = new RssFeedWriter(xw);
@@ -269,7 +269,7 @@ namespace SimpleSharing.Tests
 				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 				Item item = new Item(
-					new XmlItem("foo", "bar", payload),
+					new XmlItem("foo", "bar", payload, DateTime.Now),
 					Behaviors.Create("1", "nospam@clariusconsulting.net", DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);
@@ -297,7 +297,7 @@ namespace SimpleSharing.Tests
 				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 				Item item = new Item(
-					new XmlItem("foo", "bar", payload),
+					new XmlItem("foo", "bar", payload, DateTime.Now),
 					Behaviors.Create("1", "MACHINE\\UserName", DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);
@@ -326,7 +326,7 @@ namespace SimpleSharing.Tests
 				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 				Item item = new Item(
-					new XmlItem("foo", "bar", payload),
+					new XmlItem("foo", "bar", payload, DateTime.Now),
 					Behaviors.Create("1", deviceId, DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);
@@ -356,7 +356,7 @@ namespace SimpleSharing.Tests
 				payload.InnerXml = "<geo:point xmlns:geo='http://geo'>25</geo:point>";
 
 				Item item = new Item(
-					new XmlItem("foo", "bar", payload),
+					new XmlItem("foo", "bar", payload, DateTime.Now),
 					Behaviors.Create("1", null, DateTime.Now, false));
 
 				FeedWriter writer = new RssFeedWriter(xw);

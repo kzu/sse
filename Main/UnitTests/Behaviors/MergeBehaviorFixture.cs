@@ -24,10 +24,10 @@ namespace SimpleSharing.Tests
 
 			sb = Behaviors.Update(sb, "vga", DateTime.Now.AddSeconds(5), false);
 
-			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sa);
 			originalItem.XmlItem.Id = sb.Id;
 
-			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
+			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>"), DateTime.Now), sb);
 			incomingItem.XmlItem.Id = sb.Id;
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
@@ -43,10 +43,10 @@ namespace SimpleSharing.Tests
 			Sync sa = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false);
 			Sync sb = sa.Clone();
 
-			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sa);
 			originalItem.XmlItem.Id = sb.Id;
 
-			Item incomingItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sb);
+			Item incomingItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sb);
 			incomingItem.XmlItem.Id = sb.Id;
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
@@ -60,7 +60,7 @@ namespace SimpleSharing.Tests
 			Sync sa = new Sync(Guid.NewGuid().ToString());
 			Behaviors.Update(sa, "kzu", DateTime.Now, false);
 
-			Item incomingItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item incomingItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sa);
 			ItemMergeResult result = Behaviors.Merge(null, incomingItem);
 
 			Assert.AreEqual(MergeOperation.Added, result.Operation);
@@ -74,11 +74,11 @@ namespace SimpleSharing.Tests
 
 			Sync sb = sa.Clone();
 
-			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sa);
 			originalItem.XmlItem.Id = sb.Id;
-			originalItem.Sync.ItemHash = originalItem.XmlItem.GetHashCode();
+			originalItem.Sync.Tag = originalItem.XmlItem.Tag;
 
-			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
+			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>"), DateTime.Now), sb);
 			incomingItem.XmlItem.Id = sb.Id;
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
@@ -94,11 +94,10 @@ namespace SimpleSharing.Tests
 			sb = Behaviors.Update(sb, "vga", DateTime.Now.AddSeconds(50), false);
 			sa = Behaviors.Update(sa, "kzu", DateTime.Now.AddSeconds(100), false);
 
-			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sa);
 			originalItem.XmlItem.Id = sb.Id;
-			originalItem.Sync.ItemHash = originalItem.XmlItem.GetHashCode();
-
-			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
+			originalItem.Sync.Tag = originalItem.XmlItem.Tag;
+			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>"), DateTime.Now), sb);
 			incomingItem.XmlItem.Id = sb.Id;
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
@@ -120,10 +119,10 @@ namespace SimpleSharing.Tests
 			sb = Behaviors.Update(sb, "vga", DateTime.Now.AddSeconds(50), false);
 			sa = Behaviors.Update(sa, "kzu", DateTime.Now.AddSeconds(100), false);
 
-			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), (object)DateTime.Now), sa);
 			originalItem.XmlItem.Id = sb.Id;
 
-			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
+			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>"), (object)DateTime.Now), sb);
 			incomingItem.XmlItem.Id = sb.Id;
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
@@ -149,10 +148,10 @@ namespace SimpleSharing.Tests
 			Sync sa = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", now, false);
 			Sync sb = Behaviors.Update(sa, "kzu", now, false);
 
-			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>")), sa);
+			Item originalItem = new Item(new XmlItem("a", "a", GetElement("<payload/>"), DateTime.Now), sa);
 			originalItem.XmlItem.Id = sb.Id;
 
-			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>")), sb);
+			Item incomingItem = new Item(new XmlItem("b", "b", GetElement("<payload/>"), DateTime.Now), sb);
 			incomingItem.XmlItem.Id = sb.Id;
 
 			ItemMergeResult result = Behaviors.Merge(originalItem, originalItem);

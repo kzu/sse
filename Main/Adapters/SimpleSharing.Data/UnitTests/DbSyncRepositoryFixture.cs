@@ -137,7 +137,7 @@ namespace SimpleSharing.Data.Tests
 			{
 				repo = CreateRepository(databaseFactory, "Foo");
 				Sync s = new Sync(Guid.NewGuid().ToString());
-				s.ItemHash = "hash";
+				s.Tag = "hash";
 
 				repo.Save(s);
 
@@ -161,11 +161,11 @@ namespace SimpleSharing.Data.Tests
 			{
 				repo = CreateRepository(databaseFactory, "Foo");
 				Sync s = new Sync(Guid.NewGuid().ToString());
-				s.ItemHash = "hash";
+				s.Tag = "hash";
 				repo.Save(s);
 
 				s = new Sync(Guid.NewGuid().ToString());
-				s.ItemHash = "hash1";
+				s.Tag = "hash1";
 				repo.Save(s);
 
 				int count = 0;
@@ -192,17 +192,17 @@ namespace SimpleSharing.Data.Tests
 			{
 				repo = CreateRepository(databaseFactory, "Foo");
 				Sync s = new Sync(Guid.NewGuid().ToString());
-				s.ItemHash = "hash";
+				s.Tag = "hash";
 
 				repo.Save(s);
 
 				Sync s1 = s.Update("me", DateTime.Now, false);
-				s1.ItemHash = "New Hash";
+				s1.Tag = "New Hash";
 				repo.Save(s1);
 
 				Sync s2 = repo.Get(s.Id);
 
-				Assert.AreEqual("New Hash", s2.ItemHash);
+				Assert.AreEqual("New Hash", s2.Tag);
 			}
 			finally
 			{

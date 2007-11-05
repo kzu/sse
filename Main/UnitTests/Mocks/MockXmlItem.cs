@@ -10,6 +10,7 @@ namespace SimpleSharing.Tests
 	{
 		string id = Guid.NewGuid().ToString();
 		XmlElement payload;
+		object tag;
 
         public MockXmlItem()
 		{
@@ -32,6 +33,12 @@ namespace SimpleSharing.Tests
 		{
 			get { return id; }
 			set { }
+		}
+
+		public object Tag
+		{
+			get { return tag; }
+			set { tag = value; }
 		}
 
 		public System.Xml.XmlElement Payload

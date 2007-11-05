@@ -330,19 +330,21 @@ namespace SimpleSharing
 #endif
 			if (!item.Sync.Deleted)
 			{
-				xmlRepo.Add(item.XmlItem);
+				object tag = null;
+				xmlRepo.Add(item.XmlItem, out tag);
+
+				item.XmlItem.Tag = tag;
 
 #if !PocketPC
 				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} added to Xml Repository", item.Sync.Id));
 #endif
 			}
 
-			// TODO: replace with hash property.
-			item.Sync.ItemHash = item.XmlItem.GetHashCode(); 
+			item.Sync.Tag = item.XmlItem.Tag; 
 			syncRepo.Save(item.Sync);
 
 #if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} added to Sync Repository with Hash {1}", item.Sync.Id, item.Sync.ItemHash.ToString()));
+			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} added to Sync Repository with Hash {1}", item.Sync.Id, (item.Sync.Tag == null) ? "" : item.Sync.Tag.ToString()));
 #endif
 		}
 
@@ -397,12 +399,14 @@ namespace SimpleSharing
 			}
 			else
 			{
-				// TODO: Should return the hash and save it to the sync.ItemHash.
-				xmlRepo.Update(item.XmlItem);
-				item.Sync.ItemHash = item.XmlItem.GetHashCode();
+				object tag = null;
+
+				xmlRepo.Update(item.XmlItem, out tag);
+				item.XmlItem.Tag = tag;
+				item.Sync.Tag = item.XmlItem.Tag;
 
 #if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} updated in Sync Repository with Hash {1}", item.Sync.Id, item.Sync.ItemHash.ToString()));
+				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} updated in Sync Repository with Hash {1}", item.Sync.Id, item.Sync.Tag.ToString()));
 #endif
 			}
 
@@ -458,11 +462,11 @@ namespace SimpleSharing
 			{
 				// Add sync on-the-fly.
 				sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
-				sync.ItemHash = xml.GetHashCode();
+				sync.Tag = xml.Tag;
 				syncRepo.Save(sync);
 
 #if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Created sync for item with ID {0} and hashcode {1}", xml.Id, sync.ItemHash.ToString()));
+				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Created sync for item with ID {0} and hashcode {1}", xml.Id, sync.Tag.ToString()));
 #endif
 			}
 			else if (xml == null && sync != null)
@@ -493,15 +497,15 @@ namespace SimpleSharing
 		/// </summary>
 		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
 		{
-			if (item.GetHashCode().ToString() != sync.ItemHash.ToString())
+			if (item.Tag != sync.Tag)
 			{
 #if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Updating Sync for Item with ID {0} - Original HashCode {1} / Current HashCode {2}", sync.Id, sync.ItemHash.ToString(), item.GetHashCode().ToString()));
+				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Updating Sync for Item with ID {0} - Original HashCode {1} / Current HashCode {2}", sync.Id, sync.Tag.ToString(), item.GetHashCode().ToString()));
 #endif
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
 					DateTime.Now, sync.Deleted);
-				sync.ItemHash = item.GetHashCode();
+				sync.Tag = item.Tag;
 				syncRepo.Save(sync);
 
 				return updated;

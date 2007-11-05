@@ -9,15 +9,27 @@ namespace SimpleSharing
         private string id;
         private string description;
         private string title;
-        
+		private object tag;
+
         private XmlElement payload;
 
-        public XmlItem(string title, string description, XmlElement payload)
-            : this(Guid.NewGuid().ToString(), title, description, payload)
+        public XmlItem(string title, string description, XmlElement payload, object tag)
+            : this(Guid.NewGuid().ToString(), title, description, payload, tag)
         {
         }
 
-        public XmlItem(string id, string title, string description, XmlElement payload)
+		public XmlItem(string title, string description, XmlElement payload)
+			: this(Guid.NewGuid().ToString(), title, description, payload)
+		{
+		}
+
+
+		public XmlItem(string id, string title, string description, XmlElement payload)
+			: this(id, title, description, payload, null)
+		{
+		}
+
+		public XmlItem(string id, string title, string description, XmlElement payload, object tag)
         {
             Guard.ArgumentNotNullOrEmptyString(id, "id");
 
@@ -29,6 +41,7 @@ namespace SimpleSharing
             this.id = id;
             this.title = title;
             this.description = description;
+			this.tag = tag;
             this.payload = payload;
         }
 
@@ -64,6 +77,16 @@ namespace SimpleSharing
             }
         }
 
+		public object Tag
+		{
+			get { return tag; }
+			set
+			{
+				Guard.ArgumentNotNull(value, "Tag");
+				tag = value;
+			}
+		}
+
         #region Equality
 
         public bool Equals(IXmlItem other)
@@ -85,6 +108,7 @@ namespace SimpleSharing
                 return obj1.Id == obj2.Id &&
                     obj1.Title == obj2.Title &&
                     obj1.Description == obj2.Description &&
+					obj1.Tag == obj2.Tag &&
                     obj1.Payload.OuterXml == obj2.Payload.OuterXml;
             }
 
@@ -117,7 +141,7 @@ namespace SimpleSharing
 
         protected virtual IXmlItem DoClone()
         {
-            return new XmlItem(id, title, description, payload);
+            return new XmlItem(id, title, description, payload, tag);
         }
 
         #endregion
