@@ -434,7 +434,7 @@ namespace SimpleSharing.Tests
 		public void ResolveShouldNotUpdateArgument()
 		{
 			Item item = new Item(
-				new XmlItem("foo", "bar", GetElement("<payload/>")),
+				new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now),
 				Behaviors.Create(Guid.NewGuid().ToString(), "one", DateTime.Now, false));
 
 			Item resolved = Behaviors.ResolveConflicts(item, "two", DateTime.Now, false);
@@ -446,7 +446,7 @@ namespace SimpleSharing.Tests
 		public void ResolveShouldUpdateEvenIfNoConflicts()
 		{
 			Item item = new Item(
-				new XmlItem("foo", "bar", GetElement("<payload/>")),
+				new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now),
 				Behaviors.Create(Guid.NewGuid().ToString(), "one", DateTime.Now, false));
 
 			Item resolved = Behaviors.ResolveConflicts(item, "two", DateTime.Now, false);
@@ -459,7 +459,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldAddConflictItemHistoryWithoutIncrementingUpdates()
 		{
-			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"));
+			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now);
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "one",
 				DateTime.Now.Subtract(TimeSpan.FromMinutes(10)), false);
 			Sync conflictSync = Behaviors.Create(sync.Id, "two",
@@ -476,7 +476,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldRemoveConflicts()
 		{
-			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"));
+			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now);
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "one",
 				DateTime.Now.Subtract(TimeSpan.FromMinutes(10)), false);
 			Sync conflictSync = Behaviors.Create(sync.Id, "two",
@@ -492,7 +492,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldNotAddConflictItemHistoryIfSubsumed()
 		{
-			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"));
+			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now);
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "one",
 				DateTime.Now, false);
 			Sync conflictSync = sync.Clone();
@@ -566,15 +566,15 @@ namespace SimpleSharing.Tests
 			s = Behaviors.Update(s, "vga", DateTime.Now, false);
 
 			// TODO: set other properties
-			s.ItemHash = 5;
+			s.Tag = 5;
 			s.NoConflicts = true;
-			s.Conflicts.Add(new Item(new XmlItem("foo", "bar", GetElement("<payload/>")), new Sync("foo")));
+			s.Conflicts.Add(new Item(new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now), new Sync("foo")));
 
 			Sync purged = Behaviors.SparsePurge(s);
 
 			Assert.AreEqual(2, Count(purged.UpdatesHistory));
 			Assert.AreEqual("vga", purged.LastUpdate.By);
-			Assert.AreEqual(5, purged.ItemHash);
+			Assert.AreEqual(5, purged.Tag);
 			Assert.IsTrue(purged.NoConflicts);
 			Assert.AreEqual(1, purged.Conflicts.Count);
 		}

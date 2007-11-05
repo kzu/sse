@@ -9,7 +9,7 @@ namespace SimpleSharing
 	public class NullXmlItem : IXmlItem
 	{
 		string id;
-        object hash = null;
+        object tag = null;
 		XmlElement emptyPayload;
 
 		public NullXmlItem(string id)
@@ -26,10 +26,10 @@ namespace SimpleSharing
 			set { id = value; }
 		}
 
-		public object Hash
+		public object Tag
 		{
-			get { return hash; }
-			set { hash = value; }
+			get { return tag; }
+			set { tag = value; }
 		}
 
 		public string Title
@@ -64,7 +64,10 @@ namespace SimpleSharing
 
 		protected virtual IXmlItem DoClone()
 		{
-			return new NullXmlItem(id);
+			NullXmlItem item = new NullXmlItem(id);
+			item.tag = tag;
+
+			return item;
 		}
 
 		#endregion
@@ -87,7 +90,7 @@ namespace SimpleSharing
 			if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
 			{
 				return obj1.id == obj2.id && 
-					obj1.hash == obj2.hash;
+					obj1.tag == obj2.tag;
 			}
 
 			return false;
@@ -95,8 +98,8 @@ namespace SimpleSharing
 
 		public override int GetHashCode()
 		{
-            if (hash != null)
-                return id.GetHashCode() ^ hash.GetHashCode();
+            if (tag != null)
+                return id.GetHashCode() ^ tag.GetHashCode();
             else
                 return id.GetHashCode();
 

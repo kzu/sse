@@ -62,18 +62,21 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetExistingItem()
 		{
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
+			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"), DateTime.Now);
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			
+			object tag = null;
+			xmlRepo.Add(item, out tag);
+
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
 
 			Item i = repo.Get(item.Id);
 
-			Assert.AreEqual(item.GetHashCode(), i.XmlItem.GetHashCode());
-			Assert.AreEqual(sync.GetHashCode(), i.Sync.GetHashCode());
+			Assert.AreEqual(item.Tag, i.XmlItem.Tag);
+			Assert.AreEqual(sync.Tag, i.Sync.Tag);
 		}
 
 		[TestMethod]
@@ -81,41 +84,49 @@ namespace SimpleSharing.Tests
 		{
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			
+			object tag = null;
+			xmlRepo.Add(item, out tag);
+
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			item.Title = "changed";
-			xmlRepo.Update(item);
+
+			xmlRepo.Update(item, out tag);
+			item.Tag = tag;
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
 
 			Item i = repo.Get(item.Id);
 
-			Assert.AreEqual(item.GetHashCode(), i.XmlItem.GetHashCode());
+			Assert.AreEqual(item.Tag, i.XmlItem.Tag);
 			Assert.AreEqual(2, i.Sync.Updates);
 		}
 
 		[TestMethod]
 		public void ShouldGetCreateNewSyncForNewXmlItem()
 		{
+			object tag = null;
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
-			xmlRepo.Add(item);
+			xmlRepo.Add(item, out tag);
+
+			item.Tag = tag;
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
 
 			Item i = repo.Get(item.Id);
 
-			Assert.AreEqual(item.GetHashCode(), i.XmlItem.GetHashCode());
+			Assert.AreEqual(item.Tag, i.XmlItem.Tag);
 			Assert.AreEqual(1, i.Sync.Updates);
 		}
 
 		[TestMethod]
 		public void ShouldGetDeletedItem()
 		{
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
+			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"), DateTime.Now);
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
+			sync.Tag = item.Tag;
 			//Not added simulates deleted.
 			//xmlRepo.Add(item);
 			syncRepo.Save(sync);
@@ -133,14 +144,20 @@ namespace SimpleSharing.Tests
 		{
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+
+			object tag = null;
+			xmlRepo.Add(item, out tag);
+
+			item.Tag = tag;
+			sync.Tag = tag;
+
 			syncRepo.Save(sync);
 
 			item = new XmlItem(Guid.NewGuid().ToString(), "bar", "baz", GetElement("<payload />"));
 			sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
@@ -153,17 +170,21 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetAllWithAutoUpdatesToSync()
 		{
+			object tag = null;
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
-			xmlRepo.Add(item);
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
 
 			item = new XmlItem(Guid.NewGuid().ToString(), "bar", "baz", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			item.Title = "changed";
-			xmlRepo.Update(item);
+			
+			xmlRepo.Update(item, out tag);
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
 
@@ -181,10 +202,13 @@ namespace SimpleSharing.Tests
 			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false);
 			syncRepo.Save(sync);
 
+			object tag;
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = item.Tag;
 			syncRepo.Save(sync);
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
@@ -200,8 +224,11 @@ namespace SimpleSharing.Tests
 		{
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			object tag;
+			xmlRepo.Add(item, out tag);
+
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			// simulates a deleted item, there's sync but no item.
@@ -224,16 +251,20 @@ namespace SimpleSharing.Tests
 		{
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			object tag;
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			DateTime since = DateTime.Now;
 
 			item = new XmlItem(Guid.NewGuid().ToString(), "bar", "baz", GetElement("<payload />"));
 			sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
@@ -250,16 +281,20 @@ namespace SimpleSharing.Tests
 
 			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			object tag;
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			DateTime since = DateTime.Now;
 
 			item = new XmlItem(Guid.NewGuid().ToString(), "bar", "baz", GetElement("<payload />"));
 			sync = Behaviors.Create(item.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(4)), false);
-			sync.ItemHash = item.GetHashCode();
-			xmlRepo.Add(item);
+			
+			xmlRepo.Add(item, out tag);
+			item.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			Assert.AreEqual(0, Count(repo.GetAllSince(since)));
@@ -279,14 +314,13 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
-
+			
 			Item item = new Item(xml, sync);
 
 			repo.Add(item);
 
-			Assert.AreEqual(xml.GetHashCode(), xmlRepo.Get(xml.Id).GetHashCode());
-			Assert.AreEqual(sync.GetHashCode(), syncRepo.Get(sync.Id).GetHashCode());
+			Assert.AreEqual(xml.Tag, xmlRepo.Get(xml.Id).Tag);
+			Assert.AreEqual(sync.Tag, syncRepo.Get(sync.Id).Tag);
 		}
 
 		[TestMethod]
@@ -303,7 +337,7 @@ namespace SimpleSharing.Tests
 
 			Item saved = repo.Get(xml.Id);
 
-			Assert.AreEqual(saved.XmlItem.GetHashCode(), saved.Sync.ItemHash);
+			Assert.AreEqual(saved.XmlItem.Tag, saved.Sync.Tag);
 		}
 
 		[TestMethod]
@@ -313,7 +347,7 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
+			
 			sync = Behaviors.Delete(sync, "kzu", DateTime.Now);
 
 			Item item = new Item(xml, sync);
@@ -321,7 +355,7 @@ namespace SimpleSharing.Tests
 			repo.Add(item);
 
 			Assert.IsNull(xmlRepo.Get(xml.Id));
-			Assert.AreEqual(sync.GetHashCode(), syncRepo.Get(sync.Id).GetHashCode());
+			Assert.AreEqual(sync.Tag, syncRepo.Get(sync.Id).Tag);
 		}
 
 		[TestMethod]
@@ -331,8 +365,11 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
-			xmlRepo.Add(xml);
+
+			object tag;
+			xmlRepo.Add(xml, out tag);
+			xml.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			repo.Delete(xml.Id);
@@ -355,9 +392,12 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
 			sync = Behaviors.Delete(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(4)));
-			xmlRepo.Add(xml);
+
+			object tag;
+			xmlRepo.Add(xml, out tag);
+			xml.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			sync = Behaviors.Update(sync, "kzu", DateTime.Now, false);
@@ -367,8 +407,8 @@ namespace SimpleSharing.Tests
 
 			repo.Update(item);
 
-			Assert.AreEqual(xml.GetHashCode(), xmlRepo.Get(xml.Id).GetHashCode()); 
-			Assert.AreEqual(sync.GetHashCode(), syncRepo.Get(sync.Id).GetHashCode());
+			Assert.AreEqual(xml.Tag, xmlRepo.Get(xml.Id).Tag); 
+			Assert.AreEqual(sync.Tag, syncRepo.Get(sync.Id).Tag);
 		}
 
 		[TestMethod]
@@ -378,9 +418,14 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
+			
 			sync = Behaviors.Delete(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(4)));
-			xmlRepo.Add(xml);
+
+			object tag;
+			xmlRepo.Add(xml, out tag);
+			xml.Tag = tag;
+			sync.Tag = tag;
+
 			syncRepo.Save(sync);
 
 			sync = Behaviors.Update(sync, "kzu", DateTime.Now, false);
@@ -392,8 +437,8 @@ namespace SimpleSharing.Tests
 
 			Item item2 = repo.Get(xml.Id);
 
-			Assert.AreEqual(xml.GetHashCode(), item2.XmlItem.GetHashCode());
-			Assert.AreEqual(sync.GetHashCode(), item2.Sync.GetHashCode());
+			Assert.AreEqual(xml.Tag, item2.XmlItem.Tag);
+			Assert.AreEqual(sync.Tag, item2.Sync.Tag);
 		}
 
 		[TestMethod]
@@ -403,9 +448,13 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
+			
 			sync = Behaviors.Delete(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(4)));
-			xmlRepo.Add(xml);
+
+			object tag;
+			xmlRepo.Add(xml, out tag);
+			xml.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			sync = Behaviors.Update(sync, "kzu", DateTime.Now, false);
@@ -417,7 +466,7 @@ namespace SimpleSharing.Tests
 
 			Item item2 = repo.Get(xml.Id);
 
-			Assert.AreEqual(item2.XmlItem.GetHashCode(), item2.Sync.ItemHash);
+			Assert.AreEqual(item2.XmlItem.Tag, item2.Sync.Tag);
 		}
 
 		[TestMethod]
@@ -427,22 +476,25 @@ namespace SimpleSharing.Tests
 
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false);
-			sync.ItemHash = xml.GetHashCode();
-
+			
 			Item conflict = new Item(xml.Clone(), sync.Update("vga", DateTime.Now));
 			conflict.XmlItem.Title = "bar";
 
 			sync = sync.Update("kzu", DateTime.Now);
 			sync.Conflicts.Add(conflict);
-				
-			xmlRepo.Add(xml);
-			syncRepo.Save(sync);
 
+			object tag;
+			xmlRepo.Add(xml, out tag);
+			xml.Tag = tag;
+			sync.Tag = tag;
+			syncRepo.Save(sync);
 
 			xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			sync.ItemHash = xml.GetHashCode();
-			xmlRepo.Add(xml);
+
+			xmlRepo.Add(xml, out tag);
+			xml.Tag = tag;
+			sync.Tag = tag;
 			syncRepo.Save(sync);
 
 			List<Item> conflicts = new List<Item>(repo.GetConflicts());
@@ -468,9 +520,10 @@ namespace SimpleSharing.Tests
 			repo.Add(item);
 			DateTime? lastUpdated = item.Sync.LastUpdate.When;
 
+			object tag;
 			// Local editing outside of SSE by the local app.
 			xmlRepo.Update(new XmlItem(id, "changed", item.XmlItem.Description,
-				item.XmlItem.Payload));
+				item.XmlItem.Payload), out tag);
 
 			// Export of same item should cause it to 
 			// be updated with new Sync info and a no-op on sync.

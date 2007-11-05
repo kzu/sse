@@ -83,8 +83,8 @@ namespace SimpleSharing.Data
 				using (DbTransaction transaction = conn.BeginTransaction())
 				{
 					object itemHash = DBNull.Value;
-					if (sync.ItemHash != null)
-						itemHash = sync.ItemHash.ToString();
+					if (sync.Tag != null)
+						itemHash = sync.Tag.ToString();
 
 					int count;
 					using (DbCommand cmd = conn.CreateCommand())
@@ -228,9 +228,9 @@ namespace SimpleSharing.Data
 			xr.MoveToContent();
 
 			Sync sync = new FeedReader.SyncXmlReader(xr, new RssFeedReader(xr)).ReadSync();
-			sync.ItemHash = reader["ItemHash"] as string;
+			sync.Tag = reader["ItemHash"] as string;
 #if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Sync read, ID {0}, itemHash {1}", sync.Id, sync.ItemHash.ToString()));
+			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Sync read, ID {0}, itemHash {1}", sync.Id, sync.Tag.ToString()));
 #endif
 			return sync;
 		}

@@ -93,6 +93,7 @@ namespace SimpleSharing
 
 			string title = null;
 			string description = null;
+			DateTime lastUpdated = DateTime.MinValue;
 
 			MemoryStream mem = new MemoryStream();
 			XmlWriter writer = XmlWriter.Create(mem);
@@ -111,6 +112,7 @@ namespace SimpleSharing
 					else if (reader.LocalName == "pubDate" && reader.NamespaceURI.Length == 0)
 					{
 						string value = ReadElementValue(reader);
+						lastUpdated = RssDateTime.Parse(value).LocalTime;
 						writer.WriteElementString("pubDate", value);
 					}
 					else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
@@ -143,7 +145,7 @@ namespace SimpleSharing
 			doc.Load(mem);
 			XmlElement payload = doc.DocumentElement;
 
-			return new XmlItem(title, description, payload);
+			return new XmlItem(title, description, payload, lastUpdated);
 		}
 	}
 }

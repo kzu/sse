@@ -350,7 +350,7 @@ namespace SimpleSharing.Tests
 
 		private Item CreateItem(string title, string id, History history, params History[] otherHistory)
 		{
-			XmlItem xml = new XmlItem(title, null, GetElement("<payload/>"));
+			XmlItem xml = new XmlItem(title, null, GetElement("<payload/>"), DateTime.Now);
 			Sync sync = Behaviors.Create(id, history.By, history.When, false);
 			foreach (History h in otherHistory)
 			{

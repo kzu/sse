@@ -27,7 +27,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldThrowIfAddNullItem()
 		{
-			CreateRepository().Add(null);
+			object tag = null;
+			CreateRepository().Add(null, out tag);
 		}
 
 		[TestMethod]
@@ -36,7 +37,8 @@ namespace SimpleSharing.Tests
 			IXmlItem item = new MockXmlItem();
 			IXmlRepository repo = CreateRepository();
 
-			repo.Add(item);
+			object tag = null;
+			repo.Add(item, out tag);
 
 			Assert.IsTrue(repo.Contains(item.Id));
 		}
@@ -46,7 +48,8 @@ namespace SimpleSharing.Tests
 		{
 			IXmlItem item = new MockXmlItem();
 			IXmlRepository repo = CreateRepository();
-			repo.Add(item);
+			object tag = null;
+			repo.Add(item, out tag);
 
 			IXmlItem item2 = repo.Get(item.Id);
 
@@ -93,9 +96,10 @@ namespace SimpleSharing.Tests
 		public void ShouldEnumerateAllItems()
 		{
 			IXmlRepository repo = CreateRepository();
-			repo.Add(new MockXmlItem());
-			repo.Add(new MockXmlItem());
-			repo.Add(new MockXmlItem());
+			object tag = null;
+			repo.Add(new MockXmlItem(), out tag);
+			repo.Add(new MockXmlItem(), out tag);
+			repo.Add(new MockXmlItem(), out tag);
 
 			IEnumerable<IXmlItem> items = repo.GetAll();
 
@@ -105,16 +109,18 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetAllSinceDate()
 		{
+			object tag = null;
+
 			IXmlRepository repo = CreateRepository();
-			repo.Add(new MockXmlItem());
+			repo.Add(new MockXmlItem(), out tag);
 			Thread.Sleep(1000);
 
 			DateTime now = Timestamp.Normalize(DateTime.Now);
 
 			Thread.Sleep(1000);
 
-			repo.Add(new MockXmlItem());
-			repo.Add(new MockXmlItem());
+			repo.Add(new MockXmlItem(), out tag);
+			repo.Add(new MockXmlItem(), out tag);
 
 			IEnumerable<IXmlItem> items = repo.GetAllSince(now);
 
@@ -134,9 +140,11 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldRemoveTrueForExistingId()
 		{
+			object tag = null;
+
 			IXmlRepository repo = CreateRepository();
 			IXmlItem item = new MockXmlItem();
-			repo.Add(item);
+			repo.Add(item, out tag);
 
 			bool removed = repo.Remove(item.Id);
 
@@ -146,9 +154,10 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotReturnSameItemInstanceButEqual()
 		{
+			object tag = null;
 			IXmlRepository repo = CreateRepository();
 			IXmlItem item = new MockXmlItem();
-			repo.Add(item);
+			repo.Add(item, out tag);
 
 			IXmlItem item2 = repo.Get(item.Id);
 
@@ -158,13 +167,15 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldUpdateItem()
 		{
+			object tag = null;
+
 			IXmlRepository repo = CreateRepository();
 			IXmlItem item = new MockXmlItem();
-			repo.Add(item);
+			repo.Add(item, out tag);
 
 			item.Payload.InnerXml = "<foo>updated</foo>";
 
-			repo.Update(item);
+			repo.Update(item, out tag);
 
 			IXmlItem item2 = repo.Get(item.Id);
 
@@ -175,7 +186,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldUpdateThrowIfNullItem()
 		{
-			CreateRepository().Update(null);
+			object tag = null;
+			CreateRepository().Update(null, out tag);
 		}
 	}
 }

@@ -75,7 +75,7 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now, false);
-			sync.ItemHash = xml.GetHashCode();
+			sync.Tag = xml.Tag;
 			Item item = new Item(xml, sync);
 
 			repo.Add(item);
@@ -221,9 +221,9 @@ namespace SimpleSharing.Tests
 			DateTime created = new DateTime(2007, 9, 18, 12, 56, 23);
 			DateTime since = new DateTime(2007, 9, 18, 12, 56, 23, 500);
 
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
+			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"), DateTime.Now);
 			Sync sync = Behaviors.Create(item.Id, "kzu", created, false);
-			sync.ItemHash = item.GetHashCode();
+			sync.Tag = item.Tag;
 
 			IRepository repo = CreateRepository();
 			repo.Add(new Item(item, sync));
@@ -263,7 +263,7 @@ namespace SimpleSharing.Tests
 				Behaviors.Update(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromHours(2)), false));
 			sync.Conflicts.Add(
 				new Item(
-					new XmlItem("foo", "bar", GetElement("<payload/>")),
+					new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now),
 					Behaviors.Update(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromHours(4)), false)));
 
 			repo.Add(item);

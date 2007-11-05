@@ -10,7 +10,7 @@ namespace SimpleSharing.Tests
 {
 	public class MockXmlRepository : IXmlRepository
 	{
-        Dictionary<string, MockXmlItem> items = new Dictionary<string, MockXmlItem>();
+        Dictionary<string, IXmlItem> items = new Dictionary<string, IXmlItem>();
 
         private XmlElement GetElement(string xml)
         {
@@ -22,9 +22,9 @@ namespace SimpleSharing.Tests
         public MockXmlRepository AddOneItem()
         {
             string id = Guid.NewGuid().ToString();
-            items.Add(id, new MockXmlItem(new XmlItem(id,
+            items.Add(id, new XmlItem(id,
                 "Foo Title", "Foo Description",
-                GetElement("<Foo Title='Foo'/>")), DateTime.Now));
+                GetElement("<Foo Title='Foo'/>"), DateTime.Now));
 
             return this;
         }
@@ -32,14 +32,14 @@ namespace SimpleSharing.Tests
         public MockXmlRepository AddTwoItems()
         {
             string id = Guid.NewGuid().ToString();
-            items.Add(id, new MockXmlItem(new XmlItem(id,
+            items.Add(id, new XmlItem(id,
                 "Foo Title", "Foo Description",
-                GetElement("<Foo Title='Foo'/>")), DateTime.Now));
+				GetElement("<Foo Title='Foo'/>"), DateTime.Now));
 
             id = Guid.NewGuid().ToString();
-            items.Add(id, new MockXmlItem(new XmlItem(id,
+            items.Add(id, new XmlItem(id,
                 "Bar Title", "Bar Description",
-                GetElement("<Foo Title='Foo'/>")), DateTime.Now));
+				GetElement("<Foo Title='Foo'/>"), DateTime.Now));
 
             return this;
         }
@@ -47,31 +47,36 @@ namespace SimpleSharing.Tests
         public MockXmlRepository AddThreeItemsByDays()
         {
             string id = Guid.NewGuid().ToString();
-            items.Add(id, new MockXmlItem(new XmlItem(id,
+            items.Add(id, new XmlItem(id,
                 "Foo Title", "Foo Description",
-                GetElement("<Foo Title='Foo'/>")), DateTime.Now));
+				GetElement("<Foo Title='Foo'/>"), DateTime.Now));
 
             id = Guid.NewGuid().ToString();
-            items.Add(id, new MockXmlItem(new XmlItem(id,
+            items.Add(id, new XmlItem(id,
                 "Bar Title", "Bar Description",
-                GetElement("<Foo Title='Foo'/>")), DateTime.Now.Subtract(TimeSpan.FromDays(1))));
+				GetElement("<Foo Title='Foo'/>"), DateTime.Now.Subtract(TimeSpan.FromDays(1))));
 
             id = Guid.NewGuid().ToString();
-            items.Add(id, new MockXmlItem(new XmlItem(id,
+            items.Add(id, new XmlItem(id,
                 "Baz Title", "Baz Description",
-                GetElement("<Foo Title='Foo'/>")), DateTime.Now.Subtract(TimeSpan.FromDays(3))));
+				GetElement("<Foo Title='Foo'/>"), DateTime.Now.Subtract(TimeSpan.FromDays(3))));
 
             return this;
         }
 
-        public void Add(IXmlItem item)
+        public void Add(IXmlItem item, out object tag)
         {
             Guard.ArgumentNotNull(item, "item");
             Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
 
             IXmlItem clone = item.Clone();
 
-            items.Add(item.Id, new MockXmlItem(clone, DateTime.Now));
+			tag = DateTime.Now;
+			clone.Tag = tag;
+
+            items.Add(item.Id, clone);
+
+
         }
 
         public bool Contains(string id)
@@ -87,7 +92,7 @@ namespace SimpleSharing.Tests
 
             if (items.ContainsKey(id))
             {
-                return items[id].Item.Clone();
+                return items[id].Clone();
             }
 
             return null;
@@ -98,7 +103,7 @@ namespace SimpleSharing.Tests
             return items.Remove(id);
         }
 
-        public void Update(IXmlItem item)
+        public void Update(IXmlItem item, out object tag)
         {
             Guard.ArgumentNotNull(item, "item");
             Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
@@ -106,25 +111,27 @@ namespace SimpleSharing.Tests
             if (!items.ContainsKey(item.Id))
                 throw new KeyNotFoundException();
 
-            IXmlItem clone = item.Clone();
-            items[item.Id].Item = clone;
-            items[item.Id].Timestamp = DateTime.Now;
+			tag = DateTime.Now;
+			IXmlItem clone = item.Clone();
+			clone.Tag = tag;
+
+            items[item.Id] = clone;
         }
 
         public IEnumerable<IXmlItem> GetAll()
         {
-            foreach (MockXmlItem item in items.Values)
+            foreach (IXmlItem item in items.Values)
             {
-                yield return item.Item.Clone();
+                yield return item.Clone();
             }
         }
 
         public IEnumerable<IXmlItem> GetAllSince(DateTime date)
         {
-            foreach (MockXmlItem item in items.Values)
+            foreach (IXmlItem item in items.Values)
             {
-                if (item.Timestamp >= date)
-                    yield return item.Item.Clone();
+                if (((DateTime)item.Tag) >= date)
+                    yield return item.Clone();
             }
         }
 
@@ -134,10 +141,10 @@ namespace SimpleSharing.Tests
 
 			DateTime first = DateTime.MaxValue;
 
-			foreach (MockXmlItem item in items.Values)
+			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp < first)
-					first = item.Timestamp;
+				if (((DateTime)item.Tag) < first)
+					first = (DateTime)item.Tag;
 			}
 
 			return first;
@@ -149,10 +156,10 @@ namespace SimpleSharing.Tests
 
 			DateTime first = DateTime.MaxValue;
 
-			foreach (MockXmlItem item in items.Values)
+			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp < first && item.Timestamp > since)
-					first = item.Timestamp;
+				if (((DateTime)item.Tag) < first && ((DateTime)item.Tag) > since)
+					first = (DateTime)item.Tag;
 			}
 
 			return first;
@@ -164,26 +171,13 @@ namespace SimpleSharing.Tests
 
 			DateTime last = DateTime.MinValue;
 
-			foreach (MockXmlItem item in items.Values)
+			foreach (IXmlItem item in items.Values)
 			{
-				if (item.Timestamp > last)
-					last = item.Timestamp;
+				if (((DateTime)item.Tag) > last)
+					last = (DateTime)item.Tag;
 			}
 
 			return last;
         }
-
-        class MockXmlItem
-        {
-            public IXmlItem Item;
-            public DateTime Timestamp;
-
-            public MockXmlItem(IXmlItem item, DateTime timestamp)
-            {
-                Item = item;
-                Timestamp = timestamp;
-            }
-        }
-
     }
 }
