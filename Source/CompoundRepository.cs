@@ -497,7 +497,7 @@ namespace SimpleSharing
 		/// </summary>
 		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
 		{
-			if (item.Tag != sync.Tag)
+			if (item.Tag.ToString() != sync.Tag.ToString())
 			{
 #if !PocketPC
 				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Updating Sync for Item with ID {0} - Original HashCode {1} / Current HashCode {2}", sync.Id, sync.Tag.ToString(), item.GetHashCode().ToString()));
