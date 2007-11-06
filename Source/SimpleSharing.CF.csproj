@@ -116,6 +116,8 @@
     <Compile Include="SerializerXmlItem.cs" />
     <Compile Include="SyncEngine.cs" />
     <Compile Include="Timestamp.cs" />
+    <Compile Include="TraceEventType.cs" />
+    <Compile Include="Tracer.cs" />
     <Compile Include="XmlItem.cs" />
     <Compile Include="XmlNamespaceFilteringReader.cs" />
     <Compile Include="XmlNamespaces.cs" />

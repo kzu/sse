@@ -30,19 +30,6 @@ namespace SimpleSharing.Tests
 			syncs[sync.Id] = sync.Clone();
 		}
 
-		public DateTime? GetLastSync(string feed)
-		{
-			if (!lastSync.ContainsKey(feed))
-				return null;
-
-			return lastSync[feed];
-		}
-
-		public void SetLastSync(string feed, DateTime date)
-		{
-			lastSync[feed] = date;
-		}
-
 		public IEnumerable<Sync> GetAll()
 		{
 			Sync[] values = new Sync[syncs.Count];

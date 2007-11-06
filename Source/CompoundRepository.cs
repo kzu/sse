@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-#if !PocketPC
 using System.Diagnostics;
-#endif
 
 namespace SimpleSharing
 {
@@ -14,9 +12,6 @@ namespace SimpleSharing
 	[Obsolete("Use IRepository interface directly")]
 	public partial class CompoundRepository : IRepository
 	{
-#if !PocketPC
-		static TraceSource traceSource = new TraceSource(typeof(CompoundRepository).Namespace);
-#endif
 		IXmlRepository xmlRepo;
 		ISyncRepository syncRepo;
 
@@ -42,10 +37,8 @@ namespace SimpleSharing
 			this.syncRepo = syncRepo;
 			Initialize();
 
-#if !PocketPC
-			traceSource.TraceInformation("Compound Repository {0} / {1} Initialized", xmlRepo.GetType().FullName,
+			Tracer.TraceData(this, TraceEventType.Information, "{0} / {1} initialized", xmlRepo.GetType().FullName,
 				syncRepo.GetType().FullName);
-#endif
 		}
 
 		/// <summary>
@@ -84,17 +77,14 @@ namespace SimpleSharing
 
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Getting item with ID {0}", id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting item with ID {0}", id);
+
 			Sync sync = syncRepo.Get(id);
 			IXmlItem xml = xmlRepo.Get(id);
-
+			
 			if (xml == null && sync == null)
 			{
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - No item found with ID {0}", id));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "No item found with ID {0}", id);
 				return null;
 			}
 
@@ -108,9 +98,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAll()
 		{
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, "Compound Repository - Getting all items");
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items");
+
 			return GetAllImpl(null, NullFilter);
 		}
 
@@ -121,9 +110,8 @@ namespace SimpleSharing
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, "Compound Repository - Getting all items with filter");
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items with filter {0}", filter);
+
 			return GetAllImpl(null, filter);
 		}
 
@@ -132,9 +120,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since)
 		{
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Getting all items since {0}", (!since.HasValue) ? "" : since.Value.ToString()));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items since {0}", since);
+
 			return GetAllImpl(since, NullFilter);
 		}
 
@@ -143,9 +130,8 @@ namespace SimpleSharing
 		/// </summary>
 		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
 		{
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Getting all items since {0} with filter", since.Value.ToString()));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items since {0} with filter {1}", since, filter);
+
 			return GetAllImpl(since, filter);
 		}
 
@@ -182,9 +168,8 @@ namespace SimpleSharing
 
 			foreach (IXmlItem xmlItem in items)
 			{
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Getting sync info for item with ID {0}", xmlItem.Id));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Getting sync info for item with ID {0}", xmlItem.Id);
+
 				Sync sync = syncRepo.Get(xmlItem.Id);
 				IXmlItem xml = xmlItem;
 
@@ -197,9 +182,8 @@ namespace SimpleSharing
 
 				if (HasChangedSince(since.Value, sync))
 				{
-#if !PocketPC
-					traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} has changed since {1}", xmlItem.Id, since.Value.ToString()));
-#endif
+					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} has changed since {1}", xmlItem.Id, since);
+
 					Item item = new Item(xml, sync);
 					if (filter(item))
 						yield return item;
@@ -210,9 +194,8 @@ namespace SimpleSharing
 					// Is the item deleted from the XML repo?
 					if (!xmlRepo.Contains(syncEnum.Current.Id))
 					{
-#if !PocketPC
-						traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} not found in Xml Repository", syncEnum.Current.Id));
-#endif
+						Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} not found in Xml Repository", syncEnum.Current.Id);
+
 						sync = syncEnum.Current;
 
 						// Item does not exist in the XML repo, but the sync is not marked 
@@ -222,16 +205,13 @@ namespace SimpleSharing
 							sync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
 							syncRepo.Save(sync);
 
-#if !PocketPC
-							traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} marked as deleted", syncEnum.Current.Id));
-#endif
+							Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} marked as deleted", syncEnum.Current.Id);
 						}
 
 						if (HasChangedSince(since.Value, sync))
 						{
-#if !PocketPC
-							traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Null Item with ID {0} has changed since {1}", syncEnum.Current.Id, since.Value.ToString()));
-#endif
+							Tracer.TraceData(this, TraceEventType.Verbose, "Null Item with ID {0} has changed since {1}", syncEnum.Current.Id, since);
+
 							Item item = new Item(new NullXmlItem(syncEnum.Current.Id), sync);
 							if (filter(item))
 								yield return item;
@@ -247,11 +227,10 @@ namespace SimpleSharing
 				// Is the item deleted from the XML repo?
 				if (!xmlRepo.Contains(syncEnum.Current.Id))
 				{
-#if !PocketPC
-					traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} not found in Xml Repository", syncEnum.Current.Id));
-#endif
-					Sync sync = syncEnum.Current;
+					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} not found in Xml Repository", syncEnum.Current.Id);
 
+					Sync sync = syncEnum.Current;
+					
 					// Item does not exist in the XML repo, but the sync is not marked 
 					// as deleted, so we need to update it now on-the-fly
 					if (!syncEnum.Current.Deleted)
@@ -259,16 +238,13 @@ namespace SimpleSharing
 						sync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
 						syncRepo.Save(sync);
 
-#if !PocketPC
-						traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} marked as deleted", syncEnum.Current.Id));
-#endif
+						Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} marked as deleted", syncEnum.Current.Id);
 					}
 
 					if (HasChangedSince(since.Value, sync))
 					{
-#if !PocketPC
-						traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Null Item with ID {0} has changed since {1}", syncEnum.Current.Id, since.Value.ToString()));
-#endif
+						Tracer.TraceData(this, TraceEventType.Verbose, "Null Item with ID {0} has changed since {1}", syncEnum.Current.Id, since);
+
 						Item item = new Item(new NullXmlItem(syncEnum.Current.Id), sync);
 						if (filter(item))
 							yield return item;
@@ -284,26 +260,23 @@ namespace SimpleSharing
 		{
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, "Compound Repository - Getting all conflicts");
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all conflicts");
+
 			foreach (Sync sync in syncRepo.GetConflicts())
 			{
 				IXmlItem item = xmlRepo.Get(sync.Id);
 				Sync itemSync = sync;
 				if (item == null)
 				{
-#if !PocketPC
-					traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Conflict with ID {0} not found in Xml Repository", sync.Id));
-#endif
+					Tracer.TraceData(this, TraceEventType.Verbose, "Conflict with ID {0} not found in Xml Repository", sync.Id);
+
 					// Update deletion if necessary.
 					if (!sync.Deleted)
 					{
 						itemSync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, true);
 						syncRepo.Save(itemSync);
-#if !PocketPC
-						traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Conflict with ID {0} marked as deleted", sync.Id));
-#endif
+
+						Tracer.TraceData(this, TraceEventType.Verbose, "Conflict with ID {0} marked as deleted", sync.Id);
 					}
 				}
 				else
@@ -325,9 +298,8 @@ namespace SimpleSharing
 
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Adding item with ID {0}", item.Sync.Id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Adding item with ID {0}", item.Sync.Id);
+
 			if (!item.Sync.Deleted)
 			{
 				object tag = null;
@@ -335,17 +307,13 @@ namespace SimpleSharing
 
 				item.XmlItem.Tag = tag;
 
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} added to Xml Repository", item.Sync.Id));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} added to Xml Repository", item.Sync.Id);
 			}
 
 			item.Sync.Tag = item.XmlItem.Tag; 
 			syncRepo.Save(item.Sync);
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} added to Sync Repository with Hash {1}", item.Sync.Id, (item.Sync.Tag == null) ? "" : item.Sync.Tag.ToString()));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} added to Sync Repository with Hash {1}", item.Sync.Id, item.Sync.Tag);
 		}
 
 		/// <summary>
@@ -357,23 +325,19 @@ namespace SimpleSharing
 
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Deleting item with ID {0}", id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Deleting item with ID {0}", id);
+
 			xmlRepo.Remove(id);
 			
-#if !PocketPC			
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} deleted from Xml Repository", id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} deleted from Xml Repository", id);
+
 			Sync sync = syncRepo.Get(id);
 			if (sync != null)
 			{
 				sync = Behaviors.Delete(sync, DeviceAuthor.Current, DateTime.Now);
 				syncRepo.Save(sync);
 
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} deleted from Sync Repository", id));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} deleted from Sync Repository", id);
 			}
 		}
 
@@ -386,16 +350,13 @@ namespace SimpleSharing
 
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Updating item with ID {0}", item.Sync.Id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Updating item with ID {0}", item.Sync.Id);
+
 			if (item.Sync.Deleted)
 			{
 				xmlRepo.Remove(item.Sync.Id);
 
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} deleted from Xml Repository", item.Sync.Id));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} deleted from Xml Repository", item.Sync.Id);
 			}
 			else
 			{
@@ -405,9 +366,7 @@ namespace SimpleSharing
 				item.XmlItem.Tag = tag;
 				item.Sync.Tag = item.XmlItem.Tag;
 
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} updated in Sync Repository with Hash {1}", item.Sync.Id, item.Sync.Tag.ToString()));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} updated in Sync Repository with Tag {1}", item.Sync.Id, item.Sync.Tag);
 			}
 
 			syncRepo.Save(item.Sync);
@@ -422,9 +381,7 @@ namespace SimpleSharing
 
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Updating item with ID {0} before resolving conflicts", item.Sync.Id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Updating item with ID {0} before resolving conflicts", item.Sync.Id);
 
 			if (resolveConflicts)
 			{
@@ -465,9 +422,7 @@ namespace SimpleSharing
 				sync.Tag = xml.Tag;
 				syncRepo.Save(sync);
 
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Created sync for item with ID {0} and hashcode {1}", xml.Id, sync.Tag.ToString()));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Created sync for item with ID {0} and hashcode {1}", xml.Id, sync.Tag);
 			}
 			else if (xml == null && sync != null)
 			{
@@ -476,9 +431,7 @@ namespace SimpleSharing
 					sync = Behaviors.Delete(sync, DeviceAuthor.Current, DateTime.Now);
 					syncRepo.Save(sync);
 
-#if !PocketPC
-					traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Item with ID {0} marked as deleted", sync.Id));
-#endif
+					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} marked as deleted", sync.Id);
 				}
 
 				xml = new NullXmlItem(sync.Id);
@@ -497,11 +450,11 @@ namespace SimpleSharing
 		/// </summary>
 		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
 		{
+			// TODO: check if this is correct.
 			if (item.Tag.ToString() != sync.Tag.ToString())
 			{
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("Compound Repository - Updating Sync for Item with ID {0} - Original HashCode {1} / Current HashCode {2}", sync.Id, sync.Tag.ToString(), item.GetHashCode().ToString()));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Updating Sync for Item with ID {0} - Original Tag {1} / Current Tag {2}", sync.Id, sync.Tag, item.Tag);
+
 				Sync updated = Behaviors.Update(sync,
 					DeviceAuthor.Current,
 					DateTime.Now, sync.Deleted);
@@ -523,6 +476,8 @@ namespace SimpleSharing
 			else
 				return sync.LastUpdate.When.Value >= since;
 		}
+
+		//private void TraceData(TraceEventType severity, 
 
 		// TODO: XamlBinding - Implement instance validation here
 		private void DoValidate()

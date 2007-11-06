@@ -106,27 +106,6 @@ namespace SimpleSharing.Tests
 			Sync s = repo.Get(Guid.NewGuid().ToString());
 
 			Assert.IsNull(s);
-		}
-
-		[TestMethod]
-		public void ShouldGetNullLastSync()
-		{
-			ISyncRepository repo = CreateRepository();
-
-			Assert.IsNull(repo.GetLastSync("foo"));
-		}
-
-		[TestMethod]
-		public void ShouldSaveLastSync()
-		{
-			DateTime now = Timestamp.Normalize(DateTime.Now);
-			ISyncRepository repo = CreateRepository();
-
-			repo.SetLastSync("foo", now);
-
-			Assert.AreEqual(now, repo.GetLastSync("foo"));
-		}
-
-		
+		}		
 	}
 }

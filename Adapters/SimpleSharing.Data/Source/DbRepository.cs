@@ -7,6 +7,7 @@ using System.Reflection;
 
 #if !PocketPC
 using Microsoft.Practices.EnterpriseLibrary.Data;
+using System.Diagnostics;
 #else
 using Microsoft.Practices.Mobile.DataAccess;
 #endif
@@ -50,6 +51,8 @@ namespace SimpleSharing.Data
 
 		protected DbDataReader ExecuteReader(string sqlCommand, params DbParameter[] parameters)
 		{
+			Tracer.TraceData(this, TraceEventType.Verbose, "ExecuteReader: {0}", sqlCommand);
+
 #if PocketPC
 			return Database.ExecuteReader(sqlCommand, parameters);
 #else
@@ -65,8 +68,13 @@ namespace SimpleSharing.Data
 
 		protected int ExecuteNonQuery(string sqlCommand, params DbParameter[] parameters)
 		{
+			Tracer.TraceData(this, TraceEventType.Verbose, "ExecuteNonQuery: {0}", sqlCommand);
+
 #if PocketPC
-			return Database.ExecuteNonQuery(sqlCommand, parameters);
+			int count = Database.ExecuteNonQuery(sqlCommand, parameters);
+			Tracer.TraceData(this, TraceEventType.Verbose, "Affected rows: {0}", count);
+
+			return count;
 #else
 			DbCommand cmd = Database.DbProviderFactory.CreateCommand();
 			cmd.CommandText = sqlCommand;
@@ -79,6 +87,8 @@ namespace SimpleSharing.Data
 				int count = cmd.ExecuteNonQuery();
 				conn.Close();
 
+				Tracer.TraceData(this, TraceEventType.Verbose, "Affected rows: {0}", count);
+
 				return count;
 			}
 #endif
@@ -86,8 +96,13 @@ namespace SimpleSharing.Data
 
 		protected int ExecuteNonQuery(DbCommand command, params DbParameter[] parameters)
 		{
+			Tracer.TraceData(this, TraceEventType.Verbose, "ExecuteNonQuery: {0}", command.CommandText);
+
 #if PocketPC
-			return Database.ExecuteNonQuery(command, parameters);
+			int count = Database.ExecuteNonQuery(command, parameters);
+			Tracer.TraceData(this, TraceEventType.Verbose, "Affected rows: {0}", count);
+			
+			return count;
 #else
 			command.Parameters.AddRange(parameters);
 			using (DbConnection conn = Database.CreateConnection())
@@ -96,6 +111,8 @@ namespace SimpleSharing.Data
 				conn.Open();
 				int count = command.ExecuteNonQuery();
 				conn.Close();
+
+				Tracer.TraceData(this, TraceEventType.Verbose, "Affected rows: {0}", count);
 
 				return count;
 			}
