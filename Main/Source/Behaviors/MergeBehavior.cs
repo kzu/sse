@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 namespace SimpleSharing
 {
@@ -49,6 +50,7 @@ namespace SimpleSharing
 
 			if (originalItem == null)
 			{
+				Tracer.TraceData(this, TraceEventType.Information, "Result=MergeOperation.Added (Original item was null)");
 				return new ItemMergeResult(null, incoming, incoming, MergeOperation.Added);
 			}
 
@@ -58,17 +60,21 @@ namespace SimpleSharing
 			if (original.Sync.LastUpdate == null ||
 				incoming.Sync.LastUpdate == null)
 			{
+				Tracer.TraceData(this, TraceEventType.Warning, "Invalid input received for original or incoming items: {0}", Properties.Resources.SyncHistoryRequired);
 				throw new ArgumentException(Properties.Resources.SyncHistoryRequired);
 			}
 
 			Item proposed;
 			MergeOperation operation = MergeItems(original, incoming, out proposed);
 
+			Tracer.TraceData(this, TraceEventType.Information, "Result={0} (preliminar value)");
+
 			// If the sync are equals and there was no conflict (in these case the Sync might be 
 			// equal as the proposed could be the original item, but with conflicts), then there's 
 			// no merge to perform.
 			if (proposed != null && proposed.Sync.Equals(original.Sync) && operation != MergeOperation.Conflict)
 			{
+				Tracer.TraceData(this, TraceEventType.Information, "Result=MergeOperation.None (changed because sx:sync of proposed equals original and no new conflicts were detected)");
 				return new ItemMergeResult(original, incoming, null, MergeOperation.None);
 			}
 			else
@@ -79,6 +85,7 @@ namespace SimpleSharing
 
 		private MergeOperation MergeItems(Item localItem, Item incomingItem, out Item proposedItem)
 		{
+			Tracer.TraceData(this, TraceEventType.Verbose, "Applying SSE merge algorithm");
 			proposedItem = null;
 
 			//3.3.2
@@ -192,9 +199,6 @@ namespace SimpleSharing
 		///ii.	If X has a by attribute value for the topmost sx:history sub-element that is collates greater (see Section 2.4 for collation rules) than Y’s, then X is the ‘winning’ item
 		///3.	Y is the ‘winning’ item
 		/// </summary>
-		/// <param name="item"></param>
-		/// <param name="anotherItem"></param>
-		/// <returns></returns>
 		private Item WinnerPicking(Item item, Item anotherItem)
 		{
 			Item winner = null;

@@ -10,9 +10,6 @@ namespace SimpleSharing
 		Sync Get(string id);
 		void Save(Sync sync);
 
-		DateTime? GetLastSync(string feed);
-		void SetLastSync(string feed, DateTime date);
-
 		IEnumerable<Sync> GetAll();
 		IEnumerable<Sync> GetConflicts();
 	}

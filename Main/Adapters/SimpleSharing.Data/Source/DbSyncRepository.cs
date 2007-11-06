@@ -5,9 +5,9 @@ using System.Data.Common;
 using System.Data;
 using System.IO;
 using System.Xml;
+using System.Diagnostics;
 #if !PocketPC
 using Microsoft.Practices.EnterpriseLibrary.Data;
-using System.Diagnostics;
 #else
 using Microsoft.Practices.Mobile.DataAccess;
 using System.Globalization;
@@ -17,9 +17,6 @@ namespace SimpleSharing.Data
 {
 	public partial class DbSyncRepository : DbRepository, ISyncRepository
 	{
-#if !PocketPC		
-		static TraceSource traceSource = new TraceSource(typeof(DbSyncRepository).Namespace);
-#endif
 		private const string RepositoryPrefix = "SSE_";
 		string repositoryId;
 
@@ -47,24 +44,21 @@ namespace SimpleSharing.Data
 		public Sync Get(string id)
 		{
 			EnsureInitialized();
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Getting sync with ID {0}", id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting sync with ID {0}", id);
+
 			using (DbDataReader reader = ExecuteReader(
 				FormatSql(@"SELECT * FROM [{0}] WHERE Id = {1}", "Sync", "pid"),
 				CreateParameter("pid", DbType.String, 254, id)))
 			{
 				if (reader.Read())
 				{
-#if !PocketPC
-					traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Item with ID {0} found", id));
-#endif
+					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} found", id);
+
 					return Read(reader);
 				}
 
-#if !PocketPC
-				traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Item with ID {0} not found", id));
-#endif
+				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} not found", id);
+
 				return null;
 			}
 		}
@@ -75,9 +69,8 @@ namespace SimpleSharing.Data
 
 			string data = Write(sync);
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Saving sync with ID {0}", sync.Id));
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Saving sync with ID {0}", sync.Id);
+
 			ExecuteDb(delegate(DbConnection conn)
 			{
 				using (DbTransaction transaction = conn.BeginTransaction())
@@ -114,11 +107,10 @@ namespace SimpleSharing.Data
 								CreateParameter("itemHash", DbType.String, 254, itemHash),
 								CreateParameter("id", DbType.String, 254, sync.Id));
 						}
-#if !PocketPC
-						traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Sync with ID {0} updated - Record count {1}", sync.Id, count));
-#endif
 
+						Tracer.TraceData(this, TraceEventType.Verbose, "Sync with ID {0} updated - Record count {1}", sync.Id, count);
 					}
+
 					if (count == 0)
 					{
 						using (DbCommand cmd = conn.CreateCommand())
@@ -132,59 +124,10 @@ namespace SimpleSharing.Data
 								CreateParameter("sync", DbType.String, 0, data),
 								CreateParameter("itemHash", DbType.String, 254, itemHash));
 						}
-#if !PocketPC
-						traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Sync with ID {0} insetted", sync.Id));
-#endif
+
+						Tracer.TraceData(this, TraceEventType.Verbose, "Sync with ID {0} inserted", sync.Id);
 					}
 					transaction.Commit();
-				}
-			});
-		}
-
-		public DateTime? GetLastSync(string feed)
-		{
-			EnsureInitialized();
-
-			using (DbDataReader reader = ExecuteReader(
-				FormatSql(@"SELECT LastSync FROM [{0}] WHERE Feed = {1}", "LastSync", "feed"),
-				CreateParameter("feed", DbType.String, 1000, feed)))
-			{
-				if (reader.Read())
-					return reader.GetDateTime(0);
-
-				return null;
-			}
-		}
-
-		public void SetLastSync(string feed, DateTime date)
-		{
-			EnsureInitialized();
-
-			ExecuteDb(delegate(DbConnection conn)
-			{
-				using (DbTransaction transaction = conn.BeginTransaction())
-				{
-					using (DbCommand cmd = conn.CreateCommand())
-					{
-						cmd.CommandText = FormatSql(@"
-							UPDATE [{0}] 
-								SET LastSync = {1}
-							WHERE Feed = {2}", "LastSync", "date", "feed");
-
-						int count = ExecuteNonQuery(cmd,
-							CreateParameter("date", DbType.DateTime, 0, date),
-							CreateParameter("feed", DbType.String, 1000, feed));
-						if (count == 0)
-						{
-							cmd.CommandText = FormatSql(@"
-								INSERT INTO [{0}] (LastSync, Feed)
-								VALUES ({1}, {2})", "LastSync", "date", "feed");
-							// The parameters are already set on the command
-							count = ExecuteNonQuery(cmd);
-						}
-
-						transaction.Commit();
-					}
 				}
 			});
 		}
@@ -193,9 +136,7 @@ namespace SimpleSharing.Data
 		{
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, "DbSyncRepository - Getting all sync");
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all sync");
 
 			using (DbDataReader reader = ExecuteReader(FormatSql("SELECT * FROM [{0}]", "Sync")))
 			{
@@ -210,9 +151,8 @@ namespace SimpleSharing.Data
 		{
 			EnsureInitialized();
 
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, "DbSyncRepository - Getting all conflicts");
-#endif
+			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all conflicts");
+
 			// TODO: sub-optimal.
 			foreach (Sync sync in GetAll())
 			{
@@ -229,9 +169,9 @@ namespace SimpleSharing.Data
 
 			Sync sync = new FeedReader.SyncXmlReader(xr, new RssFeedReader(xr)).ReadSync();
 			sync.Tag = reader["ItemHash"] as string;
-#if !PocketPC
-			traceSource.TraceData(TraceEventType.Verbose, 0, string.Format("DbSyncRepository - Sync read, ID {0}, itemHash {1}", sync.Id, sync.Tag.ToString()));
-#endif
+
+			Tracer.TraceData(this, TraceEventType.Verbose, "Sync read, ID {0}, tag {1}", sync.Id, sync.Tag);
+
 			return sync;
 		}
 
