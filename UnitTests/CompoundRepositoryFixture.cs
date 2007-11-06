@@ -75,7 +75,7 @@ namespace SimpleSharing.Tests
 
 			Item i = repo.Get(item.Id);
 
-			Assert.AreEqual(item.Tag, i.XmlItem.Tag);
+			Assert.AreEqual(item.Tag.ToString(), i.XmlItem.Tag.ToString());
 			Assert.AreEqual(sync.Tag, i.Sync.Tag);
 		}
 
@@ -92,6 +92,8 @@ namespace SimpleSharing.Tests
 			syncRepo.Save(sync);
 
 			item.Title = "changed";
+
+			Thread.Sleep(1000);
 
 			xmlRepo.Update(item, out tag);
 			item.Tag = tag;
@@ -183,7 +185,9 @@ namespace SimpleSharing.Tests
 			syncRepo.Save(sync);
 
 			item.Title = "changed";
-			
+
+			Thread.Sleep(1000);
+
 			xmlRepo.Update(item, out tag);
 
 			IRepository repo = new CompoundRepository(xmlRepo, syncRepo);
@@ -519,6 +523,8 @@ namespace SimpleSharing.Tests
 			// Save original item.
 			repo.Add(item);
 			DateTime? lastUpdated = item.Sync.LastUpdate.When;
+
+			Thread.Sleep(1000);
 
 			object tag;
 			// Local editing outside of SSE by the local app.
