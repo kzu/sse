@@ -17,6 +17,11 @@ namespace SimpleSharing.Tests
 			return new MockRepository();
 		}
 
+		protected virtual XmlItem CreateItem(string id)
+		{
+			return new XmlItem(id, "foo", "bar", GetElement("<payload />"));
+		}
+
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
 		public void ShouldThrowGetNullId()
@@ -73,7 +78,7 @@ namespace SimpleSharing.Tests
 		public void ShouldAddAndGetItem()
 		{
 			IRepository repo = CreateRepository();
-			XmlItem xml = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"));
+			XmlItem xml = CreateItem(Guid.NewGuid().ToString());
 			Sync sync = Behaviors.Create(xml.Id, "kzu", DateTime.Now, false);
 			sync.Tag = xml.Tag;
 			Item item = new Item(xml, sync);
@@ -95,12 +100,12 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
 			id = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
@@ -114,11 +119,11 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 		}
@@ -129,12 +134,12 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(1)), false));
 			repo.Add(item);
 
 			id = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
@@ -147,12 +152,12 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(1)), false));
 			repo.Add(item);
 
 			id = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
@@ -165,12 +170,12 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, null, false));
 			repo.Add(item);
 
 			id = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
@@ -199,14 +204,14 @@ namespace SimpleSharing.Tests
 			IRepository repo = CreateRepository();
 
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload />")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
 			Predicate<Item> filter = delegate(Item i) { return i.Sync.Id == id; };
 
 			string id2 = Guid.NewGuid().ToString();
-			item = new Item(new XmlItem(id2, "foo", "bar", GetElement("<payload />")),
+			item = new Item(CreateItem(id2),
 				Behaviors.Create(id2, DeviceAuthor.Current, DateTime.Now, false));
 			repo.Add(item);
 
@@ -221,7 +226,7 @@ namespace SimpleSharing.Tests
 			DateTime created = new DateTime(2007, 9, 18, 12, 56, 23);
 			DateTime since = new DateTime(2007, 9, 18, 12, 56, 23, 500);
 
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"), DateTime.Now);
+			XmlItem item = CreateItem(Guid.NewGuid().ToString());
 			Sync sync = Behaviors.Create(item.Id, "kzu", created, false);
 			sync.Tag = item.Tag;
 
@@ -263,7 +268,7 @@ namespace SimpleSharing.Tests
 				Behaviors.Update(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromHours(2)), false));
 			sync.Conflicts.Add(
 				new Item(
-					new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now),
+					CreateItem(Guid.NewGuid().ToString()),
 					Behaviors.Update(sync, "kzu", DateTime.Now.Subtract(TimeSpan.FromHours(4)), false)));
 
 			repo.Add(item);
@@ -281,7 +286,7 @@ namespace SimpleSharing.Tests
 		{
 			IRepository repo = CreateRepository();
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload/>")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false));
 			repo.Add(item);
 
@@ -305,7 +310,7 @@ namespace SimpleSharing.Tests
 		{
 			IRepository repo = CreateRepository();
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload/>")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false));
 			repo.Add(item);
 
@@ -329,7 +334,7 @@ namespace SimpleSharing.Tests
 		{
 			IRepository repo = CreateRepository();
 			string id = Guid.NewGuid().ToString();
-			Item item = new Item(new XmlItem(id, "foo", "bar", GetElement("<payload/>")),
+			Item item = new Item(CreateItem(id),
 				Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)), false));
 			repo.Add(item);
 
