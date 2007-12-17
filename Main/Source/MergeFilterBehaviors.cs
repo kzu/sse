@@ -9,7 +9,7 @@ namespace SimpleSharing
 	/// be called while synchronizing.
 	/// </summary>
 	[Flags]
-	public enum FilterBehaviors
+	public enum MergeFilterBehaviors
 	{
 		/// <summary>
 		/// Do not apply filter behavior to any repository.
