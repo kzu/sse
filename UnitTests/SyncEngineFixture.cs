@@ -45,6 +45,30 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldFilterItems()
+		{
+			MockRepository left = new MockRepository(
+				CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu")));
+			MockRepository right = new MockRepository(
+				CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga")));
+
+			SyncEngine engine = new SyncEngine(left, right);
+
+			IList<Item> conflicts = engine.Synchronize(delegate (Item item)
+			{
+				if (item.XmlItem.Title == "fizz" || item.XmlItem.Title == "buzz")
+					return false;
+
+				return true;
+			});
+
+			Assert.AreEqual(0, conflicts.Count);
+			Assert.AreEqual(1, left.Items.Count);
+			Assert.AreEqual(1, right.Items.Count);
+		}
+
+
+		[TestMethod]
 		public void ShouldMergeChangesBothWays()
 		{
 			Item a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
@@ -190,24 +214,24 @@ namespace SimpleSharing.Tests
 			bool right = false;
 			bool none = false;
 			int both = 0;
-			FilterHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				Assert.AreEqual("left", targetRepository.FriendlyName);
 				left = true;
 				return mergedItems;
 			};
-			FilterHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				Assert.AreEqual("right", targetRepository.FriendlyName);
 				right = true;
 				return mergedItems;
 			};
-			FilterHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				both++;
 				return mergedItems;
 			};
-			FilterHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
 			{
 				none = true;
 				return mergedItems;
@@ -215,16 +239,16 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(new MockRepository("left"), new MockRepository("right"));
 
-			engine.Synchronize(leftHandler, FilterBehaviors.Left);
+			engine.Synchronize(leftHandler, MergeFilterBehaviors.Left);
 			Assert.IsTrue(left);
 
-			engine.Synchronize(rightHandler, FilterBehaviors.Right);
+			engine.Synchronize(rightHandler, MergeFilterBehaviors.Right);
 			Assert.IsTrue(right);
 
-			engine.Synchronize(bothHandler, FilterBehaviors.Both);
+			engine.Synchronize(bothHandler, MergeFilterBehaviors.Both);
 			Assert.AreEqual(2, both);
 
-			engine.Synchronize(noneHandler, FilterBehaviors.None);
+			engine.Synchronize(noneHandler, MergeFilterBehaviors.None);
 			Assert.IsFalse(none);
 		}
 
