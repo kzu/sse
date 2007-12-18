@@ -85,9 +85,11 @@
     <Compile Include="IRepository.cs" />
     <Compile Include="ISyncRepository.cs" />
     <Compile Include="ItemEventArgs.cs" />
+    <Compile Include="ItemFilter.cs" />
     <Compile Include="ItemMergeResult.cs" />
     <Compile Include="IXmlItem.cs" />
     <Compile Include="IXmlRepository.cs" />
+    <Compile Include="MergeFilter.cs" />
     <Compile Include="MergeOperation.cs" />
     <Compile Include="Model\ComparableList.cs" />
     <Compile Include="Model\ComparableStack.cs" />

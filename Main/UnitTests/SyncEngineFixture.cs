@@ -54,7 +54,7 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			IList<Item> conflicts = engine.Synchronize(delegate (Item item)
+			ItemFilter filter = new ItemFilter(delegate(Item item)
 			{
 				if (item.XmlItem.Title == "fizz" || item.XmlItem.Title == "buzz")
 					return false;
@@ -62,9 +62,61 @@ namespace SimpleSharing.Tests
 				return true;
 			});
 
+			IList<Item> conflicts = engine.Synchronize(filter);
+
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(1, left.Items.Count);
 			Assert.AreEqual(1, right.Items.Count);
+		}
+
+		[TestMethod]
+		public void ShouldFilterItemsOnLeft()
+		{
+			MockRepository left = new MockRepository(
+				CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu")));
+			MockRepository right = new MockRepository(
+				CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga")));
+
+			SyncEngine engine = new SyncEngine(left, right);
+
+			ItemFilter filter = new ItemFilter(delegate(Item item)
+			{
+				return false;
+			}, delegate(Item item)
+			{
+				return true;
+			});
+
+			IList<Item> conflicts = engine.Synchronize(filter);
+
+			Assert.AreEqual(0, conflicts.Count);
+			Assert.AreEqual(2, left.Items.Count);
+			Assert.AreEqual(1, right.Items.Count); //Left does not return any item
+		}
+
+		[TestMethod]
+		public void ShouldFilterItemsOnRight()
+		{
+			MockRepository left = new MockRepository(
+				CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu")));
+			MockRepository right = new MockRepository(
+				CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga")));
+
+			SyncEngine engine = new SyncEngine(left, right);
+
+			ItemFilter filter = new ItemFilter(delegate(Item item)
+			{
+				return true;
+			}, delegate(Item item)
+			{
+				return false;
+			});
+
+			IList<Item> conflicts = engine.Synchronize(filter);
+
+			Assert.AreEqual(0, conflicts.Count);
+			Assert.AreEqual(1, left.Items.Count);
+			Assert.AreEqual(2, right.Items.Count); 
 		}
 
 
@@ -239,16 +291,16 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(new MockRepository("left"), new MockRepository("right"));
 
-			engine.Synchronize(leftHandler, MergeFilterBehaviors.Left);
+			engine.Synchronize(new MergeFilter(leftHandler, MergeFilterBehaviors.Left));
 			Assert.IsTrue(left);
 
-			engine.Synchronize(rightHandler, MergeFilterBehaviors.Right);
+			engine.Synchronize(new MergeFilter(rightHandler, MergeFilterBehaviors.Right));
 			Assert.IsTrue(right);
 
-			engine.Synchronize(bothHandler, MergeFilterBehaviors.Both);
+			engine.Synchronize(new MergeFilter(bothHandler, MergeFilterBehaviors.Both));
 			Assert.AreEqual(2, both);
 
-			engine.Synchronize(noneHandler, MergeFilterBehaviors.None);
+			engine.Synchronize(new MergeFilter(noneHandler, MergeFilterBehaviors.None));
 			Assert.IsFalse(none);
 		}
 
