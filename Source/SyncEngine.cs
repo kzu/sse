@@ -27,17 +27,6 @@ namespace SimpleSharing
 			this.target = target;
 		}
 
-		private IEnumerable<ItemMergeResult> NullFilterHandler(IRepository targetRepository,
-			IEnumerable<ItemMergeResult> mergedItems)
-		{
-			return mergedItems;
-		}
-
-		private bool NullItemFilter(Item item)
-		{
-			return true;
-		}
-
 		/// <summary>
 		/// Performs a full sync between the two repositories, automatically 
 		/// incorporating changes in both.
@@ -49,37 +38,36 @@ namespace SimpleSharing
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize()
 		{
-			return SynchronizeImpl(null, NullFilterHandler, MergeFilterBehaviors.None, NullItemFilter);
+			return SynchronizeImpl(null, new MergeFilter(), new ItemFilter());
 		}
 
 		/// <summary>
 		/// Performs a full sync between the two repositories, optionally calling the 
-		/// given <paramref name="mergeFilter"/> callback as specified by the <paramref name="mergeFilterBehaviors"/> argument.
+		/// given <paramref name="mergeFilter"/> callback.
 		/// </summary>
 		/// <remarks>
 		/// Items on the source repository are sent first, and then the 
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(MergeFilterHandler mergeFilter, MergeFilterBehaviors mergeFilterBehaviors)
+		public IList<Item> Synchronize(MergeFilter mergeFilter)
 		{
-			return SynchronizeImpl(null, mergeFilter, mergeFilterBehaviors, NullItemFilter);
+			return SynchronizeImpl(null, mergeFilter, new ItemFilter());
 		}
 
 		/// <summary>
 		/// Performs a full sync between the two repositories, automatically 
 		/// incorporating changes in both.
 		/// </summary>
-		/// <param name="itemFilter">Represents a method that filter items according to a specified criteria. 
-		/// This filter always runs on the source and the target</param>
+		/// <param name="itemFilter">Represents a method that filter items according to a specified criteria. </param>
 		/// <remarks>
 		/// Items on the source repository are sent first, and then the 
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(Predicate<Item> itemFilter)
+		public IList<Item> Synchronize(ItemFilter itemFilter)
 		{
-			return SynchronizeImpl(null, NullFilterHandler, MergeFilterBehaviors.None, itemFilter);
+			return SynchronizeImpl(null, new MergeFilter(), itemFilter);
 		}
 
 		/// <summary>
@@ -94,7 +82,7 @@ namespace SimpleSharing
 		/// <returns>The list of items that had conflicts.</returns>
 		public IList<Item> Synchronize(DateTime? since)
 		{
-			return SynchronizeImpl(since, NullFilterHandler, MergeFilterBehaviors.None, NullItemFilter);
+			return SynchronizeImpl(since, new MergeFilter(), new ItemFilter());
 		}
 
 		/// <summary>
@@ -102,21 +90,20 @@ namespace SimpleSharing
 		/// incorporating changes in both.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
-		/// <param name="itemFilter">Represents a method that filter items according to a specified criteria.
-		/// This filter always runs on the source and the target</param>
+		/// <param name="itemFilter">Represents a method that filter items according to a specified criteria.</param>
 		/// <remarks>
 		/// Items on the source repository are sent first, and then the 
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, Predicate<Item> itemFilter)
+		public IList<Item> Synchronize(DateTime? since, ItemFilter itemFilter)
 		{
-			return SynchronizeImpl(since, NullFilterHandler, MergeFilterBehaviors.None, itemFilter);
+			return SynchronizeImpl(since, new MergeFilter(), itemFilter);
 		}
 
 		/// <summary>
 		/// Performs a partial sync between the two repositories since the specified date, optionally calling the 
-		/// given <paramref name="mergeFilter"/> callback as specified by the <paramref name="mergeFilterBehaviors"/> argument.
+		/// given <paramref name="mergeFilter"/> callback.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
 		/// <remarks>
@@ -124,43 +111,42 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, MergeFilterHandler mergeFilter, MergeFilterBehaviors mergeFilterBehaviors)
+		public IList<Item> Synchronize(DateTime? since, MergeFilter mergeFilter)
 		{
-			return SynchronizeImpl(since, mergeFilter, mergeFilterBehaviors, NullItemFilter);
+			return SynchronizeImpl(since, mergeFilter, new ItemFilter());
 		}
 
 		/// <summary>
 		/// Performs a partial sync between the two repositories since the specified date, optionally calling the 
-		/// given <paramref name="mergeFilter"/> callback as specified by the <paramref name="mergeFilterBehaviors"/> argument.
+		/// given <paramref name="mergeFilter"/> callback.
 		/// </summary>
 		/// <param name="since">Synchronize changes that happened after this date.</param>
-		/// <param name="itemFilter">Represents a method that filter items according to a specified criteria.
-		/// This filter always runs on the source and the target</param>
+		/// <param name="itemFilter">Represents a method that filter items according to a specified criteria.</param>
 		/// <remarks>
 		/// Items on the source repository are sent first, and then the 
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, MergeFilterHandler mergeFilter, MergeFilterBehaviors mergeFilterBehaviors, Predicate<Item> itemFilter)
+		public IList<Item> Synchronize(DateTime? since, MergeFilter mergeFilter, ItemFilter itemFilter)
 		{
-			return SynchronizeImpl(since, mergeFilter, mergeFilterBehaviors, itemFilter);
+			return SynchronizeImpl(since, mergeFilter, itemFilter);
 		}
 
-		private IList<Item> SynchronizeImpl(DateTime? since, MergeFilterHandler mergeFilter, MergeFilterBehaviors mergeFilterBehaviors, Predicate<Item> itemFilter)
+		private IList<Item> SynchronizeImpl(DateTime? since, MergeFilter mergeFilter, ItemFilter itemFilter)
 		{
 			Guard.ArgumentNotNull(mergeFilter, "mergeFilter");
 			Guard.ArgumentNotNull(itemFilter, "itemFilter");
 
 			IEnumerable<Item> outgoingItems = EnumerateItemsProgress(
-				(since == null) ? source.GetAll(itemFilter) : source.GetAllSince(since, itemFilter),
+				(since == null) ? source.GetAll(itemFilter.Left) : source.GetAllSince(since, itemFilter.Left),
 				RaiseItemSent);
 
 			if (!target.SupportsMerge)
 			{
 				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, target);
-				if ((mergeFilterBehaviors & MergeFilterBehaviors.Right) == MergeFilterBehaviors.Right)
+				if ((mergeFilter.Behaviors & MergeFilterBehaviors.Right) == MergeFilterBehaviors.Right)
 				{
-					outgoingToMerge = mergeFilter(target, outgoingToMerge);
+					outgoingToMerge = mergeFilter.Handler(target, outgoingToMerge);
 				}
 				Import(outgoingToMerge, target);
 			}
@@ -170,15 +156,15 @@ namespace SimpleSharing
 			}
 
 			IEnumerable<Item> incomingItems = EnumerateItemsProgress(
-				(since == null) ? target.GetAll(itemFilter) : target.GetAllSince(since, itemFilter),
+				(since == null) ? target.GetAll(itemFilter.Right) : target.GetAllSince(since, itemFilter.Right),
 				RaiseItemReceived);
 
 			if (!source.SupportsMerge)
 			{
 				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
-				if ((mergeFilterBehaviors & MergeFilterBehaviors.Left) == MergeFilterBehaviors.Left)
+				if ((mergeFilter.Behaviors & MergeFilterBehaviors.Left) == MergeFilterBehaviors.Left)
 				{
-					incomingToMerge = mergeFilter(source, incomingToMerge);
+					incomingToMerge = mergeFilter.Handler(source, incomingToMerge);
 				}
 				
 				return Import(incomingToMerge, source);

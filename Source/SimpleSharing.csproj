@@ -82,6 +82,8 @@
     <Compile Include="FeedReader.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ItemFilter.cs" />
+    <Compile Include="MergeFilter.cs" />
     <Compile Include="MergeFilterBehaviors.cs" />
     <Compile Include="MergeFilterHandler.cs" />
     <Compile Include="Flag.cs" />
