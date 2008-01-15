@@ -7,14 +7,9 @@ namespace SimpleSharing
 	public static class Schema
 	{
 		/// <summary>
-		/// Version of the SSE specification implemented in this library.
-		/// </summary>
-		public const string SpecificationVersion = "0.93";
-
-		/// <summary>
 		/// Namespace of the SSE elements.
 		/// </summary>
-		public const string Namespace = "http://www.microsoft.com/schemas/sse";
+		public const string Namespace = "http://feedsync.org/2007/feedsync";
 
 		/// <summary>
 		/// Default prefix used for SSE elements.
