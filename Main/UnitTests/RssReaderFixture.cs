@@ -19,7 +19,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadItemWithSharing()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -60,7 +60,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadItemWithConflict()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -111,7 +111,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadItems()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -178,7 +178,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadNoSharingAsEmptySharing()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -209,7 +209,7 @@ namespace SimpleSharing.Tests
 		public void ShouldSkipAuthorElementFromPayload()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -273,7 +273,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadItemsWithEmptySharing()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -319,7 +319,7 @@ namespace SimpleSharing.Tests
 		public void ShouldSetPayloadToUnknownElements()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -390,7 +390,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadTwoItemsFromBadSSEDataFeed()
 		{
 			string xml = @"
-<rss xmlns:sx='http://www.microsoft.com/schemas/sse' version='2.0'>
+<rss xmlns:sx='http://feedsync.org/2007/feedsync' version='2.0'>
   <channel>
     <title>title</title>
     <description>description</description>
@@ -424,7 +424,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadDeletedItem()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -457,7 +457,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadFeedPayload()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>
@@ -495,7 +495,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadFeedPayload2()
 		{
 			string xml = @"
-<rss version='2.0' xmlns:sx='http://www.microsoft.com/schemas/sse'>
+<rss version='2.0' xmlns:sx='http://feedsync.org/2007/feedsync'>
  <channel>
   <title>To Do List</title>
   <description>A list of items to do</description>

@@ -18,7 +18,7 @@ namespace SimpleSharing.Tests
 		public void ShouldReadWellFormedXML()
 		{
 			string xml = @"
-        <item xmlns:sx='http://www.microsoft.com/schemas/sse'>
+        <item xmlns:sx='http://feedsync.org/2007/feedsync'>
             <title>Bar</title>
             <sx:sync id='529a0d9d-d008-4ed2-b2d7-ccfc18da7cab' updates='1'>
                 <sx:history sequence='1' by='dcazzulino@hotmail.com' />
