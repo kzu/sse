@@ -21,9 +21,15 @@ namespace SimpleSharing
 			writer.WriteStartElement("rss");
 			writer.WriteAttributeString("version", "2.0");
 			writer.WriteStartElement("channel");
-			writer.WriteElementString("title", feed.Title);
-			writer.WriteElementString("description", feed.Description);
-			writer.WriteElementString("link", feed.Link);
+			if(!String.IsNullOrEmpty(feed.Title))
+				writer.WriteElementString("title", feed.Title);
+			
+			if(!String.IsNullOrEmpty(feed.Description))
+				writer.WriteElementString("description", feed.Description);
+
+			if(!String.IsNullOrEmpty(feed.Link))
+				writer.WriteElementString("link", feed.Link);
+
 			if (feed.Payload != null)
 			{
 				foreach (XmlElement el in feed.Payload.ChildNodes)

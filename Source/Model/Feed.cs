@@ -17,6 +17,10 @@ namespace SimpleSharing
 
 		// TODO: unpublished. 2.6 and 4.1. Add Unpublish(Item) ?
 
+		public Feed() 
+		{
+		}
+
 		public Feed(string title, string linkUrl, string description) 
 			: this(title, linkUrl, description, null)
 		{
@@ -24,9 +28,6 @@ namespace SimpleSharing
 
 		public Feed(string title, string linkUrl, string description, XmlElement payload)
 		{
-			Guard.ArgumentNotNullOrEmptyString(title, "title");
-			Guard.ArgumentNotNullOrEmptyString(linkUrl, "linkUrl");
-
 			if (payload == null)
 			{
 				this.payload = new XmlDocument().CreateElement("payload");

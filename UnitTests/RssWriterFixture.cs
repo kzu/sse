@@ -36,6 +36,25 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
+		public void ShouldWriteEmptyFeed()
+		{
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			Feed feed = new Feed();
+
+			FeedWriter writer = new RssFeedWriter(xw);
+
+			writer.Write(feed, new Item(new NullXmlItem("1"), new Sync("1")));
+
+			xw.Flush();
+
+			Assert.AreNotEqual(0, sw.GetStringBuilder().ToString().Length);
+		}
+
+		[TestMethod]
 		public void ShouldWriteCompleteFeed()
 		{
 			MockSyncRepository syncRepo = new MockSyncRepository();
@@ -242,7 +261,7 @@ namespace SimpleSharing.Tests
 			xw.Flush();
 
 			string xml = ReadToEnd(GetReader(sw.ToString()));
-			string expected = @"<item xmlns:sx=""http://www.microsoft.com/schemas/sse"">
+			string expected = @"<item xmlns:sx=""http://feedsync.org/2007/feedsync"">
   <title>foo</title>
   <description>bar</description>
   <geo:point xmlns:geo=""http://geo"">25</geo:point>
@@ -390,7 +409,7 @@ namespace SimpleSharing.Tests
 			xw.Flush();
 
 			string xml = ReadToEnd(GetReader(sw.ToString()));
-			string expected = @"<rss xmlns:sx=""http://www.microsoft.com/schemas/sse"" version=""2.0"">
+			string expected = @"<rss xmlns:sx=""http://feedsync.org/2007/feedsync"" version=""2.0"">
   <channel>
     <title>Hello World</title>
     <description>this is my feed</description>

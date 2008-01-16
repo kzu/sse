@@ -49,17 +49,14 @@ namespace SimpleSharing
 								if (reader.LocalName == "title" && reader.NamespaceURI.Length == 0)
 								{
 									title = ReadElementValue(reader);
-									//writer.WriteElementString("title", title);
 								}
 								else if (reader.LocalName == "link" && reader.NamespaceURI.Length == 0)
 								{
 									link = ReadElementValue(reader);
-									//writer.WriteElementString("link", link);
 								}
 								else if (reader.LocalName == "description" && reader.NamespaceURI.Length == 0)
 								{
 									description = ReadElementValue(reader);
-									//writer.WriteElementString("description", description);
 								}
 								else
 								{
