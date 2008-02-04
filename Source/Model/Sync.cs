@@ -1,29 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.ServiceModel.Syndication;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.Schema;
+using System.IO;
 
-namespace SimpleSharing
+namespace FeedSync
 {
-	[Serializable]
-	public class Sync : ICloneable<Sync>, IEquatable<Sync>
+	public class Sync : ICloneable<Sync>, IEquatable<Sync>, IXmlSerializable
 	{
-		private string id;
-		private bool deleted = false;
-		private int updates = 0;
-		private bool noConflicts = false;
-		private ComparableStack<History> updatesHistory = new ComparableStack<History>();
-		private ComparableList<Item> conflicts = new ComparableList<Item>();
-		private object tag;
+		string id;
+		bool deleted = false;
+		int updates = 0;
+		bool noConflicts = false;
+		ComparableStack<History> updatesHistory = new ComparableStack<History>();
+		List<string> conflicts = new List<string>();
 
-		public Sync(string id, int updates)
+		private Sync()
 		{
-			Guard.ArgumentNotNullOrEmptyString(id, "id");
-			this.id = id;
-			this.updates = updates;
 		}
 
-		public Sync(string id)
-			: this(id, 0)
+		private Sync(string id)
 		{
+			this.id = id;
 		}
 
 		public string Id
@@ -34,19 +35,16 @@ namespace SimpleSharing
 		public int Updates
 		{
 			get { return updates; }
-			set { updates = value; }
 		}
 
 		public bool Deleted
 		{
 			get { return deleted; }
-			set { deleted = value; }
 		}
 
 		public bool NoConflicts
 		{
 			get { return noConflicts; }
-			set { noConflicts = value; }
 		}
 
 		public History LastUpdate
@@ -59,51 +57,144 @@ namespace SimpleSharing
 			get { return updatesHistory; }
 		}
 
-		public List<Item> Conflicts
+		internal IList<string> RawConflicts
 		{
 			get { return conflicts; }
 		}
 
-		/// <summary>
-		/// Tag value that univoquely identifies the item
-		/// </summary>
-		public object Tag
+		
+		//TODO: This API is wrong, an item formatter only knows how to serialize the item received in the constructor, it can not be reused for multiple items
+		// Possible solutions, receive a SyndicationItemFormatter type instead of a real instance and create dynamic instances for each one of the items
+		// Or see if the SyndicationFeedFormatter can be used
+		public IEnumerable<TSyndicationItem> GetConflicts<TSyndicationItem>(SyndicationItemFormatter formatter) where TSyndicationItem : FeedSyncSyndicationItem
 		{
-			get { return tag; }
-			set { tag = value; }
+		    foreach (String itemXml in this.conflicts)
+		    {
+		        XmlReader reader = XmlReader.Create(new StringReader(itemXml));
+		        if (formatter.CanRead(reader))
+		        {
+		            formatter.ReadFrom(reader);
+		            yield return (TSyndicationItem)formatter.Item;
+		        }
+		    }
+
+			yield break;
+		}
+
+		public bool IsSubsumedBy(Sync sync)
+		{
+			History Hx = this.LastUpdate;
+			foreach (History Hy in sync.UpdatesHistory)
+			{
+				if (Hx.IsSubsumedBy(Hy))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public static Sync Create(XmlReader reader)
+		{
+			Guard.ArgumentNotNull(reader, "reader");
+
+			Sync sync = new Sync();
+			((IXmlSerializable)sync).ReadXml(reader);
+
+			return sync;
+		}
+
+		public static Sync Create(string id, string by, DateTime? when)
+		{
+			return Update(new Sync(id), by, when, false);
 		}
 
 		public Sync Update(string by, DateTime? when)
 		{
-			return Behaviors.Update(this, by, when, false);
+			Sync updated = this.Clone();
+
+			return Update(updated, by, when, false);
 		}
 
-		public Sync Update(string by, DateTime? when, bool deleteItem)
+		public Sync Delete(string by, DateTime? when)
 		{
-			return Behaviors.Update(this, by, when, deleteItem);
+			Sync updated = this.Clone();
+
+			//Deleted attribute set to true because it is a deletion (3.2.4 from spec)
+			return Update(updated, by, when, true);
 		}
 
-		public void AddHistory(History history)
+		private static Sync Update(Sync sync, string by, DateTime? when, bool deleteItem)
 		{
-			updatesHistory.Push(history);
+			// 3.2.1
+			sync.updates++;
+
+			// 3.2.2 & 3.2.2.a.i
+			History history = new History(by, when, sync.Updates);
+
+			// 3.2.3
+			sync.updatesHistory.Push(history);
+
+			// 3.2.4
+			sync.deleted = deleteItem;
+
+			return sync;
 		}
 
-		/// <summary>
-		/// Adds the conflict history immediately after the topmost history.
-		/// </summary>
-		/// <remarks>Used for conflict resolution only.</remarks>
-		internal void AddConflictHistory(History history)
+		public Sync SparsePurge()
 		{
-			History topmost = updatesHistory.Pop();
-			updatesHistory.Push(history);
-			updatesHistory.Push(topmost);
+			List<History> purgedHistory = new List<History>();
+
+			Dictionary<string, History> latest = new Dictionary<string, History>();
+
+			foreach (History history in this.updatesHistory)
+			{
+				// By may be null or empty if not specified.
+				// SSE allows either By or When to be specified.
+				if (String.IsNullOrEmpty(history.By))
+				{
+					// Can't purge without a By
+					purgedHistory.Add(history);
+				}
+				else
+				{
+					History last;
+					if (latest.TryGetValue(history.By, out last))
+					{
+						if (history.Sequence > last.Sequence)
+						{
+							// Replace the item we added before.
+							purgedHistory.Remove(last);
+							latest.Add(history.By, history);
+						}
+					}
+					else
+					{
+						latest.Add(history.By, history);
+						purgedHistory.Add(history);
+					}
+				}
+			}
+
+			purgedHistory.Reverse();
+
+			Sync purged = this.Clone();
+			purged.updatesHistory.Clear();
+
+			foreach (History history in purgedHistory)
+			{
+				purged.updatesHistory.Push(history);
+			}
+
+			return purged;
 		}
 
 		#region ICloneable<Sync> Members
 
 		public Sync Clone()
 		{
-			Sync newSync = new Sync(this.id, this.updates);
+			Sync newSync = new Sync(this.id);
+			newSync.updates = this.updates;
 			newSync.deleted = this.deleted;
 
 			List<History> newHistory = new List<History>(updatesHistory);
@@ -113,12 +204,10 @@ namespace SimpleSharing
 				newSync.updatesHistory.Push(history.Clone());
 			}
 
-			foreach (Item conflict in this.conflicts)
+			foreach (string conflict in this.conflicts)
 			{
-				newSync.Conflicts.Add(conflict.Clone());
+				newSync.conflicts.Add(conflict);
 			}
-
-			newSync.tag = this.tag;
 
 			return newSync;
 		}
@@ -141,7 +230,7 @@ namespace SimpleSharing
 					s1.updates == s2.updates &&
 					s1.deleted == s2.deleted &&
 					s1.noConflicts == s2.noConflicts &&
-					s1.updatesHistory == s2.updatesHistory;
+					s1.LastUpdate == s2.LastUpdate;
 			}
 
 			return false;
@@ -164,8 +253,7 @@ namespace SimpleSharing
 			hash = hash ^ this.updates.GetHashCode();
 			hash = hash ^ this.deleted.GetHashCode();
 			hash = hash ^ this.noConflicts.GetHashCode();
-			hash = hash ^ this.updatesHistory.GetHashCode();
-			//hash = hash ^ this.conflicts.GetHashCode();
+			hash = hash ^ this.LastUpdate.GetHashCode();
 
 			return hash;
 		}
@@ -189,5 +277,131 @@ namespace SimpleSharing
 		}
 
 		#endregion
+
+		#region IXmlSerializable Members
+
+		XmlSchema IXmlSerializable.GetSchema()
+		{
+			return null;
+		}
+
+		void IXmlSerializable.ReadXml(XmlReader reader)
+		{
+			if (reader.NamespaceURI != Schema.Namespace || reader.LocalName != Schema.ElementNames.Sync)
+				throw new InvalidOperationException(String.Format(Properties.Resources.InvalidNamespaceOrElement,
+					Schema.Namespace, Schema.ElementNames.Sync));
+
+			reader.MoveToAttribute(Schema.AttributeNames.Id);
+			this.id = reader.Value;
+			reader.MoveToAttribute(Schema.AttributeNames.Updates);
+			this.updates = XmlConvert.ToInt32(reader.Value);
+
+			if (reader.MoveToAttribute(Schema.AttributeNames.Deleted))
+			{
+				this.deleted = XmlConvert.ToBoolean(reader.Value);
+			}
+			if (reader.MoveToAttribute(Schema.AttributeNames.NoConflicts))
+			{
+				this.noConflicts = XmlConvert.ToBoolean(reader.Value);
+			}
+
+			reader.MoveToElement();
+
+			List<History> historyUpdates = new List<History>();
+
+			if (!reader.IsEmptyElement)
+			{
+				while (reader.Read() && !IsFeedSyncElement(reader, Schema.ElementNames.Sync, XmlNodeType.EndElement))
+				{
+					if (IsFeedSyncElement(reader, Schema.ElementNames.History, XmlNodeType.Element))
+					{
+						reader.MoveToAttribute(Schema.AttributeNames.Sequence);
+						int sequence = XmlConvert.ToInt32(reader.Value);
+						string by = null;
+						DateTime? when = DateTime.Now;
+
+						if (reader.MoveToAttribute(Schema.AttributeNames.When))
+							when = DateTime.Parse(reader.Value);
+						if (reader.MoveToAttribute(Schema.AttributeNames.By))
+							by = reader.Value;
+
+						historyUpdates.Add(new History(by, when, sequence));
+					}
+					else if (IsFeedSyncElement(reader, Schema.ElementNames.Conflicts, XmlNodeType.Element))
+					{
+						while (reader.Read() &&
+							!IsFeedSyncElement(reader, Schema.ElementNames.Conflicts, XmlNodeType.EndElement))
+						{
+							XmlReader subTreeReader = reader.ReadSubtree();
+							subTreeReader.MoveToContent();
+							this.conflicts.Add(subTreeReader.ReadOuterXml());
+						}
+					}
+				}
+			}
+
+			if (historyUpdates.Count != 0)
+			{
+				historyUpdates.Reverse();
+				foreach (History history in historyUpdates)
+				{
+					this.updatesHistory.Push(history);
+				}
+			}
+		}
+
+		void IXmlSerializable.WriteXml(XmlWriter writer)
+		{
+			// <sx:sync>
+			writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Sync, Schema.Namespace);
+			writer.WriteAttributeString(Schema.AttributeNames.Id, this.Id);
+			writer.WriteAttributeString(Schema.AttributeNames.Updates, XmlConvert.ToString(this.Updates));
+			writer.WriteAttributeString(Schema.AttributeNames.Deleted, XmlConvert.ToString(this.Deleted));
+			writer.WriteAttributeString(Schema.AttributeNames.NoConflicts, XmlConvert.ToString(this.NoConflicts));
+
+			foreach (History history in this.UpdatesHistory)
+			{
+				WriteHistory(writer, history);
+			}
+
+			if (this.conflicts.Count > 0)
+			{
+				// <sx:conflicts>
+				writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Conflicts, Schema.Namespace);
+
+				foreach (string conflict in this.conflicts)
+				{
+					writer.WriteRaw(conflict);
+				}
+
+				// </sx:conflicts>
+				writer.WriteEndElement();
+			}
+
+			// </sx:sync>
+			writer.WriteEndElement();
+		}
+
+		private void WriteHistory(XmlWriter writer, History history)
+		{
+			// <sx:history>
+			writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.History, Schema.Namespace);
+			writer.WriteAttributeString(Schema.AttributeNames.Sequence, XmlConvert.ToString(history.Sequence));
+			if (history.When.HasValue)
+				writer.WriteAttributeString(Schema.AttributeNames.When, Timestamp.ToString(history.When.Value));
+			writer.WriteAttributeString(Schema.AttributeNames.By, history.By);
+			// </sx:history>
+			writer.WriteEndElement();
+		}
+
+		private static bool IsFeedSyncElement(XmlReader reader, string elementName, XmlNodeType nodeType)
+		{
+			return reader.LocalName == elementName &&
+				reader.NamespaceURI == Schema.Namespace &&
+				reader.NodeType == nodeType;
+		}
+
+		#endregion
+
 	}
 }

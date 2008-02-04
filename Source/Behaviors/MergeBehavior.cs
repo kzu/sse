@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	///3.3	Merge Behavior
@@ -37,75 +38,69 @@ namespace SimpleSharing
 	///i.	If Z equals W (i.e. they are the same item), then process the next item in M
 	///ii.	Add Z as a sub-element of the sx:conflicts element created in step 11a.
 	/// </summary>
-	internal class MergeBehavior
+	public static class MergeBehavior
 	{
 		/// <summary>
 		/// Merges the two items applying the SSE algorithm.
 		/// </summary>
-		public ItemMergeResult Merge(Item originalItem, Item incomingItem)
+		/// // TODO: Same problem as the Sync.GetConflicts problem, see how to serialize the conflicts in a transparent way
+		public static MergeResult Merge(this FeedSyncSyndicationItem originalItem, FeedSyncSyndicationItem incomingItem, SyndicationItemFormatter formatter)
 		{
 			Guard.ArgumentNotNull(incomingItem, "incomingItem");
 
-			Item incoming = incomingItem.Clone();
+			FeedSyncSyndicationItem incoming = (FeedSyncSyndicationItem)incomingItem.Clone();
 
 			if (originalItem == null)
 			{
-				Tracer.TraceData(this, TraceEventType.Information, "Result=MergeOperation.Added (Original item was null)");
-				return new ItemMergeResult(null, incoming, incoming, MergeOperation.Added);
+				return new MergeResult(null, incoming, incoming, MergeOperation.Added);
 			}
 
-			Item original = originalItem.Clone();
+			FeedSyncSyndicationItem original = (FeedSyncSyndicationItem)originalItem.Clone();
 
 			// History on both elements must have at least one entry
 			if (original.Sync.LastUpdate == null ||
 				incoming.Sync.LastUpdate == null)
 			{
-				Tracer.TraceData(this, TraceEventType.Warning, "Invalid input received for original or incoming items: {0}", Properties.Resources.SyncHistoryRequired);
 				throw new ArgumentException(Properties.Resources.SyncHistoryRequired);
 			}
 
-			Item proposed;
-			MergeOperation operation = MergeItems(original, incoming, out proposed);
-
-			Tracer.TraceData(this, TraceEventType.Information, "Result={0} (preliminar value)");
+			FeedSyncSyndicationItem proposed;
+			MergeOperation operation = MergeItems(original, incoming, out proposed, formatter);
 
 			// If the sync are equals and there was no conflict (in these case the Sync might be 
 			// equal as the proposed could be the original item, but with conflicts), then there's 
 			// no merge to perform.
 			if (proposed != null && proposed.Sync.Equals(original.Sync) && operation != MergeOperation.Conflict)
 			{
-				Tracer.TraceData(this, TraceEventType.Information, "Result=MergeOperation.None (changed because sx:sync of proposed equals original and no new conflicts were detected)");
-				return new ItemMergeResult(original, incoming, null, MergeOperation.None);
+				return new MergeResult(original, incoming, null, MergeOperation.None);
 			}
 			else
 			{
-				return new ItemMergeResult(original, incoming, proposed, operation);
+				return new MergeResult(original, incoming, proposed, operation);
 			}
 		}
 
-		private MergeOperation MergeItems(Item localItem, Item incomingItem, out Item proposedItem)
+		private static MergeOperation MergeItems(FeedSyncSyndicationItem localItem, FeedSyncSyndicationItem incomingItem, out FeedSyncSyndicationItem proposedItem, SyndicationItemFormatter formatter)
 		{
-			Tracer.TraceData(this, TraceEventType.Verbose, "Applying SSE merge algorithm");
 			proposedItem = null;
 
 			//3.3.2
-			List<Item> L = new List<Item>();
-			L.AddRange(localItem.Sync.Conflicts);
-			localItem.Sync.Conflicts.Clear();
+			List<FeedSyncSyndicationItem> L = new List<FeedSyncSyndicationItem>();
+			L.AddRange(localItem.Sync.GetConflicts<FeedSyncSyndicationItem>(formatter));
+			localItem.Sync.RawConflicts.Clear();
 			L.Add(localItem);
-
-
+			
 			//3.3.3
-			List<Item> I = new List<Item>();
-			I.AddRange(incomingItem.Sync.Conflicts);
-			incomingItem.Sync.Conflicts.Clear();
+			List<FeedSyncSyndicationItem> I = new List<FeedSyncSyndicationItem>();
+			I.AddRange(incomingItem.Sync.GetConflicts<FeedSyncSyndicationItem>(formatter));
+			incomingItem.Sync.RawConflicts.Clear();
 			I.Add(incomingItem);
 
 			//3.3.4
-			List<Item> M = new List<Item>();
+			List<FeedSyncSyndicationItem> M = new List<FeedSyncSyndicationItem>();
 
 			//3.3.5
-			Item W = null;
+			FeedSyncSyndicationItem W = null;
 
 			//3.3.6 and 3.3.7
 			PerformStep7(ref L, ref I, M, ref W);
@@ -123,17 +118,20 @@ namespace SimpleSharing
 			//3.3.10
 			if (!W.Sync.NoConflicts)
 			{
+				List<FeedSyncSyndicationItem> conflictsW = W.Sync.GetConflicts<FeedSyncSyndicationItem>(formatter); 
 				//3.3.11
-				foreach (Item z in M)
+				foreach (FeedSyncSyndicationItem z in M)
 				{
-					if (!z.Equals(W) && !W.Sync.Conflicts.Contains(z))
+					if (!z.Equals(W) && !conflictsW.Contains(z))
 					{
-						W.Sync.Conflicts.Add(z);
+						conflictsW.Add(z);
 					}
 				}
+
+				//TODO: Serialize the conflicts and add them to the W.Sync.RawConflicts collection
 			}
 
-			if (W.Sync.Conflicts.Count > 0)
+			if (conflictsW.Count > 0)
 			{
 				return MergeOperation.Conflict;
 			}
@@ -150,18 +148,18 @@ namespace SimpleSharing
 		/// <param name="innerCollection"></param>
 		/// <param name="M"></param>
 		/// <param name="W"></param>
-		private void PerformStep7(ref List<Item> outerCollection, ref List<Item> innerCollection, List<Item> M, ref Item W)
+		private static void PerformStep7(ref List<FeedSyncSyndicationItem> outerCollection, ref List<FeedSyncSyndicationItem> innerCollection, List<FeedSyncSyndicationItem> M, ref FeedSyncSyndicationItem W)
 		{
-			List<Item> resOuter = new List<Item>(outerCollection);
-			List<Item> resInner = new List<Item>(innerCollection);
+			List<FeedSyncSyndicationItem> resOuter = new List<FeedSyncSyndicationItem>(outerCollection);
+			List<FeedSyncSyndicationItem> resInner = new List<FeedSyncSyndicationItem>(innerCollection);
 
 			// Collections must be modified from this method.
-			foreach (Item x in outerCollection)
+			foreach (FeedSyncSyndicationItem x in outerCollection)
 			{
 				bool isSubsumed = false;
-				foreach (Item y in innerCollection)
+				foreach (FeedSyncSyndicationItem y in innerCollection)
 				{
-					if (x.IsSubsumedBy(y))
+					if (x.Sync.IsSubsumedBy(y))
 					{
 						isSubsumed = true;
 						resOuter.Remove(x);
@@ -199,9 +197,9 @@ namespace SimpleSharing
 		///ii.	If X has a by attribute value for the topmost sx:history sub-element that is collates greater (see Section 2.4 for collation rules) than Y’s, then X is the ‘winning’ item
 		///3.	Y is the ‘winning’ item
 		/// </summary>
-		private Item WinnerPicking(Item item, Item anotherItem)
+		private static FeedSyncSyndicationItem WinnerPicking(FeedSyncSyndicationItem item, FeedSyncSyndicationItem anotherItem)
 		{
-			Item winner = null;
+			FeedSyncSyndicationItem winner = null;
 
 			if (item.Sync.Updates == anotherItem.Sync.Updates)
 			{
@@ -223,7 +221,7 @@ namespace SimpleSharing
 			return winner;
 		}
 
-		private bool FirstWinsWithWhen(Item first, Item second, out Item winner)
+		private static bool FirstWinsWithWhen(FeedSyncSyndicationItem first, FeedSyncSyndicationItem second, out FeedSyncSyndicationItem winner)
 		{
 			winner = null;
 
@@ -237,7 +235,7 @@ namespace SimpleSharing
 			return firstWins;
 		}
 
-		private bool FirstWinsWithBy(Item first, Item second, out Item winner)
+		private static bool FirstWinsWithBy(FeedSyncSyndicationItem first, FeedSyncSyndicationItem second, out FeedSyncSyndicationItem winner)
 		{
 			winner = null;
 

@@ -147,6 +147,9 @@
   <data name="InitializedAlready" xml:space="preserve">
     <value>The object has already been initialized.</value>
   </data>
+  <data name="InvalidNamespaceOrElement" xml:space="preserve">
+    <value>Invalid xml root element or namespace. Expected namespace {0} and element {1}</value>
+  </data>
   <data name="MustProvideWhenOrBy" xml:space="preserve">
     <value>Either when or by must be provided.</value>
   </data>

@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
-	[Serializable]
 	public enum RelatedType
 	{
-		Complete, 
+		Complete,
 		Aggregated,
 	}
 }
