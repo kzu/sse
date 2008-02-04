@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
+using System.Xml.Schema;
+using System.Xml;
 
-namespace SimpleSharing
+namespace FeedSync
 {
-	[Serializable]
 	public class History : ICloneable<History>, IEquatable<History>
 	{
 		private DateTime? when;
@@ -28,9 +30,10 @@ namespace SimpleSharing
 
 		public History(string by, DateTime? when, int sequence)
 		{
-			if (String.IsNullOrEmpty(by) && when == null)
-				throw new ArgumentException(Properties.Resources.Arg_EitherWhenOrByMustBeSpecified);
-			if (sequence <= 0)
+			if (by == null && !when.HasValue)
+				throw new ArgumentException(Properties.Resources.MustProvideWhenOrBy);
+
+			if (sequence < 1)
 				throw new ArgumentException(Properties.Resources.Arg_SequenceMustBeGreaterThanZero);
 
 			this.by = by;
@@ -83,7 +86,7 @@ namespace SimpleSharing
 			if (Object.ReferenceEquals(h1, h2)) return true;
 			if (!Object.Equals(null, h1) && !Object.Equals(null, h2))
 			{
-				return h1.by == h2.by && 
+				return h1.by == h2.by &&
 					h1.when == h2.when &&
 					h1.sequence == h2.sequence;
 			}
@@ -139,5 +142,7 @@ namespace SimpleSharing
 
 			return false;
 		}
+
+
 	}
 }

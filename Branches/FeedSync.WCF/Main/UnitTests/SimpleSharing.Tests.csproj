@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{6634F9B2-94CB-4D65-8AD7-E38D6F503057}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -132,9 +132,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Source\SimpleSharing.csproj">
+    <ProjectReference Include="..\Source\FeedSync.WCF.csproj">
       <Project>{5A747B6C-D230-4D59-9321-83B48C4553CF}</Project>
-      <Name>SimpleSharing</Name>
+      <Name>FeedSync.WCF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

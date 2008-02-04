@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Supports cloning, which creates a new instance of a class with 

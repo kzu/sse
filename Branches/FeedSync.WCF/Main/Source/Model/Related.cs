@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
-	[Serializable]
-	public class Related
+	public class Related : ICloneable<Related>
 	{
 		private string link;
 		private string title;
@@ -16,8 +17,6 @@ namespace SimpleSharing
 
 		public Related(string linkUrl, RelatedType type, string title)
 		{
-			Guard.ArgumentNotNullOrEmptyString(linkUrl, "linkUrl");
-
 			this.link = linkUrl;
 			this.type = type;
 			this.title = title;
@@ -37,5 +36,23 @@ namespace SimpleSharing
 		{
 			get { return type; }
 		}
+
+		#region ICloneable<Related> Members
+
+		public Related Clone()
+		{
+			return new Related(link, type, title);
+		}
+
+		#endregion
+
+		#region ICloneable Members
+
+		object ICloneable.Clone()
+		{
+			return Clone();
+		}
+
+		#endregion
 	}
 }

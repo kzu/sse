@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
-	[Serializable]
 	public class ComparableStack<T> : Stack<T>, IEquatable<ComparableStack<T>>
 	{
 		public override int GetHashCode()
