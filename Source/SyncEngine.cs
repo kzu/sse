@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Main class that performs synchronization between two repositories.
@@ -36,7 +36,7 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize()
+		public IList<FeedSyncSyndicationItem> Synchronize()
 		{
 			return SynchronizeImpl(null, new MergeFilter(), new ItemFilter());
 		}
@@ -50,7 +50,7 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(MergeFilter mergeFilter)
+		public IList<FeedSyncSyndicationItem> Synchronize(MergeFilter mergeFilter)
 		{
 			return SynchronizeImpl(null, mergeFilter, new ItemFilter());
 		}
@@ -65,7 +65,7 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(ItemFilter itemFilter)
+		public IList<FeedSyncSyndicationItem> Synchronize(ItemFilter itemFilter)
 		{
 			return SynchronizeImpl(null, new MergeFilter(), itemFilter);
 		}
@@ -80,7 +80,7 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since)
+		public IList<FeedSyncSyndicationItem> Synchronize(DateTime? since)
 		{
 			return SynchronizeImpl(since, new MergeFilter(), new ItemFilter());
 		}
@@ -96,7 +96,7 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, ItemFilter itemFilter)
+		public IList<FeedSyncSyndicationItem> Synchronize(DateTime? since, ItemFilter itemFilter)
 		{
 			return SynchronizeImpl(since, new MergeFilter(), itemFilter);
 		}
@@ -111,7 +111,7 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, MergeFilter mergeFilter)
+		public IList<FeedSyncSyndicationItem> Synchronize(DateTime? since, MergeFilter mergeFilter)
 		{
 			return SynchronizeImpl(since, mergeFilter, new ItemFilter());
 		}
@@ -127,23 +127,23 @@ namespace SimpleSharing
 		/// changes from the target repository are incorporated into the source.
 		/// </remarks>
 		/// <returns>The list of items that had conflicts.</returns>
-		public IList<Item> Synchronize(DateTime? since, MergeFilter mergeFilter, ItemFilter itemFilter)
+		public IList<FeedSyncSyndicationItem> Synchronize(DateTime? since, MergeFilter mergeFilter, ItemFilter itemFilter)
 		{
 			return SynchronizeImpl(since, mergeFilter, itemFilter);
 		}
 
-		private IList<Item> SynchronizeImpl(DateTime? since, MergeFilter mergeFilter, ItemFilter itemFilter)
+		private IList<FeedSyncSyndicationItem> SynchronizeImpl(DateTime? since, MergeFilter mergeFilter, ItemFilter itemFilter)
 		{
 			Guard.ArgumentNotNull(mergeFilter, "mergeFilter");
 			Guard.ArgumentNotNull(itemFilter, "itemFilter");
 
-			IEnumerable<Item> outgoingItems = EnumerateItemsProgress(
+			IEnumerable<FeedSyncSyndicationItem> outgoingItems = EnumerateItemsProgress(
 				(since == null) ? source.GetAll(itemFilter.Left) : source.GetAllSince(since, itemFilter.Left),
 				RaiseItemSent);
 
 			if (!target.SupportsMerge)
 			{
-				IEnumerable<ItemMergeResult> outgoingToMerge = MergeItems(outgoingItems, target);
+				IEnumerable<MergeResult> outgoingToMerge = MergeItems(outgoingItems, target);
 				if ((mergeFilter.Behaviors & MergeFilterBehaviors.Right) == MergeFilterBehaviors.Right)
 				{
 					outgoingToMerge = mergeFilter.Handler(target, outgoingToMerge);
@@ -155,13 +155,13 @@ namespace SimpleSharing
 				target.Merge(outgoingItems);
 			}
 
-			IEnumerable<Item> incomingItems = EnumerateItemsProgress(
+			IEnumerable<FeedSyncSyndicationItem> incomingItems = EnumerateItemsProgress(
 				(since == null) ? target.GetAll(itemFilter.Right) : target.GetAllSince(since, itemFilter.Right),
 				RaiseItemReceived);
 
 			if (!source.SupportsMerge)
 			{
-				IEnumerable<ItemMergeResult> incomingToMerge = MergeItems(incomingItems, source);
+				IEnumerable<MergeResult> incomingToMerge = MergeItems(incomingItems, source);
 				if ((mergeFilter.Behaviors & MergeFilterBehaviors.Left) == MergeFilterBehaviors.Left)
 				{
 					incomingToMerge = mergeFilter.Handler(source, incomingToMerge);
@@ -172,23 +172,23 @@ namespace SimpleSharing
 			else
 			{
 				// If repository supports its own SSE merge behavior, don't apply it locally.
-				return new List<Item>(source.Merge(incomingItems));
+				return new List<FeedSyncSyndicationItem>(source.Merge(incomingItems));
 			}
 		}
 
-		private IEnumerable<ItemMergeResult> MergeItems(IEnumerable<Item> items, IRepository repository)
+		private IEnumerable<MergeResult> MergeItems(IEnumerable<FeedSyncSyndicationItem> items, IRepository repository)
 		{
-			foreach (Item incoming in items)
+			foreach (FeedSyncSyndicationItem incoming in items)
 			{
-				Item original = repository.Get(incoming.Sync.Id);
-				ItemMergeResult result = new MergeBehavior().Merge(original, incoming);
+				FeedSyncSyndicationItem original = repository.Get(incoming.Sync.Id);
+				MergeResult result = original.Merge(incoming);
 
 				if (result.Operation != MergeOperation.None)
 					yield return result;
 			}
 		}
 
-		private IList<Item> Import(IEnumerable<ItemMergeResult> items, IRepository repository)
+		private IList<FeedSyncSyndicationItem> Import(IEnumerable<MergeResult> items, IRepository repository)
 		{
 			// Straight import of data in merged results. 
 			// Conflicting items are saved and also 
@@ -200,9 +200,9 @@ namespace SimpleSharing
 			// processed. If we returned an IEnumerable, we would 
 			// depend on the client iterating it in order to 
 			// actually import items, which is undesirable.
-			List<Item> conflicts = new List<Item>();
+			List<FeedSyncSyndicationItem> conflicts = new List<FeedSyncSyndicationItem>();
 
-			foreach (ItemMergeResult result in items)
+			foreach (MergeResult result in items)
 			{
 				if (result.Operation != MergeOperation.None &&
 					result.Proposed != null &&
@@ -216,15 +216,15 @@ namespace SimpleSharing
 					case MergeOperation.Added:
 						// Clean history before adding
 						repository.Add(
-							new Item(result.Proposed.XmlItem, 
-							Behaviors.SparsePurge(result.Proposed.Sync)));
+							new FeedSyncSyndicationItem(result.Proposed, 
+							result.Proposed.Sync.SparsePurge()));
 						break;
 					case MergeOperation.Updated:
 					case MergeOperation.Conflict:
 						// Clean history before updating
 						repository.Update(
-							new Item(result.Proposed.XmlItem,
-							Behaviors.SparsePurge(result.Proposed.Sync)));
+							new FeedSyncSyndicationItem(result.Proposed,
+							result.Proposed.Sync.SparsePurge()));
 						break;
 					case MergeOperation.None:
 						break;
@@ -236,27 +236,27 @@ namespace SimpleSharing
 			return conflicts;
 		}
 
-		private IEnumerable<Item> EnumerateItemsProgress(IEnumerable<Item> items, RaiseHandler raiser)
+		private IEnumerable<FeedSyncSyndicationItem> EnumerateItemsProgress(IEnumerable<FeedSyncSyndicationItem> items, RaiseHandler raiser)
 		{
-			foreach (Item item in items)
+			foreach (FeedSyncSyndicationItem item in items)
 			{
 				raiser(item);
 				yield return item;
 			}
 		}
 
-		private void RaiseItemReceived(Item item)
+		private void RaiseItemReceived(FeedSyncSyndicationItem item)
 		{
 			if (ItemReceived != null)
 				ItemReceived(this, new ItemEventArgs(item));
 		}
 
-		private void RaiseItemSent(Item item)
+		private void RaiseItemSent(FeedSyncSyndicationItem item)
 		{
 			if (ItemSent != null)
 				ItemSent(this, new ItemEventArgs(item));
 		}
 
-		delegate void RaiseHandler(Item item);
+		delegate void RaiseHandler(FeedSyncSyndicationItem item);
 	}
 }

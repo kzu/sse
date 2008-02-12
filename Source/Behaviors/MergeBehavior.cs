@@ -41,10 +41,17 @@ namespace FeedSync
 	public static class MergeBehavior
 	{
 		/// <summary>
-		/// Merges the two items applying the SSE algorithm.
+		/// Merges the two items applying the FeedSync algorithm.
 		/// </summary>
-		/// // TODO: Same problem as the Sync.GetConflicts problem, see how to serialize the conflicts in a transparent way
-		public static MergeResult Merge(this FeedSyncSyndicationItem originalItem, FeedSyncSyndicationItem incomingItem, SyndicationItemFormatter formatter)
+		public static MergeResult Merge(FeedSyncSyndicationItem incomingItem)
+		{
+			return Merge(null, incomingItem);
+		}
+
+		/// <summary>
+		/// Merges the two items applying the FeedSync algorithm.
+		/// </summary>
+		public static MergeResult Merge(this FeedSyncSyndicationItem originalItem, FeedSyncSyndicationItem incomingItem)
 		{
 			Guard.ArgumentNotNull(incomingItem, "incomingItem");
 
@@ -65,7 +72,7 @@ namespace FeedSync
 			}
 
 			FeedSyncSyndicationItem proposed;
-			MergeOperation operation = MergeItems(original, incoming, out proposed, formatter);
+			MergeOperation operation = MergeItems(original, incoming, out proposed);
 
 			// If the sync are equals and there was no conflict (in these case the Sync might be 
 			// equal as the proposed could be the original item, but with conflicts), then there's 
@@ -80,20 +87,21 @@ namespace FeedSync
 			}
 		}
 
-		private static MergeOperation MergeItems(FeedSyncSyndicationItem localItem, FeedSyncSyndicationItem incomingItem, out FeedSyncSyndicationItem proposedItem, SyndicationItemFormatter formatter)
+		private static MergeOperation MergeItems(FeedSyncSyndicationItem localItem, FeedSyncSyndicationItem incomingItem, out FeedSyncSyndicationItem proposedItem)
 		{
 			proposedItem = null;
 
 			//3.3.2
 			List<FeedSyncSyndicationItem> L = new List<FeedSyncSyndicationItem>();
-			L.AddRange(localItem.Sync.GetConflicts<FeedSyncSyndicationItem>(formatter));
-			localItem.Sync.RawConflicts.Clear();
+			L.AddRange(localItem.Sync.Conflicts);
+			localItem.Sync.Conflicts.Clear();
 			L.Add(localItem);
-			
+
+
 			//3.3.3
 			List<FeedSyncSyndicationItem> I = new List<FeedSyncSyndicationItem>();
-			I.AddRange(incomingItem.Sync.GetConflicts<FeedSyncSyndicationItem>(formatter));
-			incomingItem.Sync.RawConflicts.Clear();
+			I.AddRange(incomingItem.Sync.Conflicts);
+			incomingItem.Sync.Conflicts.Clear();
 			I.Add(incomingItem);
 
 			//3.3.4
@@ -118,20 +126,17 @@ namespace FeedSync
 			//3.3.10
 			if (!W.Sync.NoConflicts)
 			{
-				List<FeedSyncSyndicationItem> conflictsW = W.Sync.GetConflicts<FeedSyncSyndicationItem>(formatter); 
 				//3.3.11
 				foreach (FeedSyncSyndicationItem z in M)
 				{
-					if (!z.Equals(W) && !conflictsW.Contains(z))
+					if (!z.Equals(W) && !W.Sync.Conflicts.Contains(z))
 					{
-						conflictsW.Add(z);
+						W.Sync.Conflicts.Add(z);
 					}
 				}
-
-				//TODO: Serialize the conflicts and add them to the W.Sync.RawConflicts collection
 			}
 
-			if (conflictsW.Count > 0)
+			if (W.Sync.Conflicts.Count > 0)
 			{
 				return MergeOperation.Conflict;
 			}
@@ -159,7 +164,7 @@ namespace FeedSync
 				bool isSubsumed = false;
 				foreach (FeedSyncSyndicationItem y in innerCollection)
 				{
-					if (x.Sync.IsSubsumedBy(y))
+					if (x.Sync.IsSubsumedBy(y.Sync))
 					{
 						isSubsumed = true;
 						resOuter.Remove(x);

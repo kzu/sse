@@ -9,8 +9,9 @@ using System.Text;
 using SimpleSharing;
 using System.Xml;
 using System.Threading;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	/// <summary>
 	/// Base class for fixtures of implementations of <see cref="ISyncRepository"/>.
@@ -56,7 +57,7 @@ namespace SimpleSharing.Tests
 			ISyncRepository repo = CreateRepository();
 			string id = Guid.NewGuid().ToString();
 
-			repo.Save(Behaviors.Create(id, "kzu", DateTime.Now, false));
+			repo.Save(Sync.Create(id, "kzu", DateTime.Now));
 
 			Sync sync = repo.Get(id);
 
@@ -68,9 +69,9 @@ namespace SimpleSharing.Tests
 		public void ShouldGetAll()
 		{
 			ISyncRepository repo = CreateRepository();
-			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
-			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
-			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
+			repo.Save(Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now));
+			repo.Save(Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now));
+			repo.Save(Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now));
 
 			IEnumerable<Sync> syncs = repo.GetAll();
 
@@ -81,16 +82,17 @@ namespace SimpleSharing.Tests
 		public void ShouldGetAllConflicts()
 		{
 			ISyncRepository repo = CreateRepository();
-			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
-			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
-			repo.Save(Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false));
+			repo.Save(Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now));
+			repo.Save(Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now));
+			repo.Save(Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now));
 
-			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now, false);
+			Sync s = Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now);
 			Sync conflict = s.Clone();
-			s = Behaviors.Update(s, "vcc", null, false);
-			conflict = Behaviors.Update(conflict, "ary", null, false);
+			s = s.Update("vcc", null);
+			conflict = conflict.Update("ary", null);
 
-			s.Conflicts.Add(new Item(new MockXmlItem(s.Id), conflict));
+			s.Conflicts.Add(new FeedSyncSyndicationItem("title", "summary", 
+				new TextSyndicationContent("test"), conflict));
 
 			repo.Save(s);
 

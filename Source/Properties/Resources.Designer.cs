@@ -178,6 +178,15 @@ namespace FeedSync.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Formatter not supported.
+        /// </summary>
+        internal static string NotSupportedFormatter {
+            get {
+                return ResourceManager.GetString("NotSupportedFormatter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sync information does not contain any history elements..
         /// </summary>
         internal static string SyncHistoryRequired {

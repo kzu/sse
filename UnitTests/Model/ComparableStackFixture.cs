@@ -1,12 +1,7 @@
-#if PocketPC
-using Microsoft.Practices.Mobile.TestTools.UnitTesting;
-#else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
-
 using System;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	[TestClass]
 	public class ComparableStackFixture

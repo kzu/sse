@@ -7,8 +7,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	[TestClass]
 	public class SyncEngineFixture : TestFixtureBase
@@ -37,7 +38,7 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			IList<Item> conflicts = engine.Synchronize();
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize();
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(2, left.Items.Count);
@@ -54,15 +55,15 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			ItemFilter filter = new ItemFilter(delegate(Item item)
+			ItemFilter filter = new ItemFilter(delegate(FeedSyncSyndicationItem item)
 			{
-				if (item.XmlItem.Title == "fizz" || item.XmlItem.Title == "buzz")
+				if (item.Title.Text == "fizz" || item.Title.Text == "buzz")
 					return false;
 
 				return true;
 			});
 
-			IList<Item> conflicts = engine.Synchronize(filter);
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize(filter);
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(1, left.Items.Count);
@@ -79,15 +80,15 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			ItemFilter filter = new ItemFilter(delegate(Item item)
+			ItemFilter filter = new ItemFilter(delegate(FeedSyncSyndicationItem item)
 			{
 				return false;
-			}, delegate(Item item)
+			}, delegate(FeedSyncSyndicationItem item)
 			{
 				return true;
 			});
 
-			IList<Item> conflicts = engine.Synchronize(filter);
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize(filter);
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(2, left.Items.Count);
@@ -104,15 +105,15 @@ namespace SimpleSharing.Tests
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			ItemFilter filter = new ItemFilter(delegate(Item item)
+			ItemFilter filter = new ItemFilter(delegate(FeedSyncSyndicationItem item)
 			{
 				return true;
-			}, delegate(Item item)
+			}, delegate(FeedSyncSyndicationItem item)
 			{
 				return false;
 			});
 
-			IList<Item> conflicts = engine.Synchronize(filter);
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize(filter);
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(1, left.Items.Count);
@@ -123,20 +124,20 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldMergeChangesBothWays()
 		{
-			Item a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
-			Item b = CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga"));
+			FeedSyncSyndicationItem a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
+			FeedSyncSyndicationItem b = CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga"));
 
 			MockRepository left = new MockRepository(
-				new Item(a.XmlItem, a.Sync.Update("kzu", DateTime.Now)), 
+				new FeedSyncSyndicationItem(a, a.Sync.Update("kzu", DateTime.Now)), 
 				b);
 
 			MockRepository right = new MockRepository(
 				a,
-				new Item(b.XmlItem, b.Sync.Update("vga", DateTime.Now)));
+				new FeedSyncSyndicationItem(b, b.Sync.Update("vga", DateTime.Now)));
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			IList<Item> conflicts = engine.Synchronize();
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize();
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(2, right.Items[a.Sync.Id].Sync.Updates);
@@ -146,34 +147,34 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldMarkItemDeleted()
 		{
-			Item a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
-			Item b = CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga"));
+			FeedSyncSyndicationItem a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
+			FeedSyncSyndicationItem b = CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga"));
 
 			MockRepository left = new MockRepository(a, b);
 			MockRepository right = new MockRepository(
-				a, 
-				new Item(b.XmlItem, b.Sync.Update("vga", DateTime.Now, true)));
+				a,
+				new FeedSyncSyndicationItem(b, b.Sync.Update("vga", DateTime.Now)));
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			IList<Item> conflicts = engine.Synchronize();
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize();
 
 			Assert.AreEqual(0, conflicts.Count);
-			Assert.AreEqual(1, Count(left.GetAll(delegate(Item i) { return !i.Sync.Deleted; })));
+			Assert.AreEqual(1, Count(left.GetAll(delegate(FeedSyncSyndicationItem i) { return !i.Sync.Deleted; })));
 		}
 
 		[TestMethod]
 		public void ShouldSynchronizeSince()
 		{
-			Item a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1))));
-			Item b = CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga", DateTime.Now.Subtract(TimeSpan.FromDays(1))));
+			FeedSyncSyndicationItem a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1))));
+			FeedSyncSyndicationItem b = CreateItem("buzz", Guid.NewGuid().ToString(), new History("vga", DateTime.Now.Subtract(TimeSpan.FromDays(1))));
 
 			MockRepository left = new MockRepository(a);
 			MockRepository right = new MockRepository(b);
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			IList<Item> conflicts = engine.Synchronize(DateTime.Now);
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize(DateTime.Now);
 
 			Assert.AreEqual(0, conflicts.Count);
 			Assert.AreEqual(1, left.Items.Count);
@@ -183,19 +184,19 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGenerateConflict()
 		{
-			Item a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
+			FeedSyncSyndicationItem a = CreateItem("fizz", Guid.NewGuid().ToString(), new History("kzu"));
 			Thread.Sleep(1000);
 
 			MockRepository left = new MockRepository(
-				new Item(a.XmlItem, a.Sync.Update("kzu", DateTime.Now)));
+				new FeedSyncSyndicationItem(a, a.Sync.Update("kzu", DateTime.Now)));
 			Thread.Sleep(1000);
 
 			MockRepository right = new MockRepository(
-				new Item(a.XmlItem, a.Sync.Update("vga", DateTime.Now)));
+				new FeedSyncSyndicationItem(a, a.Sync.Update("vga", DateTime.Now)));
 
 			SyncEngine engine = new SyncEngine(left, right);
 
-			IList<Item> conflicts = engine.Synchronize();
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize();
 
 			Assert.AreEqual(1, conflicts.Count);
 			Assert.AreEqual(1, left.Items[a.Sync.Id].Sync.Conflicts.Count);
@@ -210,36 +211,36 @@ namespace SimpleSharing.Tests
 			SyncEngine engine = new SyncEngine(left, right);
 
 			string id = Guid.NewGuid().ToString();
-			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			Item item = new Item(
-				new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync sync = Sync.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(
+				"foo", "bar",
+					new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
 
 			left.Add(item);
 			right.Add(item);
 
-			Item incomingItem = item.Clone();
+			FeedSyncSyndicationItem incomingItem = new FeedSyncSyndicationItem(item);
 
 			// Local editing.
-			item = new Item(new XmlItem(id, "changed", item.XmlItem.Description,
-				item.XmlItem.Payload),
-				Behaviors.Update(item.Sync, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false));
+			item = new FeedSyncSyndicationItem("changed", item.Summary.Text,
+				item.Content,
+				item.Sync.Update(DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(1))));
 
 			left.Update(item);
 
 			// Conflicting remote editing.
-			incomingItem = new Item(new XmlItem(id, "remote", item.XmlItem.Description,
-				item.XmlItem.Payload),
-				Behaviors.Update(incomingItem.Sync, "REMOTE\\kzu", DateTime.Now, false));
+			incomingItem = new FeedSyncSyndicationItem("remote", item.Summary.Text,
+				item.Content,
+				incomingItem.Sync.Update("REMOTE\\kzu", DateTime.Now));
 
 			right.Update(incomingItem);
-			
-			IList<Item> conflicts = engine.Synchronize();
+
+			IList<FeedSyncSyndicationItem> conflicts = engine.Synchronize();
 
 			Assert.AreEqual(1, conflicts.Count);
 			Assert.AreEqual(1, Count(left.GetAll()));
-			Assert.AreEqual("remote", left.Get(id).XmlItem.Title);
+			Assert.AreEqual("remote", left.Get(id).Title.Text);
 			Assert.AreEqual("REMOTE\\kzu", left.Get(id).Sync.LastUpdate.By);
 
 			Assert.AreEqual(1, Count(left.GetConflicts()));
@@ -266,24 +267,24 @@ namespace SimpleSharing.Tests
 			bool right = false;
 			bool none = false;
 			int both = 0;
-			MergeFilterHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler leftHandler = delegate(IRepository targetRepository, IEnumerable<MergeResult> mergedItems)
 			{
 				Assert.AreEqual("left", targetRepository.FriendlyName);
 				left = true;
 				return mergedItems;
 			};
-			MergeFilterHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler rightHandler = delegate(IRepository targetRepository, IEnumerable<MergeResult> mergedItems)
 			{
 				Assert.AreEqual("right", targetRepository.FriendlyName);
 				right = true;
 				return mergedItems;
 			};
-			MergeFilterHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler bothHandler = delegate(IRepository targetRepository, IEnumerable<MergeResult> mergedItems)
 			{
 				both++;
 				return mergedItems;
 			};
-			MergeFilterHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<ItemMergeResult> mergedItems)
+			MergeFilterHandler noneHandler = delegate(IRepository targetRepository, IEnumerable<MergeResult> mergedItems)
 			{
 				none = true;
 				return mergedItems;
@@ -312,19 +313,19 @@ namespace SimpleSharing.Tests
 			SyncEngine engine = new SyncEngine(left, right);
 
 			string id = Guid.NewGuid().ToString();
-			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			Item item = new Item(
-				new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync sync = Sync.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(
+				"foo", "bar",
+					new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
 
 			left.Add(item);
 
 			id = Guid.NewGuid().ToString();
-			sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			item = new Item(
-				new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			sync = Sync.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			item = new FeedSyncSyndicationItem(
+				"foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
 
 			right.Add(item);
@@ -352,19 +353,19 @@ namespace SimpleSharing.Tests
 			SyncEngine engine = new SyncEngine(left, right);
 
 			string id = Guid.NewGuid().ToString();
-			Sync sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			Item item = new Item(
-				new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync sync = Sync.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(
+				"foo", "bar",
+					new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
 
 			left.Add(item);
 
 			id = Guid.NewGuid().ToString();
-			sync = Behaviors.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(2)), false);
-			item = new Item(
-				new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			sync = Sync.Create(id, DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromDays(2)));
+			item = new FeedSyncSyndicationItem(
+				"foo", "bar",
+					new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
 
 			right.Add(item);
@@ -424,16 +425,16 @@ namespace SimpleSharing.Tests
 		//    engine2.Import("mock", items);
 		//}
 
-		private Item CreateItem(string title, string id, History history, params History[] otherHistory)
+		private FeedSyncSyndicationItem CreateItem(string title, string id, History history, params History[] otherHistory)
 		{
-			XmlItem xml = new XmlItem(title, null, GetElement("<payload/>"), DateTime.Now);
-			Sync sync = Behaviors.Create(id, history.By, history.When, false);
+			Sync sync = Sync.Create(id, history.By, history.When);
 			foreach (History h in otherHistory)
 			{
 				sync = sync.Update(h.By, h.When);
 			}
 
-			return new Item(xml, sync);
+			return new FeedSyncSyndicationItem(title, "description", 
+				new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), sync);
 		}
 
 		class MockMergeRepository : IRepository
@@ -452,46 +453,46 @@ namespace SimpleSharing.Tests
 				get { return true; }
 			}
 
-			public Item Get(string id)
+			public FeedSyncSyndicationItem Get(string id)
 			{
 				return null;
 			}
 
-			public IEnumerable<Item> GetAll()
+			public IEnumerable<FeedSyncSyndicationItem> GetAll()
 			{
-				return new Item[0];
+				return new FeedSyncSyndicationItem[0];
 			}
 
-			public IEnumerable<Item> GetAllSince(DateTime? since)
+			public IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since)
 			{
-				return new Item[0];
+				return new FeedSyncSyndicationItem[0];
 			}
 
-			public IEnumerable<Item> GetConflicts()
+			public IEnumerable<FeedSyncSyndicationItem> GetConflicts()
 			{
-				return new Item[0];
+				return new FeedSyncSyndicationItem[0];
 			}
 
 			public void Delete(string id)
 			{
 			}
 
-			public void Update(Item item)
+			public void Update(FeedSyncSyndicationItem item)
 			{
 			}
 
-			public Item Update(Item item, bool resolveConflicts)
+			public FeedSyncSyndicationItem Update(FeedSyncSyndicationItem item, bool resolveConflicts)
 			{
                 return item;
 			}
 
-			public IEnumerable<Item> Merge(IEnumerable<Item> items)
+			public IEnumerable<FeedSyncSyndicationItem> Merge(IEnumerable<FeedSyncSyndicationItem> items)
 			{
 				MergeCalled = true;
-				return new List<Item>();
+				return new List<FeedSyncSyndicationItem>();
 			}
 
-			public void Add(Item item)
+			public void Add(FeedSyncSyndicationItem item)
 			{
 			}
 
@@ -499,14 +500,14 @@ namespace SimpleSharing.Tests
 
 			#region IRepository Members
 
-			public IEnumerable<Item> GetAll(Predicate<Item> filter)
+			public IEnumerable<FeedSyncSyndicationItem> GetAll(Predicate<FeedSyncSyndicationItem> filter)
 			{
-				return new Item[0];
+				return new FeedSyncSyndicationItem[0];
 			}
 
-			public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+			public IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since, Predicate<FeedSyncSyndicationItem> filter)
 			{
-				return new Item[0];
+				return new FeedSyncSyndicationItem[0];
 			}
 
 			#endregion

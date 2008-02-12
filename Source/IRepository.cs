@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Main repository interface for an SSE adapter.
@@ -20,42 +20,42 @@ namespace SimpleSharing
 		/// </summary>
 		/// <param name="id">SSE identifier for the item</param>
 		/// <returns>An <see cref="Item"/> if the item was found in the repository; <see langword="null"/> otherwise.</returns>
-		Item Get(string id);
+		FeedSyncSyndicationItem Get(string id);
 
 		/// <summary>
 		/// Gets all the items in the repository, including deleted ones.
 		/// </summary>
-		IEnumerable<Item> GetAll();
+		IEnumerable<FeedSyncSyndicationItem> GetAll();
 
 		/// <summary>
 		/// Gets all the items in the repository, including deleted ones, and filters 
 		/// the result using the given filter predicate.
 		/// </summary>
-		IEnumerable<Item> GetAll(Predicate<Item> filter);
+		IEnumerable<FeedSyncSyndicationItem> GetAll(Predicate<FeedSyncSyndicationItem> filter);
 
 		/// <summary>
 		/// Gets all the items in the repository that were added, changed or removed after the given date.
 		/// </summary>
 		/// <param name="since">Optional date to retrieve items since.</param>
-		IEnumerable<Item> GetAllSince(DateTime? since);
+		IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since);
 
 		/// <summary>
 		/// Gets all the items in the repository that were added, changed or removed after the given date, 
 		/// and filters the result using the given filter predicate.
 		/// </summary>
 		/// <param name="since">Optional date to retrieve items since.</param>
-		IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter);
+		IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since, Predicate<FeedSyncSyndicationItem> filter);
 
 		/// <summary>
 		/// Returns the items with conflicts.
 		/// </summary>
-		IEnumerable<Item> GetConflicts();
+		IEnumerable<FeedSyncSyndicationItem> GetConflicts();
 
 		/// <summary>
 		/// Adds an item to the repository.
 		/// </summary>
 		/// <param name="item">The item to add.</param>
-		void Add(Item item);
+		void Add(FeedSyncSyndicationItem item);
 
 		/// <summary>
 		/// Permanently deletes the item from the repository, if supported by the implementation.
@@ -75,7 +75,7 @@ namespace SimpleSharing
 		/// Updates the item on the repository.
 		/// </summary>
 		/// <param name="item">The item to update.</param>
-		void Update(Item item);
+		void Update(FeedSyncSyndicationItem item);
 
 		/// <summary>
 		/// Updates the item on the repository, optionally merging the conflicts history 
@@ -89,7 +89,7 @@ namespace SimpleSharing
 		/// <remarks>
 		/// See 3.4 on SSE spec.
 		/// </remarks>
-		Item Update(Item item, bool resolveConflicts);
+		FeedSyncSyndicationItem Update(FeedSyncSyndicationItem item, bool resolveConflicts);
 
 		/// <summary>
 		/// Merges the list of items in the repository, and returns any conflicting 
@@ -98,7 +98,7 @@ namespace SimpleSharing
 		/// <param name="items">The items to merge.</param>
 		/// <returns>List of conflicts resulting from the merge. Items with conflicts are 
 		/// persisted to the repository, and the winner determines the item payload.</returns>
-		IEnumerable<Item> Merge(IEnumerable<Item> items);
+		IEnumerable<FeedSyncSyndicationItem> Merge(IEnumerable<FeedSyncSyndicationItem> items);
 
 		/// <summary>
 		/// Friendly name of the repository, useful for showing 

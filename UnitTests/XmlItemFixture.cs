@@ -3,9 +3,10 @@ using System;
 using Microsoft.Practices.Mobile.TestTools.UnitTesting;
 #else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.ServiceModel.Syndication;
 #endif
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	[TestClass]
 	public class XmlItemFixture : TestFixtureBase
@@ -13,8 +14,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetHashcodeWithNullDescription()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", null, GetElement("<payload/>"));
-			XmlItem i2 = new XmlItem(i1.Id, "title", null, GetElement("<payload/>"));
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", null, new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml));
+			XmlItem i2 = new XmlItem(i1.Id, "title", null, new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml));
 
 			Assert.AreEqual(i1, i2);
 			Assert.AreEqual(i1.GetHashCode(), i2.GetHashCode());
@@ -23,7 +24,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShoudAllowNullTitle()
 		{
-			XmlItem item = new XmlItem(null, "description", GetElement("<payload/>"), DateTime.Now);
+			XmlItem item = new XmlItem("id", null, "description", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml));
 
 			Assert.IsNull(item.Title);
 		}
@@ -31,7 +32,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShoudAllowNullDescription()
 		{
-			XmlItem item = new XmlItem("title", null, GetElement("<payload/>"), DateTime.Now);
+			XmlItem item = new XmlItem("id", "title", null, new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml));
 
 			Assert.IsNull(item.Description);
 		}
@@ -39,8 +40,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldEqualWithSameValues()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", GetElement("<payload/>"), DateTime.Now);
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description", GetElement("<payload/>"), i1.Tag);
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml));
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), i1.Tag);
 
 			Assert.AreEqual(i1, i2);
 		}
@@ -48,8 +49,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualWithDifferentPayload()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", GetElement("<payload/>"), DateTime.Now);
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description", GetElement("<payload id='foo'/>"), DateTime.Now);
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), DateTime.Now);
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description", new TextSyndicationContent("<payload id='foo'/>", TextSyndicationContentKind.XHtml), DateTime.Now);
 
 			Assert.AreNotEqual(i1, i2);
 		}
@@ -57,8 +58,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualWithDifferentTitle()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title1", "description", GetElement("<payload/>"), DateTime.Now);
-			XmlItem i2 = new XmlItem(i1.Id, "title2", "description", GetElement("<payload/>"), DateTime.Now);
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title1", "description", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), DateTime.Now);
+			XmlItem i2 = new XmlItem(i1.Id, "title2", "description", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), DateTime.Now);
 
 			Assert.AreNotEqual(i1, i2);
 		}
@@ -66,27 +67,10 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualWithDifferentDescription()
 		{
-			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description1", GetElement("<payload/>"), DateTime.Now);
-			XmlItem i2 = new XmlItem(i1.Id, "title", "description2", GetElement("<payload/>"), DateTime.Now);
+			XmlItem i1 = new XmlItem(Guid.NewGuid().ToString(), "title", "description1", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), DateTime.Now);
+			XmlItem i2 = new XmlItem(i1.Id, "title", "description2", new TextSyndicationContent("<payload/>", TextSyndicationContentKind.XHtml), DateTime.Now);
 
 			Assert.AreNotEqual(i1, i2);
-		}
-
-		[TestMethod]
-		public void ShouldAddEmptyPayloadIfTitleAndDescriptionAreNull()
-		{
-			XmlItem item = new XmlItem(null, null, null);
-
-			Assert.IsNotNull(item.Payload);
-			Assert.AreEqual(0, item.Payload.ChildNodes.Count);
-		}
-
-		[TestMethod]
-		public void ShouldNotThrowExceptionIfTitleAndDescriptionAreNull()
-		{
-			XmlItem item = new XmlItem(null, null, null, DateTime.Now);
-
-			item.GetHashCode();
 		}
 	}
 }

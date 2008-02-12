@@ -156,6 +156,9 @@
   <data name="NotInitialized" xml:space="preserve">
     <value>The object has not been initialized properly.</value>
   </data>
+  <data name="NotSupportedFormatter" xml:space="preserve">
+    <value>Formatter not supported</value>
+  </data>
   <data name="SyncHistoryRequired" xml:space="preserve">
     <value>Sync information does not contain any history elements.</value>
   </data>

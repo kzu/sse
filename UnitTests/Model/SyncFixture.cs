@@ -1,16 +1,21 @@
-#if PocketPC
-using Microsoft.Practices.Mobile.TestTools.UnitTesting;
-#else
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
-
 using System;
+using System.Xml;
+using System.Text;
+using System.IO;
+using System.Xml.Serialization;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	[TestClass]
-	public class SyncFixture
+	public class SyncFixture : TestFixtureBase
 	{
+		protected virtual string GetVersion()
+		{
+			return new Rss20ItemFormatter().Version;
+		}
+
 		[TestMethod]
 		public void ShouldEqualNullSyncToNull()
 		{
@@ -20,22 +25,22 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualNullOperator()
 		{
-			Assert.IsFalse(null == new Sync("foo"));
-			Assert.IsFalse(new Sync("foo") == null);
+			Assert.IsFalse(null == Sync.Create("foo", "foo", DateTime.Now));
+			Assert.IsFalse(Sync.Create("foo", "foo", DateTime.Now) == null);
 		}
 
 		[TestMethod]
 		public void ShouldNotEqualNull()
 		{
-			Assert.IsFalse(new Sync("foo").Equals((object)null));
-			Assert.IsFalse(new Sync("foo").Equals((Sync)null));
+			Assert.IsFalse(Sync.Create("foo", "foo", DateTime.Now).Equals((object)null));
+			Assert.IsFalse(Sync.Create("foo", "foo", DateTime.Now).Equals((Sync)null));
 		}
 
 		[TestMethod]
 		public void ShouldEqualIfSameId()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			Sync s2 = new Sync(s1.Id);
+			Sync s1 = Sync.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now);
+			Sync s2 = Sync.Create(s1.Id, s1.LastUpdate.By, s1.LastUpdate.When); ;
 
 			Assert.AreEqual(s1, s2);
 			Assert.IsTrue(s1 == s2);
@@ -44,8 +49,8 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldNotEqualIfDifferentId()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			Sync s2 = new Sync(Guid.NewGuid().ToString());
+			Sync s1 = Sync.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now);
+			Sync s2 = Sync.Create(Guid.NewGuid().ToString(), s1.LastUpdate.By, s1.LastUpdate.When); ;
 
 			Assert.AreNotEqual(s1, s2);
 			Assert.IsFalse(s1 == s2);
@@ -53,10 +58,10 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldNotEqualIfDifferentUpdates()
+		public void ShouldNotEqualIfDifferentBy()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			Sync s2 = new Sync(s1.Id, 2);
+			Sync s1 = Sync.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now);
+			Sync s2 = Sync.Create(s1.Id, "Foo1", s1.LastUpdate.When); ;
 
 			Assert.AreNotEqual(s1, s2);
 			Assert.IsFalse(s1 == s2);
@@ -64,11 +69,10 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldNotEqualIfDifferentDeleted()
+		public void ShouldNotEqualIfDifferentWhen()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			Sync s2 = new Sync(s1.Id);
-			s2.Deleted = true;
+			Sync s1 = Sync.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now);
+			Sync s2 = Sync.Create(s1.Id, s1.LastUpdate.By, DateTime.Now.AddMinutes(10));
 
 			Assert.AreNotEqual(s1, s2);
 			Assert.IsFalse(s1 == s2);
@@ -76,57 +80,136 @@ namespace SimpleSharing.Tests
 		}
 
 		[TestMethod]
-		public void ShouldNotEqualIfDifferentNoConflicts()
+		public void ShouldReadSyncWithConflict()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			s1.NoConflicts = false;
-			Sync s2 = new Sync(s1.Id);
-			s2.NoConflicts = true;
+			string xml = @"
+   <sx:sync xmlns:sx='http://feedsync.org/2007/feedsync' id='0a7903db47fb0fff' updates='2'>
+    <sx:history sequence='2' by='REO1750'/>
+    <sx:history sequence='1' by='REO1750'/>
+	<sx:conflicts>
+	  <item>
+	   <title>Buy icecream</title>
+	   <customer id='1' />
+	   <sx:sync id='0a7903db47fb0fff' updates='2'>
+		 <sx:history sequence='2' by='JEO2000'/>
+		 <sx:history sequence='1' by='REO1750'/>
+	   </sx:sync>
+	  </item>
+		<item>
+	   <title>Buy chocolate</title>
+	   <customer id='1' />
+	   <sx:sync id='1a7903db47fb0fff' updates='2'>
+		 <sx:history sequence='2' by='JEO2000'/>
+		 <sx:history sequence='1' by='REO1750'/>
+	   </sx:sync>
+	  </item>
+	</sx:conflicts>
+   </sx:sync>";
 
-			Assert.AreNotEqual(s1, s2);
-			Assert.IsFalse(s1 == s2);
-			Assert.IsTrue(s1 != s2);
+			XmlReader reader = GetReader(xml);
+			reader.MoveToContent();
+
+			Sync sync = Sync.Create(reader, GetVersion());
+			
+			int count = Count(sync.Conflicts);
+			Assert.AreEqual(2, count);
 		}
 
 		[TestMethod]
-		public void ShouldEqualIfEqualHistory()
+		public void ShouldReadSync()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			Sync s2 = s1.Clone();
+			string xml = @"
+   <sx:sync xmlns:sx='http://feedsync.org/2007/feedsync' id='0a7903db47fb0fff' updates='3'>
+    <sx:history sequence='3' by='JEO2000'/>
+    <sx:history sequence='2' by='REO1750'/>
+    <sx:history sequence='1' by='REO1750'/>
+   </sx:sync>";
 
-			History history = new History("foo");
-			s1.AddHistory(history);
-			s2.AddHistory(history);
+			XmlReader reader = GetReader(xml);
+			reader.MoveToContent();
+			Sync sync = Sync.Create(reader, GetVersion());
 
-			Assert.AreEqual(s1, s2);
-			Assert.IsTrue(s1 == s2);
+			Assert.AreEqual("0a7903db47fb0fff", sync.Id);
+			Assert.AreEqual(3, sync.Updates);
+			Assert.AreEqual(3, Count(sync.UpdatesHistory));
+			Assert.AreEqual(3, sync.LastUpdate.Sequence);
+			Assert.AreEqual("JEO2000", sync.LastUpdate.By);
 		}
 
 		[TestMethod]
-		public void ShouldNotEqualIfDifferentHistory()
+		public void ShouldWriteSync()
 		{
-			Sync s1 = new Sync(Guid.NewGuid().ToString());
-			Sync s2 = s1.Clone();
+			Sync sync = Sync.Create("0a7903db47fb0fff", "JEO2000", DateTime.Now);
+			sync = sync.Update("REO1750", DateTime.Now);
 
-			s1.AddHistory(new History("kzu"));
-			s2.AddHistory(new History("vga"));
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
 
-			Assert.AreNotEqual(s1, s2);
-			Assert.IsFalse(s1 == s2);
-			Assert.IsTrue(s1 != s2);
+			sync.WriteXml(xw, GetVersion());
+
+			xw.Flush();
+
+			XmlElement output = GetElement(sw.ToString());
+
+			Assert.AreEqual(1, EvaluateCount(output, "//sx:sync"));
+			Assert.AreEqual(2, EvaluateCount(output, "//sx:sync/sx:history"));
 		}
 
 
+		[TestMethod]
+		public void ShouldWriteSyncWithConflicts()
+		{
+			Sync sync = Sync.Create("0a7903db47fb0fff", "JEO2000", DateTime.Now);
+			sync = sync.Update("REO1750", DateTime.Now);
 
-		// TODO: missing tests
-		// Validate Id. 2.3
-		// Validate updates
-		// Test equality
-		// Test AddUpdate
-		// See if AddHistory is needed as public
-		// Test IsConflictWith (see if it belongs here)
-		// Sync.Id must be == to Item.XmlItem.Id
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem("title", "content", new Uri("urn:test"),
+				Sync.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now));
+			
+			sync.Conflicts.Add(item);
 
-		// Validate required properties
+			StringWriter sw = new StringWriter();
+			XmlWriterSettings set = new XmlWriterSettings();
+			set.Indent = true;
+			XmlWriter xw = XmlWriter.Create(sw, set);
+
+			sync.WriteXml(xw, GetVersion());
+
+			xw.Flush();
+
+			XmlElement output = GetElement(sw.ToString());
+
+			Assert.AreEqual(2, EvaluateCount(output, "//sx:sync"));
+			Assert.AreEqual(3, EvaluateCount(output, "//sx:sync/sx:history"));
+		}
+
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void ShouldFailReadWithInvalidNamespace()
+		{
+			string xml = @"
+   <sx:sync xmlns:sx='http://feedsync.org/2007/sse' id='0a7903db47fb0fff' updates='3'>
+   </sx:sync>";
+
+			XmlReader reader = GetReader(xml);
+			reader.MoveToContent();
+			Sync sync = Sync.Create(reader, GetVersion());
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void ShouldFailReadWithInvalidElement()
+		{
+			string xml = @"
+   <sx:foo xmlns:sx='http://feedsync.org/2007/FeedSync' id='0a7903db47fb0fff' updates='3'>
+   </sx:foo>";
+
+			XmlReader reader = GetReader(xml);
+			reader.MoveToContent();
+			Sync sync = Sync.Create(reader, GetVersion());
+		}
+
 	}
 }

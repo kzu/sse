@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	public class DeviceAuthor
 	{

@@ -1,20 +1,26 @@
-#if PocketPC
-using Microsoft.Practices.Mobile.TestTools.UnitTesting;
-#else
+﻿using System;
+using System.Text;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
-using System;
-
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
+	/// <summary>
+	/// Summary description for SharingFixture
+	/// </summary>
 	[TestClass]
 	public class SharingFixture : TestFixtureBase
 	{
+		public SharingFixture()
+		{
+		}
+
 		[TestMethod]
 		public void ShouldGetSetPublicProperties()
 		{
 			TestProperties(new Sharing());
 		}
+
+		
 	}
 }

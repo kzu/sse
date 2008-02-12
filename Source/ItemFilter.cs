@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Items filter
 	/// </summary>
 	public class ItemFilter
 	{
-		private Predicate<Item> leftFilter;
-		private Predicate<Item> rightFilter;
+		private Predicate<FeedSyncSyndicationItem> leftFilter;
+		private Predicate<FeedSyncSyndicationItem> rightFilter;
 
 		public ItemFilter()
 		{
@@ -22,7 +22,7 @@ namespace SimpleSharing
 		/// Constructor
 		/// </summary>
 		/// <param name="commonFilter">Filter for adapters on the left and right</param>
-		public ItemFilter(Predicate<Item> commonFilter)
+		public ItemFilter(Predicate<FeedSyncSyndicationItem> commonFilter)
 		{
 			this.leftFilter = commonFilter;
 			this.rightFilter = commonFilter;
@@ -33,7 +33,7 @@ namespace SimpleSharing
 		/// </summary>
 		/// <param name="left">Filter for adapter on the left</param>
 		/// <param name="right">Filter for adapter on the right</param>
-		public ItemFilter(Predicate<Item> left, Predicate<Item> right)
+		public ItemFilter(Predicate<FeedSyncSyndicationItem> left, Predicate<FeedSyncSyndicationItem> right)
 		{
 			this.leftFilter = left;
 			this.rightFilter = right;
@@ -42,7 +42,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// Filter for adapter on the left
 		/// </summary>
-		public Predicate<Item> Left
+		public Predicate<FeedSyncSyndicationItem> Left
 		{
 			get { return leftFilter; }
 			set { leftFilter = value; }
@@ -51,13 +51,13 @@ namespace SimpleSharing
 		/// <summary>
 		/// Filter for adapter on the right
 		/// </summary>
-		public Predicate<Item> Right
+		public Predicate<FeedSyncSyndicationItem> Right
 		{
 			get { return rightFilter; }
 			set { rightFilter = value; }
 		}
 
-		private bool NullItemFilter(Item item)
+		private bool NullItemFilter(FeedSyncSyndicationItem item)
 		{
 			return true;
 		}

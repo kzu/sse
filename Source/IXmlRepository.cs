@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	[Obsolete("Use IRepository interface directly")]
 	public interface IXmlRepository
 	{
-		void Add(IXmlItem item, out object tag);
+		void Add(XmlItem item, out object tag);
 		bool Contains(string id);
-		IXmlItem Get(string id);
+		XmlItem Get(string id);
 		bool Remove(string id);
 
-		void Update(IXmlItem item, out object tag);
-		IEnumerable<IXmlItem> GetAll();
-		IEnumerable<IXmlItem> GetAllSince(DateTime since);
+		void Update(XmlItem item, out object tag);
+		IEnumerable<XmlItem> GetAll();
+		IEnumerable<XmlItem> GetAllSince(DateTime since);
 	}
 }

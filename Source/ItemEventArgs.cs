@@ -2,20 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	public class ItemEventArgs : EventArgs
 	{
-		private Item item;
+		private FeedSyncSyndicationItem item;
 
-		public ItemEventArgs(Item item)
+		public ItemEventArgs(FeedSyncSyndicationItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
 			this.item = item;
 		}
 
-		public Item Item
+		public FeedSyncSyndicationItem Item
 		{
 			get { return item; }
 		}

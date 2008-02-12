@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// A repository that splits its data between an <see cref="IXmlRepository"/> containing 
@@ -71,7 +72,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Get"/>.
 		/// </summary>
-		public Item Get(string id)
+		public FeedSyncSyndicationItem Get(string id)
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
@@ -80,7 +81,7 @@ namespace SimpleSharing
 			Tracer.TraceData(this, TraceEventType.Verbose, "Getting item with ID {0}", id);
 
 			Sync sync = syncRepo.Get(id);
-			IXmlItem xml = xmlRepo.Get(id);
+			XmlItem xml = xmlRepo.Get(id);
 			
 			if (xml == null && sync == null)
 			{
@@ -89,14 +90,16 @@ namespace SimpleSharing
 			}
 
 			AutoUpdateSync(ref xml, ref sync);
-
-			return new Item(xml, sync);
+			if (xml == null)
+				return new FeedSyncSyndicationItem(sync);
+			else
+				return new FeedSyncSyndicationItem(xml.Title, xml.Description, xml.Payload, sync);
 		}
 
 		/// <summary>
 		/// See <see cref="IRepository.GetAll"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAll()
+		public IEnumerable<FeedSyncSyndicationItem> GetAll()
 		{
 			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items");
 
@@ -106,7 +109,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAll(Predicate{Item})"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAll(Predicate<Item> filter)
+		public IEnumerable<FeedSyncSyndicationItem> GetAll(Predicate<FeedSyncSyndicationItem> filter)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
@@ -118,7 +121,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAllSince"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAllSince(DateTime? since)
+		public IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since)
 		{
 			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items since {0}", since);
 
@@ -128,19 +131,19 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAllSince(DateTime?, Predicate{Item})"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+		public IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since, Predicate<FeedSyncSyndicationItem> filter)
 		{
 			Tracer.TraceData(this, TraceEventType.Verbose, "Getting all items since {0} with filter {1}", since, filter);
 
 			return GetAllImpl(since, filter);
 		}
 
-		private static bool NullFilter(Item item)
+		private static bool NullFilter(FeedSyncSyndicationItem item)
 		{
 			return true;
 		}
 
-		private IEnumerable<Item> GetAllImpl(DateTime? since, Predicate<Item> filter)
+		private IEnumerable<FeedSyncSyndicationItem> GetAllImpl(DateTime? since, Predicate<FeedSyncSyndicationItem> filter)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
@@ -153,7 +156,7 @@ namespace SimpleSharing
 			// to find the deleted ones.
 			IEnumerator<Sync> syncEnum = syncRepo.GetAll().GetEnumerator();
 
-			IEnumerable<IXmlItem> items = since.HasValue ?
+			IEnumerable<XmlItem> items = since.HasValue ?
 				xmlRepo.GetAllSince(since.Value) :
 				xmlRepo.GetAll();
 
@@ -166,12 +169,12 @@ namespace SimpleSharing
 				since = Timestamp.Normalize(since.Value);
 			}
 
-			foreach (IXmlItem xmlItem in items)
+			foreach (XmlItem xmlItem in items)
 			{
 				Tracer.TraceData(this, TraceEventType.Verbose, "Getting sync info for item with ID {0}", xmlItem.Id);
 
 				Sync sync = syncRepo.Get(xmlItem.Id);
-				IXmlItem xml = xmlItem;
+				XmlItem xml = xmlItem;
 
 				AutoUpdateSync(ref xml, ref sync);
 
@@ -184,7 +187,12 @@ namespace SimpleSharing
 				{
 					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} has changed since {1}", xmlItem.Id, since);
 
-					Item item = new Item(xml, sync);
+					FeedSyncSyndicationItem item = null;
+					if (xml == null)
+						item = new FeedSyncSyndicationItem(sync);
+					else
+						item = new FeedSyncSyndicationItem(xml.Title, xml.Description, xml.Payload, sync);
+					
 					if (filter(item))
 						yield return item;
 				}
@@ -202,7 +210,7 @@ namespace SimpleSharing
 						// as deleted, so we need to update it now on-the-fly
 						if (!syncEnum.Current.Deleted)
 						{
-							sync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
+							sync = syncEnum.Current.Delete(DeviceAuthor.Current, DateTime.Now);
 							syncRepo.Save(sync);
 
 							Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} marked as deleted", syncEnum.Current.Id);
@@ -212,7 +220,7 @@ namespace SimpleSharing
 						{
 							Tracer.TraceData(this, TraceEventType.Verbose, "Null Item with ID {0} has changed since {1}", syncEnum.Current.Id, since);
 
-							Item item = new Item(new NullXmlItem(syncEnum.Current.Id), sync);
+							FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(sync);
 							if (filter(item))
 								yield return item;
 						}
@@ -235,7 +243,7 @@ namespace SimpleSharing
 					// as deleted, so we need to update it now on-the-fly
 					if (!syncEnum.Current.Deleted)
 					{
-						sync = Behaviors.Update(syncEnum.Current, DeviceAuthor.Current, DateTime.Now, true);
+						sync = syncEnum.Current.Delete(DeviceAuthor.Current, DateTime.Now);
 						syncRepo.Save(sync);
 
 						Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} marked as deleted", syncEnum.Current.Id);
@@ -245,7 +253,7 @@ namespace SimpleSharing
 					{
 						Tracer.TraceData(this, TraceEventType.Verbose, "Null Item with ID {0} has changed since {1}", syncEnum.Current.Id, since);
 
-						Item item = new Item(new NullXmlItem(syncEnum.Current.Id), sync);
+						FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(sync);
 						if (filter(item))
 							yield return item;
 					}
@@ -256,7 +264,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetConflicts"/>.
 		/// </summary>
-		public IEnumerable<Item> GetConflicts()
+		public IEnumerable<FeedSyncSyndicationItem> GetConflicts()
 		{
 			EnsureInitialized();
 
@@ -264,7 +272,7 @@ namespace SimpleSharing
 
 			foreach (Sync sync in syncRepo.GetConflicts())
 			{
-				IXmlItem item = xmlRepo.Get(sync.Id);
+				XmlItem item = xmlRepo.Get(sync.Id);
 				Sync itemSync = sync;
 				if (item == null)
 				{
@@ -273,7 +281,7 @@ namespace SimpleSharing
 					// Update deletion if necessary.
 					if (!sync.Deleted)
 					{
-						itemSync = Behaviors.Update(sync, DeviceAuthor.Current, DateTime.Now, true);
+						itemSync = sync.Delete(DeviceAuthor.Current, DateTime.Now);
 						syncRepo.Save(itemSync);
 
 						Tracer.TraceData(this, TraceEventType.Verbose, "Conflict with ID {0} marked as deleted", sync.Id);
@@ -284,7 +292,7 @@ namespace SimpleSharing
 					itemSync = UpdateSyncIfItemHashChanged(item, sync);
 				}
 
-				yield return new Item(item, itemSync);
+				yield return new FeedSyncSyndicationItem(item.Title, item.Description, item.Payload, itemSync);
 			}
 		}
 
@@ -292,7 +300,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Add"/>.
 		/// </summary>
-		public void Add(Item item)
+		public void Add(FeedSyncSyndicationItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
@@ -300,17 +308,16 @@ namespace SimpleSharing
 
 			Tracer.TraceData(this, TraceEventType.Verbose, "Adding item with ID {0}", item.Sync.Id);
 
+			object tag = null;
 			if (!item.Sync.Deleted)
 			{
-				object tag = null;
-				xmlRepo.Add(item.XmlItem, out tag);
-
-				item.XmlItem.Tag = tag;
+				xmlRepo.Add(new XmlItem(item.Title.Text, item.Summary.Text,
+					item.Content), out tag);
 
 				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} added to Xml Repository", item.Sync.Id);
 			}
 
-			item.Sync.Tag = item.XmlItem.Tag; 
+			item.Sync.Tag = tag;
 			syncRepo.Save(item.Sync);
 
 			Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} added to Sync Repository with Hash {1}", item.Sync.Id, item.Sync.Tag);
@@ -334,7 +341,7 @@ namespace SimpleSharing
 			Sync sync = syncRepo.Get(id);
 			if (sync != null)
 			{
-				sync = Behaviors.Delete(sync, DeviceAuthor.Current, DateTime.Now);
+				sync = sync.Delete(DeviceAuthor.Current, DateTime.Now);
 				syncRepo.Save(sync);
 
 				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} deleted from Sync Repository", id);
@@ -344,7 +351,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Update"/>.
 		/// </summary>
-		public void Update(Item item)
+		public void Update(FeedSyncSyndicationItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
@@ -362,9 +369,8 @@ namespace SimpleSharing
 			{
 				object tag = null;
 
-				xmlRepo.Update(item.XmlItem, out tag);
-				item.XmlItem.Tag = tag;
-				item.Sync.Tag = item.XmlItem.Tag;
+				xmlRepo.Update(new XmlItem(item.Title.Text, item.Summary.Text, item.Content), out tag);
+				item.Sync.Tag = tag;
 
 				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} updated in Sync Repository with Tag {1}", item.Sync.Id, item.Sync.Tag);
 			}
@@ -375,7 +381,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Update(Item, bool)"/>.
 		/// </summary>
-		public Item Update(Item item, bool resolveConflicts)
+		public FeedSyncSyndicationItem Update(FeedSyncSyndicationItem item, bool resolveConflicts)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
@@ -386,7 +392,7 @@ namespace SimpleSharing
 			if (resolveConflicts)
 			{
 				// TODO: verify if this is what we were doing before.
-				item = Behaviors.ResolveConflicts(item, DeviceAuthor.Current, DateTime.Now,
+				item = item.ResolveConflicts(DeviceAuthor.Current, DateTime.Now,
 					item.Sync.Deleted);
 			}
 
@@ -399,7 +405,7 @@ namespace SimpleSharing
 		/// is not provided by this repository.
 		/// </summary>
 		/// <exception cref="NotSupportedException">Thrown always.</exception>
-		public IEnumerable<Item> Merge(IEnumerable<Item> items)
+		public IEnumerable<FeedSyncSyndicationItem> Merge(IEnumerable<FeedSyncSyndicationItem> items)
 		{
 			throw new NotSupportedException();
 		}
@@ -413,12 +419,12 @@ namespace SimpleSharing
 			get { return this.GetType().Name; }
 		}
 
-		private void AutoUpdateSync(ref IXmlItem xml, ref Sync sync)
+		private void AutoUpdateSync(ref XmlItem xml, ref Sync sync)
 		{
 			if (xml != null && sync == null)
 			{
 				// Add sync on-the-fly.
-				sync = Behaviors.Create(xml.Id, DeviceAuthor.Current, DateTime.Now, false);
+				sync = Sync.Create(xml.Id, DeviceAuthor.Current, DateTime.Now);
 				sync.Tag = xml.Tag;
 				syncRepo.Save(sync);
 
@@ -428,13 +434,13 @@ namespace SimpleSharing
 			{
 				if (!sync.Deleted)
 				{
-					sync = Behaviors.Delete(sync, DeviceAuthor.Current, DateTime.Now);
+					sync = sync.Delete(DeviceAuthor.Current, DateTime.Now);
 					syncRepo.Save(sync);
 
 					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} marked as deleted", sync.Id);
 				}
 
-				xml = new NullXmlItem(sync.Id);
+				xml = null;
 			}
 			else
 			{
@@ -448,16 +454,19 @@ namespace SimpleSharing
 		/// update will be added. Used when exporting/retrieving 
 		/// items from the local stores.
 		/// </summary>
-		private Sync UpdateSyncIfItemHashChanged(IXmlItem item, Sync sync)
+		private Sync UpdateSyncIfItemHashChanged(XmlItem item, Sync sync)
 		{
 			// TODO: check if this is correct.
 			if (item.Tag.ToString() != sync.Tag.ToString())
 			{
 				Tracer.TraceData(this, TraceEventType.Verbose, "Updating Sync for Item with ID {0} - Original Tag {1} / Current Tag {2}", sync.Id, sync.Tag, item.Tag);
 
-				Sync updated = Behaviors.Update(sync,
-					DeviceAuthor.Current,
-					DateTime.Now, sync.Deleted);
+				Sync updated = null;
+				if (sync.Deleted)
+					updated = sync.Update(DeviceAuthor.Current, DateTime.Now);
+				else
+					updated = sync.Update(DeviceAuthor.Current, DateTime.Now);
+
 				sync.Tag = item.Tag;
 				syncRepo.Save(sync);
 
