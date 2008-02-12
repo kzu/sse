@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Flags that specify when the <see cref="FilterHandler"/> delegate should 

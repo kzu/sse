@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Base implementation of <see cref="IRepository"/> that provides support for 
@@ -19,9 +19,9 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Get"/>.
 		/// </summary>
-		public abstract Item Get(string id);
+		public abstract FeedSyncSyndicationItem Get(string id);
 
-		private static bool NullFilter(Item item)
+		private static bool NullFilter(FeedSyncSyndicationItem item)
 		{
 			return true;
 		}
@@ -29,7 +29,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAll"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAll()
+		public IEnumerable<FeedSyncSyndicationItem> GetAll()
 		{
 			return GetAllSince(null, NullFilter);
 		}
@@ -37,7 +37,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAll(Predicate{Item})"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAll(Predicate<Item> filter)
+		public IEnumerable<FeedSyncSyndicationItem> GetAll(Predicate<FeedSyncSyndicationItem> filter)
 		{
 			return GetAllSince(null, filter);
 		}
@@ -45,7 +45,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAllSince(DateTime?)"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAllSince(DateTime? since)
+		public IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since)
 		{
 			return GetAllSince(since, NullFilter);
 		}
@@ -53,20 +53,20 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.GetAllSince(DateTime?, Predicate{Item})"/>.
 		/// </summary>
-		public IEnumerable<Item> GetAllSince(DateTime? since, Predicate<Item> filter)
+		public IEnumerable<FeedSyncSyndicationItem> GetAllSince(DateTime? since, Predicate<FeedSyncSyndicationItem> filter)
 		{
 			return GetAll(since == null ? since : Timestamp.Normalize(since.Value), filter);
 		}
 
-		protected abstract IEnumerable<Item> GetAll(DateTime? since, Predicate<Item> filter);
+		protected abstract IEnumerable<FeedSyncSyndicationItem> GetAll(DateTime? since, Predicate<FeedSyncSyndicationItem> filter);
 
 		/// <summary>
 		/// See <see cref="IRepository.GetConflicts"/>. Default implementation retrieves 
 		/// all items and filters out those without conflicts.
 		/// </summary>
-		public virtual IEnumerable<Item> GetConflicts()
+		public virtual IEnumerable<FeedSyncSyndicationItem> GetConflicts()
 		{
-			return GetAllSince(null, delegate(Item item)
+			return GetAllSince(null, delegate(FeedSyncSyndicationItem item)
 			{
 				return item.Sync.Conflicts.Count > 0;
 			});
@@ -75,7 +75,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Add"/>.
 		/// </summary>
-		public abstract void Add(Item item);
+		public abstract void Add(FeedSyncSyndicationItem item);
 
 		/// <summary>
 		/// See <see cref="IRepository.Delete"/>.
@@ -85,7 +85,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Update"/>.
 		/// </summary>
-		public abstract void Update(Item item);
+		public abstract void Update(FeedSyncSyndicationItem item);
 
 		/// <summary>
 		/// See <see cref="IRepository.Update(Item, bool)"/>. Default implementation 
@@ -93,13 +93,13 @@ namespace SimpleSharing
 		/// that resolves all conflicts, with the <see cref="DeviceAuthor.Current"/> and 
 		/// <see cref="DateTime.Now"/> as the by/when information.
 		/// </summary>
-		public virtual Item Update(Item item, bool resolveConflicts)
+		public virtual FeedSyncSyndicationItem Update(FeedSyncSyndicationItem item, bool resolveConflicts)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
 			if (resolveConflicts)
 			{
-				item = Behaviors.ResolveConflicts(item, DeviceAuthor.Current, DateTime.Now, item.Sync.Deleted);
+				item = item.ResolveConflicts(DeviceAuthor.Current, DateTime.Now, item.Sync.Deleted);
 			}
 			
 			Update(item);
@@ -110,7 +110,7 @@ namespace SimpleSharing
 		/// <summary>
 		/// See <see cref="IRepository.Merge"/>.
 		/// </summary>
-		public abstract IEnumerable<Item> Merge(IEnumerable<Item> items);
+		public abstract IEnumerable<FeedSyncSyndicationItem> Merge(IEnumerable<FeedSyncSyndicationItem> items);
 
 		/// <summary>
 		/// See <see cref="IRepository.FriendlyName"/>.

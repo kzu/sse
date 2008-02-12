@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	public class MockRepository : Repository
 	{
 		public string name;
-		public Dictionary<string, Item> Items = new Dictionary<string, Item>();
+		public Dictionary<string, FeedSyncSyndicationItem> Items = new Dictionary<string, FeedSyncSyndicationItem>();
 
-		public MockRepository(params Item[] items)
+		public MockRepository(params FeedSyncSyndicationItem[] items)
 		{
-			foreach (Item item in items)
+			foreach (FeedSyncSyndicationItem item in items)
 			{
 				Items.Add(item.Sync.Id, item);
 			}
@@ -32,7 +32,7 @@ namespace SimpleSharing.Tests
 			get { return false; }
 		}
 
-		public override void Add(Item item)
+		public override void Add(FeedSyncSyndicationItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
@@ -42,28 +42,28 @@ namespace SimpleSharing.Tests
 			Items.Add(item.Sync.Id, item);
 		}
 
-		public override Item Get(string id)
+		public override FeedSyncSyndicationItem Get(string id)
 		{
 			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
 			if (Items.ContainsKey(id))
-				return Items[id].Clone();
+				return new FeedSyncSyndicationItem(Items[id]);
 			else
 				return null;
 		}
 
-		protected override IEnumerable<Item> GetAll(DateTime? since, Predicate<Item> filter)
+		protected override IEnumerable<FeedSyncSyndicationItem> GetAll(DateTime? since, Predicate<FeedSyncSyndicationItem> filter)
 		{
 			Guard.ArgumentNotNull(filter, "filter");
 
-			foreach (Item i in Items.Values)
+			foreach (FeedSyncSyndicationItem i in Items.Values)
 			{
-				if ((since == null || 
-					i.Sync.LastUpdate == null || 
-					i.Sync.LastUpdate.When == null || 
+				if ((since == null ||
+					i.Sync.LastUpdate == null ||
+					i.Sync.LastUpdate.When == null ||
 					i.Sync.LastUpdate.When >= since)
 					&& filter(i))
-					yield return i.Clone();
+					yield return new FeedSyncSyndicationItem(i);
 			}
 		}
 
@@ -74,20 +74,20 @@ namespace SimpleSharing.Tests
 			Items.Remove(id);
 		}
 
-		public override void Update(Item item)
+		public override void Update(FeedSyncSyndicationItem item)
 		{
 			Guard.ArgumentNotNull(item, "item");
 
-			Item i;
+			FeedSyncSyndicationItem i;
 			if (item.Sync.Deleted)
-				i = new Item(new NullXmlItem(item.Sync.Id), item.Sync.Clone());
+				i = new FeedSyncSyndicationItem(item.Sync.Clone());
 			else
-				i = item.Clone();
+				i = new FeedSyncSyndicationItem(item);
 
 			Items[item.Sync.Id] = i;
 		}
 
-		public override IEnumerable<Item> Merge(IEnumerable<Item> items)
+		public override IEnumerable<FeedSyncSyndicationItem> Merge(IEnumerable<FeedSyncSyndicationItem> items)
 		{
 			throw new NotSupportedException();
 		}

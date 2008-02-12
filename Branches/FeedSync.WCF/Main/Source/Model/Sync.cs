@@ -9,14 +9,15 @@ using System.IO;
 
 namespace FeedSync
 {
-	public class Sync : ICloneable<Sync>, IEquatable<Sync>, IXmlSerializable
+	public class Sync : ICloneable<Sync>, IEquatable<Sync>
 	{
 		string id;
 		bool deleted = false;
 		int updates = 0;
 		bool noConflicts = false;
 		ComparableStack<History> updatesHistory = new ComparableStack<History>();
-		List<string> conflicts = new List<string>();
+		List<FeedSyncSyndicationItem> conflicts = new List<FeedSyncSyndicationItem>();
+		object tag;
 
 		private Sync()
 		{
@@ -57,28 +58,18 @@ namespace FeedSync
 			get { return updatesHistory; }
 		}
 
-		internal IList<string> RawConflicts
+		public IList<FeedSyncSyndicationItem> Conflicts
 		{
 			get { return conflicts; }
 		}
 
-		
-		//TODO: This API is wrong, an item formatter only knows how to serialize the item received in the constructor, it can not be reused for multiple items
-		// Possible solutions, receive a SyndicationItemFormatter type instead of a real instance and create dynamic instances for each one of the items
-		// Or see if the SyndicationFeedFormatter can be used
-		public IEnumerable<TSyndicationItem> GetConflicts<TSyndicationItem>(SyndicationItemFormatter formatter) where TSyndicationItem : FeedSyncSyndicationItem
+		// <summary>
+		/// Tag value that univoquely identifies the item
+		/// </summary>
+		public object Tag
 		{
-		    foreach (String itemXml in this.conflicts)
-		    {
-		        XmlReader reader = XmlReader.Create(new StringReader(itemXml));
-		        if (formatter.CanRead(reader))
-		        {
-		            formatter.ReadFrom(reader);
-		            yield return (TSyndicationItem)formatter.Item;
-		        }
-		    }
-
-			yield break;
+			get { return tag; }
+			set { tag = value; }
 		}
 
 		public bool IsSubsumedBy(Sync sync)
@@ -94,12 +85,13 @@ namespace FeedSync
 			return false;
 		}
 
-		public static Sync Create(XmlReader reader)
+		public static Sync Create(XmlReader reader, string version)
 		{
 			Guard.ArgumentNotNull(reader, "reader");
+			Guard.ArgumentNotNullOrEmptyString(version, "version");
 
 			Sync sync = new Sync();
-			((IXmlSerializable)sync).ReadXml(reader);
+			sync.ReadXml(reader, version);
 
 			return sync;
 		}
@@ -189,6 +181,17 @@ namespace FeedSync
 			return purged;
 		}
 
+		/// <summary>
+		/// Adds the conflict history immediately after the topmost history.
+		/// </summary>
+		/// <remarks>Used for conflict resolution only.</remarks>
+		internal void AddConflictHistory(History history)
+		{
+			History topmost = updatesHistory.Pop();
+			updatesHistory.Push(history);
+			updatesHistory.Push(topmost);
+		}
+
 		#region ICloneable<Sync> Members
 
 		public Sync Clone()
@@ -204,9 +207,9 @@ namespace FeedSync
 				newSync.updatesHistory.Push(history.Clone());
 			}
 
-			foreach (string conflict in this.conflicts)
+			foreach (FeedSyncSyndicationItem conflict in this.conflicts)
 			{
-				newSync.conflicts.Add(conflict);
+				newSync.conflicts.Add((FeedSyncSyndicationItem)conflict.Clone());
 			}
 
 			return newSync;
@@ -278,14 +281,7 @@ namespace FeedSync
 
 		#endregion
 
-		#region IXmlSerializable Members
-
-		XmlSchema IXmlSerializable.GetSchema()
-		{
-			return null;
-		}
-
-		void IXmlSerializable.ReadXml(XmlReader reader)
+		internal void ReadXml(XmlReader reader, string version)
 		{
 			if (reader.NamespaceURI != Schema.Namespace || reader.LocalName != Schema.ElementNames.Sync)
 				throw new InvalidOperationException(String.Format(Properties.Resources.InvalidNamespaceOrElement,
@@ -334,7 +330,11 @@ namespace FeedSync
 						{
 							XmlReader subTreeReader = reader.ReadSubtree();
 							subTreeReader.MoveToContent();
-							this.conflicts.Add(subTreeReader.ReadOuterXml());
+
+							SyndicationItemFormatter itemFormatter = SyndicationFormatterFactory.CreateItemFormatter(version);
+							itemFormatter.ReadFrom(subTreeReader);
+							
+							this.conflicts.Add((FeedSyncSyndicationItem)itemFormatter.Item);
 						}
 					}
 				}
@@ -350,7 +350,7 @@ namespace FeedSync
 			}
 		}
 
-		void IXmlSerializable.WriteXml(XmlWriter writer)
+		public void WriteXml(XmlWriter writer, string version)
 		{
 			// <sx:sync>
 			writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Sync, Schema.Namespace);
@@ -369,9 +369,10 @@ namespace FeedSync
 				// <sx:conflicts>
 				writer.WriteStartElement(Schema.DefaultPrefix, Schema.ElementNames.Conflicts, Schema.Namespace);
 
-				foreach (string conflict in this.conflicts)
+				foreach (FeedSyncSyndicationItem conflict in this.conflicts)
 				{
-					writer.WriteRaw(conflict);
+					SyndicationItemFormatter itemFormatter = SyndicationFormatterFactory.CreateItemFormatter(version, conflict);
+					itemFormatter.WriteTo(writer);
 				}
 
 				// </sx:conflicts>
@@ -401,7 +402,7 @@ namespace FeedSync
 				reader.NodeType == nodeType;
 		}
 
-		#endregion
+
 
 	}
 }

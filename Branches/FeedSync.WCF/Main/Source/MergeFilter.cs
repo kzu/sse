@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimpleSharing
+namespace FeedSync
 {
 	/// <summary>
 	/// Contains a callback function to filter items according the value of behaviors 
@@ -59,8 +59,8 @@ namespace SimpleSharing
 			set { behaviors = value; }
 		}
 
-		private IEnumerable<ItemMergeResult> NullFilterHandler(IRepository targetRepository,
-			IEnumerable<ItemMergeResult> mergedItems)
+		private IEnumerable<MergeResult> NullFilterHandler(IRepository targetRepository,
+			IEnumerable<MergeResult> mergedItems)
 		{
 			return mergedItems;
 		}

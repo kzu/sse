@@ -1,4 +1,4 @@
-namespace SimpleSharing
+namespace FeedSync
 {
     using System;
     using System.ComponentModel;

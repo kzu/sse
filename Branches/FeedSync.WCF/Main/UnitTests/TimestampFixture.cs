@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	[TestClass]
 	public class TimestampFixture : TestFixtureBase

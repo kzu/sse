@@ -27,22 +27,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Adapters", "Adapters", "{8A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeedSync.WCF", "Source\FeedSync.WCF.csproj", "{5A747B6C-D230-4D59-9321-83B48C4553CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleSharing.Tests", "UnitTests\SimpleSharing.Tests.csproj", "{6634F9B2-94CB-4D65-8AD7-E38D6F503057}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeedSync.Tests", "UnitTests\FeedSync.Tests.csproj", "{6634F9B2-94CB-4D65-8AD7-E38D6F503057}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs03.codeplex.com/
-		SccProjectUniqueName0 = UnitTests\\SimpleSharing.Tests.csproj
-		SccProjectTopLevelParentUniqueName0 = FeedSync.WCF.sln
-		SccProjectName0 = UnitTests
-		SccLocalPath0 = UnitTests
+		SccLocalPath0 = .
 		SccProjectUniqueName1 = Source\\FeedSync.WCF.csproj
-		SccProjectTopLevelParentUniqueName1 = SimpleSharing.2008.sln
+		SccProjectTopLevelParentUniqueName1 = FeedSync.WCF.sln
 		SccProjectName1 = Source
 		SccLocalPath1 = Source
-		SccLocalPath2 = .
+		SccProjectUniqueName2 = UnitTests\\FeedSync.Tests.csproj
+		SccProjectTopLevelParentUniqueName2 = FeedSync.WCF.sln
+		SccProjectName2 = UnitTests
+		SccLocalPath2 = UnitTests
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SimpleSharing.2008.vsmdi
@@ -70,6 +70,7 @@ Global
 		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Release|.NET.ActiveCfg = Release|Any CPU
 		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6634F9B2-94CB-4D65-8AD7-E38D6F503057}.Release|Any CPU.Build.0 = Release|Any CPU

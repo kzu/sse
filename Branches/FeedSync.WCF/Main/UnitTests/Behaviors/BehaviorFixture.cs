@@ -8,8 +8,9 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Threading;
+using System.ServiceModel.Syndication;
 
-namespace SimpleSharing.Tests
+namespace FeedSync.Tests
 {
 	[TestClass]
 	public class BehaviorFixture : TestFixtureBase
@@ -20,26 +21,20 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldThrowIfIncomingItemNull()
 		{
-			Behaviors.Merge(new Item(new NullXmlItem("1"), new Sync("1")), null);
-		}
-
-		[TestMethod]
-		public void MergeShouldNotThrowIfOriginalItemNull()
-		{
-			Behaviors.Merge(null, new Item(new NullXmlItem("1"), new Sync("1")));
+			new FeedSyncSyndicationItem().Merge(null);
 		}
 
 		[TestMethod]
 		public void MergeShouldAddWithoutConflict()
 		{
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now);
 
-			Item remoteItem = new Item(
-				new XmlItem(sync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
-				sync);
-
-			ItemMergeResult result = Behaviors.Merge(null, remoteItem);
+			FeedSyncSyndicationItem remoteItem = new FeedSyncSyndicationItem(
+				"foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml), sync);
+			remoteItem.Id = sync.Id;
+			
+			MergeResult result = MergeBehavior.Merge(remoteItem);
 
 			Assert.AreEqual(MergeOperation.Added, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -48,41 +43,41 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldUpdateWithoutConflict()
 		{
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
-			Item originalItem = new Item(
-				new XmlItem(sync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
-				sync);
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem(
+				"foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml), sync);
+			originalItem.Id = sync.Id;
 
 			// Simulate editing.
-			sync = Behaviors.Update(originalItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
-			Item incomingItem = new Item(new XmlItem(sync.Id, "changed", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
-				sync);
-
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			sync = originalItem.Sync.Update("REMOTE\\kzu", DateTime.Now);
+			FeedSyncSyndicationItem incomingItem = new FeedSyncSyndicationItem("changed", originalItem.Summary.Text, originalItem.Content,
+					sync);
+			
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.Updated, result.Operation);
 			Assert.IsNotNull(result.Proposed);
-			Assert.AreEqual("changed", result.Proposed.XmlItem.Title);
+			Assert.AreEqual("changed", result.Proposed.Title.Text);
 			Assert.AreEqual("REMOTE\\kzu", result.Proposed.Sync.LastUpdate.By);
 		}
 
 		[TestMethod]
 		public void MergeShouldDeleteWithoutConflict()
 		{
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
 			string id = sync.Id;
-			Item originalItem = new Item(
-				new XmlItem(sync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
-				sync);
-
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem(
+				"foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml), sync);
+			originalItem.Id = id;
+			
 			// Simulate editing.
-			sync = Behaviors.Update(originalItem.Sync, "REMOTE\\kzu", DateTime.Now, true);
-			Item incomingItem = new Item(originalItem.XmlItem, sync);
-
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			sync = originalItem.Sync.Delete("REMOTE\\kzu", DateTime.Now);
+			
+			FeedSyncSyndicationItem incomingItem = new FeedSyncSyndicationItem("foo", "bar", originalItem.Content, sync);
+			
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.Updated, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -93,27 +88,31 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldConflictOnDeleteWithConflict()
 		{
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			Item originalItem = new Item(
-				new XmlItem(localSync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync localSync = Sync.Create(Guid.NewGuid().ToString(), 
+				"mypc\\user", 
+				DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem(
+				"foo", "bar", new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				localSync);
 
-			Item incomingItem = originalItem.Clone();
+			FeedSyncSyndicationItem incomingItem = (FeedSyncSyndicationItem)originalItem.Clone();
 
 			// Local editing.
-			localSync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
-			originalItem = new Item(new XmlItem(localSync.Id, "changed", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
+			localSync = originalItem.Sync.Update("mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
+			originalItem = new FeedSyncSyndicationItem("changed", originalItem.Summary.Text,
+				originalItem.Content,
 				localSync);
+			originalItem.Id = localSync.Id;
 
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(incomingItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
-			remoteSync.Deleted = true;
-			incomingItem = new Item(incomingItem.XmlItem, remoteSync);
+			Sync remoteSync = incomingItem.Sync.Delete("REMOTE\\kzu", DateTime.Now);
+			
+			incomingItem = new FeedSyncSyndicationItem("foo", "bar", originalItem.Content, remoteSync);
+			incomingItem.Id = originalItem.Id;
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -124,14 +123,14 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldNoOpWithNoChanges()
 		{
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now, false);
-			Item item = new Item(
-				new XmlItem(sync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now);
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem("foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
+			item.Id = sync.Id;
 
 			// Do a merge with the same item.
-			ItemMergeResult result = Behaviors.Merge(item, item);
+			MergeResult result = item.Merge(item);
 
 			Assert.AreEqual(MergeOperation.None, result.Operation);
 			Assert.IsNull(result.Proposed);
@@ -140,22 +139,21 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldNoOpOnUpdatedLocalItemWithUnchangedIncoming()
 		{
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
-			Item originalItem = new Item(
-				new XmlItem(sync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem("foo", "title",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				sync);
 
-			Item incomingItem = originalItem.Clone();
+			FeedSyncSyndicationItem incomingItem = (FeedSyncSyndicationItem)originalItem.Clone();
 
 			// Simulate editing.
-			sync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now, false);
-			originalItem = new Item(new XmlItem(sync.Id, "changed", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
+			sync = originalItem.Sync.Update("mypc\\user", DateTime.Now);
+			originalItem = new FeedSyncSyndicationItem("changed", originalItem.Summary.Text,
+				originalItem.Content,
 				sync);
 
 			// Merge with the older incoming item.
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.None, result.Operation);
 			Assert.IsNull(result.Proposed);
@@ -164,28 +162,27 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldIncomingWinWithConflict()
 		{
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			Item originalItem = new Item(
-				new XmlItem(localSync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync localSync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem("foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				localSync);
 
-			Item incomingItem = originalItem.Clone();
+			FeedSyncSyndicationItem incomingItem = (FeedSyncSyndicationItem)originalItem.Clone();
 
 			// Local editing.
-			localSync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
-			originalItem = new Item(new XmlItem(localSync.Id, "changed", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
+			localSync = originalItem.Sync.Update("mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
+			originalItem = new FeedSyncSyndicationItem("changed", originalItem.Summary.Text,
+				originalItem.Content,
 				localSync);
 
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(incomingItem.Sync, "REMOTE\\kzu", DateTime.Now, false);
-			incomingItem = new Item(new XmlItem(localSync.Id, "changed2", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
+			Sync remoteSync = incomingItem.Sync.Update("REMOTE\\kzu", DateTime.Now);
+			incomingItem = new FeedSyncSyndicationItem("changed2", originalItem.Summary.Text,
+				originalItem.Content,
 				remoteSync);
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -198,26 +195,26 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldLocalWinWithConflict()
 		{
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)), false);
-			Item originalItem = new Item(
-				new XmlItem(localSync.Id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync localSync = Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now.Subtract(TimeSpan.FromMinutes(2)));
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem(
+				"foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				localSync);
 
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(localSync, "REMOTE\\kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
-			Item incomingItem = new Item(new XmlItem(localSync.Id, "changed2", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
+			Sync remoteSync = localSync.Update("REMOTE\\kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
+			FeedSyncSyndicationItem incomingItem = new FeedSyncSyndicationItem("changed2", originalItem.Summary.Text,
+				originalItem.Content,
 				remoteSync);
 
 			// Local editing.
-			localSync = Behaviors.Update(originalItem.Sync, "mypc\\user", DateTime.Now, false);
-			originalItem = new Item(new XmlItem(localSync.Id, "changed", originalItem.XmlItem.Description,
-				originalItem.XmlItem.Payload),
+			localSync = originalItem.Sync.Update("mypc\\user", DateTime.Now);
+			originalItem = new FeedSyncSyndicationItem("changed", originalItem.Summary.Text,
+				originalItem.Content,
 				localSync);
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -230,24 +227,24 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void MergeShouldConflictWithDeletedLocalItem()
 		{
-			Sync localSync = Behaviors.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(3)), false);
-			string id = localSync.Id;
-			Item originalItem = new Item(
-				new XmlItem(id, "foo", "bar",
-					GetElement("<foo id='bar'/>")),
+			Sync localSync = Sync.Create(Guid.NewGuid().ToString(), DeviceAuthor.Current, DateTime.Now.Subtract(TimeSpan.FromMinutes(3)));
+			
+			FeedSyncSyndicationItem originalItem = new FeedSyncSyndicationItem(
+				"foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
 				localSync);
 
 			// Remote editing.
-			Sync remoteSync = Behaviors.Update(originalItem.Sync, "REMOTE\\kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false);
-			Item incomingItem = new Item(
-				new XmlItem(id, "changed2", originalItem.XmlItem.Description, originalItem.XmlItem.Payload),
+			Sync remoteSync = originalItem.Sync.Update("REMOTE\\kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(1)));
+			FeedSyncSyndicationItem incomingItem = new FeedSyncSyndicationItem(
+				"changed2", originalItem.Summary.Text, originalItem.Content,
 				remoteSync);
 
-			localSync = Behaviors.Delete(localSync, DeviceAuthor.Current, DateTime.Now);
-			originalItem = new Item(originalItem.XmlItem, localSync);
+			localSync = localSync.Delete(DeviceAuthor.Current, DateTime.Now);
+			originalItem = new FeedSyncSyndicationItem(originalItem, localSync);
 
 			// Merge conflicting changed incoming item.
-			ItemMergeResult result = Behaviors.Merge(originalItem, incomingItem);
+			MergeResult result = originalItem.Merge(incomingItem);
 
 			Assert.AreEqual(MergeOperation.Conflict, result.Operation);
 			Assert.IsNotNull(result.Proposed);
@@ -258,20 +255,20 @@ namespace SimpleSharing.Tests
 			Assert.IsTrue(result.Proposed.Sync.Deleted);
 		}
 
-		// TODO:
-		// WinnerPicking missing tests: FirstWinsWithBy and comparison with updates.
-		// FirstWinsWithWhen when lastupdate.when is null
+		//// TODO:
+		//// WinnerPicking missing tests: FirstWinsWithBy and comparison with updates.
+		//// FirstWinsWithWhen when lastupdate.when is null
 
-		#endregion
+		//#endregion
 
 		#region Update
 
 		[TestMethod]
 		public void UpdateShouldNotModifyArgument()
 		{
-			Sync expected = Behaviors.Update(new Sync(Guid.NewGuid().ToString()), "foo", null, false);
+			Sync expected = Sync.Create(Guid.NewGuid().ToString(), "foo", null);
 
-			Sync updated = Behaviors.Update(expected, "bar", null, false);
+			Sync updated = expected.Update("bar", null);
 
 			Assert.AreEqual("foo", expected.LastUpdate.By);
 			Assert.AreNotEqual(expected, updated);
@@ -281,11 +278,11 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void UpdateShouldIncrementUpdatesByOne()
 		{
-			Sync sync = new Sync(Guid.NewGuid().ToString());
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "kzu", null);
 
 			int original = sync.Updates;
 
-			Sync updated = Behaviors.Update(sync, "foo", DateTime.Now, false);
+			Sync updated = sync.Update("foo", DateTime.Now);
 
 			Assert.AreEqual(original + 1, updated.Updates);
 		}
@@ -293,12 +290,12 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void UpdateShouldAddTopmostHistory()
 		{
-			Sync sync = new Sync(Guid.NewGuid().ToString());
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "kzu", null);
 
 			int original = sync.Updates;
 
-			sync = Behaviors.Update(sync, "foo", DateTime.Now, false);
-			sync = Behaviors.Update(sync, "bar", DateTime.Now, false);
+			sync = sync.Update("foo", DateTime.Now);
+			sync = sync.Update("bar", DateTime.Now);
 
 			Assert.AreEqual("bar", GetFirst<History>(sync.UpdatesHistory).By);
 		}
@@ -311,40 +308,40 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void CreateShouldThrowExceptionIfIdNull()
 		{
-			Behaviors.Create(null, "mypc\\user", DateTime.Now, true);
+			Sync.Create(null, "mypc\\user", DateTime.Now);
 		}
 
 		[ExpectedException(typeof(ArgumentException))]
 		[TestMethod]
 		public void CreateShouldThrowExceptionIfIdEmpty()
 		{
-			Behaviors.Create("", "mypc\\user", DateTime.Now, true);
+			Sync.Create("", "mypc\\user", DateTime.Now);
 		}
 
 		[TestMethod]
 		public void CreateShouldNotThrowIfNullByWithWhen()
 		{
-			Behaviors.Create(Guid.NewGuid().ToString(), null, DateTime.Now, true);
+			Sync.Create(Guid.NewGuid().ToString(), null, DateTime.Now);
 		}
 
 		[TestMethod]
 		public void CreateShouldNotThrowIfNullWhenWithBy()
 		{
-			Behaviors.Create(Guid.NewGuid().ToString(), "foo", null, true);
+			Sync.Create(Guid.NewGuid().ToString(), "foo", null);
 		}
 
 		[ExpectedException(typeof(ArgumentException))]
 		[TestMethod]
 		public void CreateShouldThrowIfNullWhenAndBy()
 		{
-			Behaviors.Create(Guid.NewGuid().ToString(), null, null, true);
+			Sync.Create(Guid.NewGuid().ToString(), null, null);
 		}
 
 		[TestMethod]
 		public void CreateShouldReturnSyncWithId()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
+			Sync sync = Sync.Create(id.ToString(), "mypc\\user", DateTime.Now);
 			Assert.AreEqual(id.ToString(), sync.Id);
 		}
 
@@ -352,7 +349,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldReturnSyncWithUpdatesEqualsToOne()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
+			Sync sync = Sync.Create(id.ToString(), "mypc\\user", DateTime.Now);
 			Assert.AreEqual(1, sync.Updates);
 		}
 
@@ -360,7 +357,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldHaveAHistory()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
+			Sync sync = Sync.Create(id.ToString(), "mypc\\user", DateTime.Now);
 			List<History> histories = new List<History>(sync.UpdatesHistory);
 			Assert.AreEqual(1, histories.Count);
 		}
@@ -369,7 +366,7 @@ namespace SimpleSharing.Tests
 		public void CreateShouldHaveHistorySequenceSameAsUpdateCount()
 		{
 			Guid id = Guid.NewGuid();
-			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
+			Sync sync = Sync.Create(id.ToString(), "mypc\\user", DateTime.Now);
 			History history = new List<History>(sync.UpdatesHistory)[0];
 			Assert.AreEqual(sync.Updates, history.Sequence);
 		}
@@ -379,50 +376,43 @@ namespace SimpleSharing.Tests
 		{
 			Guid id = Guid.NewGuid();
 			DateTime time = DateTime.Now;
-			Sync sync = Behaviors.Create(id.ToString(), "mypc\\user", DateTime.Now, true);
+			Sync sync = Sync.Create(id.ToString(), "mypc\\user", DateTime.Now);
 			History history = new List<History>(sync.UpdatesHistory)[0];
 			DatesEqualWithoutMillisecond(time, history.When.Value);
 		}
 
-		# endregion
+		#endregion
 
 		#region Delete
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
-		public void ShouldThrowIfSyncNull()
-		{
-			Behaviors.Delete(null, "mypc\\user", DateTime.Now);
-		}
-
-		[ExpectedException(typeof(ArgumentNullException))]
-		[TestMethod]
 		public void ShouldThrowIfByNull()
 		{
-			Behaviors.Delete(new Sync(Guid.NewGuid().ToString()), null, DateTime.Now);
+			Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now).Delete(null, DateTime.Now);
 		}
 
 		[ExpectedException(typeof(ArgumentNullException))]
 		[TestMethod]
 		public void ShouldThrowIfWhenParameterNull()
 		{
-			Behaviors.Delete(new Sync(Guid.NewGuid().ToString()), "mypc\\user", null);
+			Sync.Create(Guid.NewGuid().ToString(), "mypc\\user", DateTime.Now).Delete("mypc\\user", null);
 		}
 
 		[TestMethod]
 		public void ShouldIncrementUpdatesByOneOnDeletion()
 		{
-			Sync sync = new Sync(new Guid().ToString());
+			Sync sync = Sync.Create(new Guid().ToString(), "kzu", DateTime.Now);
 			int updates = sync.Updates;
-			sync = Behaviors.Delete(sync, "mypc\\user", DateTime.Now);
+			sync = sync.Delete("mypc\\user", DateTime.Now);
 			Assert.AreEqual(updates + 1, sync.Updates);
 		}
 
 		[TestMethod]
 		public void ShouldDeletionAttributeBeTrue()
 		{
-			Sync sync = new Sync(new Guid().ToString());
-			sync = Behaviors.Delete(sync, "mypc\\user", DateTime.Now);
+			Sync sync = Sync.Create(new Guid().ToString(), "kzu", DateTime.Now);
+			sync = sync.Delete("mypc\\user", DateTime.Now);
 			Assert.AreEqual(true, sync.Deleted);
 		}
 
@@ -433,11 +423,11 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldNotUpdateArgument()
 		{
-			Item item = new Item(
-				new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now),
-				Behaviors.Create(Guid.NewGuid().ToString(), "one", DateTime.Now, false));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(
+				"foo", "bar", new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
+				Sync.Create(Guid.NewGuid().ToString(), "one", DateTime.Now));
 
-			Item resolved = Behaviors.ResolveConflicts(item, "two", DateTime.Now, false);
+			FeedSyncSyndicationItem resolved = item.ResolveConflicts("two", DateTime.Now, false);
 
 			Assert.AreNotSame(item, resolved);
 		}
@@ -445,11 +435,11 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldUpdateEvenIfNoConflicts()
 		{
-			Item item = new Item(
-				new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now),
-				Behaviors.Create(Guid.NewGuid().ToString(), "one", DateTime.Now, false));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem(
+				"foo", "bar", new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
+				Sync.Create(Guid.NewGuid().ToString(), "one", DateTime.Now));
 
-			Item resolved = Behaviors.ResolveConflicts(item, "two", DateTime.Now, false);
+			FeedSyncSyndicationItem resolved = item.ResolveConflicts("two", DateTime.Now, false);
 
 			Assert.AreNotEqual(item, resolved);
 			Assert.AreEqual(2, resolved.Sync.Updates);
@@ -459,15 +449,17 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldAddConflictItemHistoryWithoutIncrementingUpdates()
 		{
-			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now);
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "one",
-				DateTime.Now.Subtract(TimeSpan.FromMinutes(10)), false);
-			Sync conflictSync = Behaviors.Create(sync.Id, "two",
-				DateTime.Now.Subtract(TimeSpan.FromHours(1)), false);
-			sync.Conflicts.Add(new Item(xml.Clone(), conflictSync));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem("foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
+				Sync.Create(Guid.NewGuid().ToString(), "one",
+				DateTime.Now.Subtract(TimeSpan.FromMinutes(10))));
+			
+			Sync conflictSync = Sync.Create(item.Sync.Id, "two",
+				DateTime.Now.Subtract(TimeSpan.FromHours(1)));
+			item.Sync.Conflicts.Add(new FeedSyncSyndicationItem(item, conflictSync));
 
-			Item conflicItem = new Item(xml, sync);
-			Item resolvedItem = Behaviors.ResolveConflicts(conflicItem, "one", DateTime.Now, false);
+			FeedSyncSyndicationItem conflicItem = new FeedSyncSyndicationItem(item, item.Sync);
+			FeedSyncSyndicationItem resolvedItem = conflicItem.ResolveConflicts("one", DateTime.Now, false);
 
 			Assert.AreEqual(2, resolvedItem.Sync.Updates);
 			Assert.AreEqual(3, Count(resolvedItem.Sync.UpdatesHistory));
@@ -476,15 +468,17 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldRemoveConflicts()
 		{
-			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now);
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "one",
-				DateTime.Now.Subtract(TimeSpan.FromMinutes(10)), false);
-			Sync conflictSync = Behaviors.Create(sync.Id, "two",
-				DateTime.Now.Subtract(TimeSpan.FromHours(1)), false);
-			sync.Conflicts.Add(new Item(xml.Clone(), conflictSync));
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem("foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
+				Sync.Create(Guid.NewGuid().ToString(), "one",
+				DateTime.Now.Subtract(TimeSpan.FromMinutes(10))));
+			
+			Sync conflictSync = Sync.Create(item.Sync.Id, "two",
+				DateTime.Now.Subtract(TimeSpan.FromHours(1)));
+			item.Sync.Conflicts.Add(new FeedSyncSyndicationItem(item, conflictSync));
 
-			Item conflicItem = new Item(xml, sync);
-			Item resolvedItem = Behaviors.ResolveConflicts(conflicItem, "one", DateTime.Now, false);
+			FeedSyncSyndicationItem conflicItem = new FeedSyncSyndicationItem(item, item.Sync);
+			FeedSyncSyndicationItem resolvedItem = conflicItem.ResolveConflicts("one", DateTime.Now, false);
 
 			Assert.AreEqual(0, resolvedItem.Sync.Conflicts.Count);
 		}
@@ -492,19 +486,22 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ResolveShouldNotAddConflictItemHistoryIfSubsumed()
 		{
-			XmlItem xml = new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now);
-			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "one",
-				DateTime.Now, false);
+			Sync sync = Sync.Create(Guid.NewGuid().ToString(), "one",
+				DateTime.Now);
+			FeedSyncSyndicationItem item = new FeedSyncSyndicationItem("foo", "bar",
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
+				sync);
+			
 			Sync conflictSync = sync.Clone();
 			// Add subsuming update
-			sync = Behaviors.Update(sync, "one", DateTime.Now.AddDays(1), false);
+			sync = item.Sync.Update("one", DateTime.Now.AddDays(1));
 
-			conflictSync = Behaviors.Update(conflictSync, "two", DateTime.Now.AddMinutes(5), false);
+			conflictSync = conflictSync.Update("two", DateTime.Now.AddMinutes(5));
 
-			sync.Conflicts.Add(new Item(xml.Clone(), conflictSync));
+			sync.Conflicts.Add(new FeedSyncSyndicationItem(item, conflictSync));
 
-			Item conflicItem = new Item(xml, sync);
-			Item resolvedItem = Behaviors.ResolveConflicts(conflicItem, "one", DateTime.Now, false);
+			FeedSyncSyndicationItem conflicItem = new FeedSyncSyndicationItem(item, sync);
+			FeedSyncSyndicationItem resolvedItem = conflicItem.ResolveConflicts("one", DateTime.Now, false);
 
 			Assert.AreEqual(3, resolvedItem.Sync.Updates);
 			// there would otherwise be 3 updates to the original item + 2 on the conflict.
@@ -518,13 +515,13 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void PurgeShouldRemoveOlderSequence()
 		{
-			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false);
-			s = Behaviors.Update(s, "kzu", DateTime.Now, false);
+			Sync s = Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)));
+			s = s.Update("kzu", DateTime.Now);
 
 			Assert.AreEqual(2, Count(s.UpdatesHistory));
 			Assert.AreEqual(2, s.Updates);
 
-			Sync purged = Behaviors.SparsePurge(s);
+			Sync purged = s.SparsePurge();
 
 			Assert.AreEqual(1, Count(purged.UpdatesHistory));
 		}
@@ -532,11 +529,11 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void PurgeShouldPreserveHistoryOrder()
 		{
-			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false);
-			s = Behaviors.Update(s, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)), false);
-			s = Behaviors.Update(s, "vga", DateTime.Now, false);
+			Sync s = Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)));
+			s = s.Update("kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)));
+			s = s.Update("vga", DateTime.Now);
 
-			Sync purged = Behaviors.SparsePurge(s);
+			Sync purged = s.SparsePurge();
 
 			Assert.AreEqual(2, Count(purged.UpdatesHistory));
 			Assert.AreEqual("vga", purged.LastUpdate.By);
@@ -545,13 +542,13 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void PurgeShouldPreserveHistoryNoBy()
 		{
-			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), false);
-			s = Behaviors.Update(s, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)), false);
-			s = Behaviors.Update(s, null, DateTime.Now.Subtract(TimeSpan.FromMinutes(10)), false);
+			Sync s = Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)));
+			s = s.Update("kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)));
+			s = s.Update(null, DateTime.Now.Subtract(TimeSpan.FromMinutes(10)));
 			DateTime lastWhen = Timestamp.Normalize(DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
-			s = Behaviors.Update(s, null, lastWhen, false);
+			s = s.Update(null, lastWhen);
 
-			Sync purged = Behaviors.SparsePurge(s);
+			Sync purged = s.SparsePurge();
 
 			Assert.AreEqual(3, Count(purged.UpdatesHistory));
 			Assert.AreEqual(null, purged.LastUpdate.By);
@@ -561,23 +558,24 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void PurgeShouldPreserveOtherSyncProperties()
 		{
-			Sync s = Behaviors.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)), true);
-			s = Behaviors.Update(s, "kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)), false);
-			s = Behaviors.Update(s, "vga", DateTime.Now, false);
+			Sync s = Sync.Create(Guid.NewGuid().ToString(), "kzu", DateTime.Now.Subtract(TimeSpan.FromDays(1)));
+			s = s.Update("kzu", DateTime.Now.Subtract(TimeSpan.FromMinutes(30)));
+			s = s.Update("vga", DateTime.Now);
 
 			// TODO: set other properties
-			s.Tag = 5;
-			s.NoConflicts = true;
-			s.Conflicts.Add(new Item(new XmlItem("foo", "bar", GetElement("<payload/>"), DateTime.Now), new Sync("foo")));
+			s.Conflicts.Add(new FeedSyncSyndicationItem("foo", "bar", 
+				new TextSyndicationContent("<foo id='bar'/>", TextSyndicationContentKind.XHtml),
+				Sync.Create("foo", "kzu", DateTime.Now)));
 
-			Sync purged = Behaviors.SparsePurge(s);
+			Sync purged = s.SparsePurge();
 
 			Assert.AreEqual(2, Count(purged.UpdatesHistory));
 			Assert.AreEqual("vga", purged.LastUpdate.By);
-			Assert.AreEqual(5, purged.Tag);
 			Assert.IsTrue(purged.NoConflicts);
 			Assert.AreEqual(1, purged.Conflicts.Count);
 		}
+
+		#endregion
 
 		#endregion
 

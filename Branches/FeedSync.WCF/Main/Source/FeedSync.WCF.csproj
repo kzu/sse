@@ -59,9 +59,9 @@
     <Compile Include="Behaviors\MergeBehavior.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Behaviors\ResolveConflicsBehavior.cs" />
     <Compile Include="CompoundRepository.cs" />
     <Compile Include="CompoundRepository.XamlBinding.cs" />
-    <Compile Include="DataEventArgs.cs" />
     <Compile Include="DeviceAuthor.cs" />
     <Compile Include="Flag.cs" />
     <Compile Include="IRepository.cs" />
@@ -75,17 +75,17 @@
     <Compile Include="Model\ComparableStack.cs" />
     <Compile Include="Model\FeedSyncSyndicationFeed.cs" />
     <Compile Include="Model\FeedSyncSyndicationItem.cs" />
-    <Compile Include="Repository.cs" />
-    <Compile Include="Schema.cs" />
     <Compile Include="MergeResult.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MergeOperation.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Repository.cs" />
+    <Compile Include="Schema.cs" />
     <Compile Include="SyncEngine.cs" />
+    <Compile Include="SyndicationFormatterFactory.cs" />
     <Compile Include="Timestamp.cs" />
-    <Compile Include="TraceEventType.cs" />
     <Compile Include="Tracer.cs" />
     <Compile Include="Guard.cs" />
     <Compile Include="ICloneable.cs" />
@@ -110,6 +110,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="XmlItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
