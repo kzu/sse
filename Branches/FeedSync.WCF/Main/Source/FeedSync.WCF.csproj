@@ -72,12 +72,12 @@
     <Compile Include="MergeFilter.cs" />
     <Compile Include="MergeFilterBehaviors.cs" />
     <Compile Include="MergeFilterHandler.cs" />
-    <Compile Include="Model\ComparableStack.cs" />
-    <Compile Include="Model\FeedSyncSyndicationFeed.cs" />
-    <Compile Include="Model\FeedSyncSyndicationItem.cs" />
     <Compile Include="MergeResult.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Model\ComparableStack.cs" />
+    <Compile Include="Model\FeedSyncSyndicationFeed.cs" />
+    <Compile Include="Model\FeedSyncSyndicationItem.cs" />
     <Compile Include="MergeOperation.cs">
       <SubType>Code</SubType>
     </Compile>
