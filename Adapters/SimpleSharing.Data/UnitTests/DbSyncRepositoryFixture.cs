@@ -224,7 +224,7 @@ namespace SimpleSharing.Data.Tests
 #endif
 				connection.Open();
 				DbCommand command = connection.CreateCommand();
-				command.CommandText = "SELECT COUNT(*) FROM Usys_SSE_Foo_Sync WHERE ID = id";
+				command.CommandText = "SELECT COUNT(*) FROM Usys_FeedSync_Foo_Sync WHERE ID = id";
 
 				DbParameter parameter = command.CreateParameter();
 				parameter.ParameterName = database.BuildParameterName("id");
