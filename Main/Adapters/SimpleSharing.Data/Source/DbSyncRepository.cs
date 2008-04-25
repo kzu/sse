@@ -17,7 +17,7 @@ namespace SimpleSharing.Data
 {
 	public partial class DbSyncRepository : DbRepository, ISyncRepository
 	{
-		private const string RepositoryPrefix = "Usys_SSE_";
+		private const string RepositoryPrefix = "Usys_FeedSync_";
 		string repositoryId;
 
 		public DbSyncRepository()
