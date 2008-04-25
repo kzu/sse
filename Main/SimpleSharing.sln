@@ -180,6 +180,9 @@ Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SimpleSharing1.vsmdi
 	EndGlobalSection
+	GlobalSection(TextTemplating) = postSolution
+		TextTemplating = 1
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
 		Debug|Any CPU = Debug|Any CPU
@@ -321,8 +324,5 @@ Global
 		{1D2752BC-65DB-4CA0-BAF0-3CB45C1AAD67} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{99CD956C-0F9E-4BA3-9A88-3E4489864378} = {02D69D88-C646-439D-A9D7-77C81B454F77}
 		{B03988C0-5E00-42A0-BA58-53DE73157208} = {02D69D88-C646-439D-A9D7-77C81B454F77}
-	EndGlobalSection
-	GlobalSection(TextTemplating) = postSolution
-		TextTemplating = 1
 	EndGlobalSection
 EndGlobal

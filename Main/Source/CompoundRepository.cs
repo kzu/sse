@@ -9,7 +9,6 @@ namespace SimpleSharing
 	/// A repository that splits its data between an <see cref="IXmlRepository"/> containing 
 	/// the actual data, and an <see cref="ISyncRepository"/> containing the SSE metadata.
 	/// </summary>
-	[Obsolete("Use IRepository interface directly")]
 	public partial class CompoundRepository : IRepository
 	{
 		IXmlRepository xmlRepo;
