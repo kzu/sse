@@ -303,6 +303,34 @@ namespace SimpleSharing.Tests
 			Assert.AreEqual("bar", GetFirst<History>(sync.UpdatesHistory).By);
 		}
 
+		[TestMethod]
+		public void UpdateShouldRemoveConflictsForSameBy()
+		{
+			Sync syncConflict = Behaviors.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now, false);
+			Item itemConflict = new Item(new NullXmlItem(syncConflict.Id), syncConflict);
+
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now, false);
+			sync.Conflicts.Add(itemConflict);
+
+			sync = Behaviors.Update(sync, "foo", DateTime.Now, false);
+
+			Assert.AreEqual(0, sync.Conflicts.Count);
+		}
+
+		[TestMethod]
+		public void UpdateShouldNotRemoveConflictsForDifferentBy()
+		{
+			Sync syncConflict = Behaviors.Create(Guid.NewGuid().ToString(), "bar", DateTime.Now, false);
+			Item itemConflict = new Item(new NullXmlItem(syncConflict.Id), syncConflict);
+
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now, false);
+			sync.Conflicts.Add(itemConflict);
+
+			sync = Behaviors.Update(sync, "foo", DateTime.Now, false);
+
+			Assert.AreEqual(1, sync.Conflicts.Count);
+		}
+
 		#endregion
 
 		#region Create
@@ -424,6 +452,34 @@ namespace SimpleSharing.Tests
 			Sync sync = new Sync(new Guid().ToString());
 			sync = Behaviors.Delete(sync, "mypc\\user", DateTime.Now);
 			Assert.AreEqual(true, sync.Deleted);
+		}
+
+		[TestMethod]
+		public void DeleteShouldRemoveConflictsForSameBy()
+		{
+			Sync syncConflict = Behaviors.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now, false);
+			Item itemConflict = new Item(new NullXmlItem(syncConflict.Id), syncConflict);
+
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now, false);
+			sync.Conflicts.Add(itemConflict);
+
+			sync = Behaviors.Delete(sync, "foo", DateTime.Now);
+
+			Assert.AreEqual(0, sync.Conflicts.Count);
+		}
+
+		[TestMethod]
+		public void DeleteShouldNotRemoveConflictsForDifferentBy()
+		{
+			Sync syncConflict = Behaviors.Create(Guid.NewGuid().ToString(), "bar", DateTime.Now, false);
+			Item itemConflict = new Item(new NullXmlItem(syncConflict.Id), syncConflict);
+
+			Sync sync = Behaviors.Create(Guid.NewGuid().ToString(), "foo", DateTime.Now, false);
+			sync.Conflicts.Add(itemConflict);
+
+			sync = Behaviors.Delete(sync, "foo", DateTime.Now);
+
+			Assert.AreEqual(1, sync.Conflicts.Count);
 		}
 
 		#endregion Delete
