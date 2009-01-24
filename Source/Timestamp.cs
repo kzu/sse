@@ -11,15 +11,16 @@ namespace SimpleSharing
 	/// </summary>
 	public static class Timestamp
 	{
-		const string Rfc3389 = "yyyy'-'MM'-'dd'T'HH':'mm':'ss%K";
+		const string Rfc3389 = "yyyy'-'MM'-'dd'T'HH':'mm':'ssZ";
 
 		public static DateTime Parse(string timestamp)
 		{
-			return DateTime.ParseExact(timestamp, Rfc3389, CultureInfo.CurrentCulture);
+			return DateTime.ParseExact(timestamp, Rfc3389, CultureInfo.CurrentCulture, DateTimeStyles.AdjustToUniversal);
 		}
 
 		public static string ToString(DateTime timestamp)
 		{
+			if (timestamp.Kind == DateTimeKind.Local) timestamp = timestamp.ToUniversalTime();
 			return timestamp.ToString(Rfc3389);
 		}
 
