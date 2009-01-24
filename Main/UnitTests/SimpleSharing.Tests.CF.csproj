@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F3D077E0-0FD6-4914-A55C-3FC14F36276A}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -91,10 +91,6 @@
     <Compile Include="XmlNoNsReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Source\SimpleSharing.CF.csproj">
-      <Project>{6AB67AF4-83D3-449E-83D0-A88C343801AE}</Project>
-      <Name>SimpleSharing.CF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Tools\CFUnitTester\UnitTesting\UnitTesting.csproj">
       <Project>{3385C4E6-0657-48E3-8437-6BF4A51B2315}</Project>
       <Name>UnitTesting</Name>

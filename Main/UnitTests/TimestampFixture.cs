@@ -23,19 +23,38 @@ namespace SimpleSharing.Tests
 			string value = Timestamp.ToString(now);
 			DateTime dt = Timestamp.Parse(value);
 
+			//Assert.AreEqual(DateTimeKind.Utc, dt.Kind);
 			Assert.AreEqual(now, dt);
 		}
 
 		[TestMethod]
-		public void ShouldNormalizePreserveTimezone()
+		public void ShouldPreserveIfAlreadyUtc()
 		{
 			DateTime now = DateTime.Now;
+			// Timestamp resolution is up to seconds :S.
+			now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+
+			string value = Timestamp.ToString(now);
+			DateTime dt = Timestamp.Parse(value);
+
+			//Assert.AreEqual(DateTimeKind.Utc, dt.Kind);
+			Assert.AreEqual(now, dt);
+		}
+
+		[TestMethod]
+		public void ShouldNormalizeAdjustToUtcButRemainEqual()
+		{
+			DateTime now = DateTime.Now;
+			// Timestamp resolution is up to seconds :S.
+			now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
 			DateTime norm = Timestamp.Normalize(now);
 
 			TimeSpan offset1 = TimeZone.CurrentTimeZone.GetUtcOffset(now);
 			TimeSpan offset2 = TimeZone.CurrentTimeZone.GetUtcOffset(norm);
 
-			Assert.AreEqual(offset1, offset2);
+			Assert.AreNotEqual(offset1, offset2);
+			Assert.AreEqual(TimeSpan.Zero, offset2);
+			Assert.AreEqual(now, norm);
 		}
 	}
 }
