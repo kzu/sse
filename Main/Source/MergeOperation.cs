@@ -7,7 +7,7 @@ namespace SimpleSharing
 	public enum MergeOperation
 	{
 		Added,
-		Updated, 
+		Updated,
 		Conflict,
 		Removed,
 		None

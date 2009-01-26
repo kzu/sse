@@ -17,11 +17,11 @@ namespace SimpleSharing
 
 		// TODO: unpublished. 2.6 and 4.1. Add Unpublish(Item) ?
 
-		public Feed() 
+		public Feed()
 		{
 		}
 
-		public Feed(string title, string linkUrl, string description) 
+		public Feed(string title, string linkUrl, string description)
 			: this(title, linkUrl, description, null)
 		{
 		}

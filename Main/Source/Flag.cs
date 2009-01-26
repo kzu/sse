@@ -33,7 +33,7 @@ namespace SimpleSharing
 				int flag = (int)(object)flagToSet;
 				return (TFlags)(object)(current |= flag);
 			}
-		
+
 			ThrowInvalidFlagType();
 			// satisfy compiler ;)
 			return default(TFlags);

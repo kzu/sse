@@ -9,7 +9,7 @@ namespace SimpleSharing
 	public class NullXmlItem : IXmlItem
 	{
 		string id;
-        object tag = null;
+		object tag = null;
 		XmlElement emptyPayload;
 
 		public NullXmlItem(string id)
@@ -40,7 +40,7 @@ namespace SimpleSharing
 
 		public string Description
 		{
-			get { return String.Empty;  }
+			get { return String.Empty; }
 			set { }
 		}
 
@@ -89,7 +89,7 @@ namespace SimpleSharing
 			if (Object.ReferenceEquals(obj1, obj2)) return true;
 			if (!Object.Equals(null, obj1) && !Object.Equals(null, obj2))
 			{
-				return obj1.id == obj2.id && 
+				return obj1.id == obj2.id &&
 					obj1.tag == obj2.tag;
 			}
 
@@ -98,10 +98,10 @@ namespace SimpleSharing
 
 		public override int GetHashCode()
 		{
-            if (tag != null)
-                return id.GetHashCode() ^ tag.GetHashCode();
-            else
-                return id.GetHashCode();
+			if (tag != null)
+				return id.GetHashCode() ^ tag.GetHashCode();
+			else
+				return id.GetHashCode();
 
 		}
 

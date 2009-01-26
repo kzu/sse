@@ -37,12 +37,33 @@ namespace SimpleSharing.Tests
 			string value = Timestamp.ToString(now);
 			DateTime dt = Timestamp.Parse(value);
 
-			//Assert.AreEqual(DateTimeKind.Utc, dt.Kind);
-			Assert.AreEqual(now, dt);
+			Assert.AreEqual(now, dt.ToUniversalTime());
 		}
 
 		[TestMethod]
-		public void ShouldNormalizeAdjustToUtcButRemainEqual()
+		public void ShouldParseAsLocal()
+		{
+			DateTime now = DateTime.Now;
+			// Timestamp resolution is up to seconds :S.
+			now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Local);
+
+			DateTime norm = Timestamp.Normalize(now);
+
+			Assert.AreEqual(now, norm);
+		}
+
+		[TestMethod]
+		public void BewareLocalAndUniversalDoNotEqual()
+		{
+			// This gives you a local time.
+			DateTime now = DateTime.Now;
+			DateTime utc = now.ToUniversalTime();
+
+			Assert.AreNotEqual(now, utc);
+		}
+
+		[TestMethod]
+		public void ShouldNormalizeAdjustToLocalAndRemainEqual()
 		{
 			DateTime now = DateTime.Now;
 			// Timestamp resolution is up to seconds :S.
@@ -52,8 +73,7 @@ namespace SimpleSharing.Tests
 			TimeSpan offset1 = TimeZone.CurrentTimeZone.GetUtcOffset(now);
 			TimeSpan offset2 = TimeZone.CurrentTimeZone.GetUtcOffset(norm);
 
-			Assert.AreNotEqual(offset1, offset2);
-			Assert.AreEqual(TimeSpan.Zero, offset2);
+			Assert.AreEqual(offset1, offset2);
 			Assert.AreEqual(now, norm);
 		}
 	}

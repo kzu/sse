@@ -10,9 +10,9 @@ namespace SimpleSharing
 	public class DynamicXmlItem : XmlItem
 	{
 		static readonly Regex ReplacementExpression = new Regex("{([^}]+)}", RegexOptions.Compiled);
-		
-		public DynamicXmlItem(string id, string titleExpression, 
-			string descriptionExpression, XmlElement payload, object data) 
+
+		public DynamicXmlItem(string id, string titleExpression,
+			string descriptionExpression, XmlElement payload, object data)
 			: base(id, Evaluate(titleExpression, data), Evaluate(descriptionExpression, data),
 				payload)
 		{
@@ -89,7 +89,7 @@ namespace SimpleSharing
 			{
 				member = members[0];
 			}
-			
+
 			FieldInfo field = member as FieldInfo;
 			if (field != null) return field.GetValue(data);
 
@@ -104,7 +104,7 @@ namespace SimpleSharing
 					throw new ArgumentException(String.Format(
 						"Method named {0} in type {1} does not provide a parameterless overload.",
 						memberName, data.GetType().FullName));
-			
+
 				return method.Invoke(data, null);
 			}
 

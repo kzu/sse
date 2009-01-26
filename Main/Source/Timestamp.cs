@@ -15,13 +15,12 @@ namespace SimpleSharing
 
 		public static DateTime Parse(string timestamp)
 		{
-			return DateTime.ParseExact(timestamp, Rfc3389, CultureInfo.CurrentCulture, DateTimeStyles.AdjustToUniversal);
+			return DateTime.ParseExact(timestamp, Rfc3389, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal);
 		}
 
 		public static string ToString(DateTime timestamp)
 		{
-			if (timestamp.Kind == DateTimeKind.Local) timestamp = timestamp.ToUniversalTime();
-			return timestamp.ToString(Rfc3389);
+			return timestamp.ToUniversalTime().ToString(Rfc3389);
 		}
 
 		public static DateTime Normalize(DateTime dateTime)

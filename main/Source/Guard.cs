@@ -30,8 +30,8 @@ namespace SimpleSharing
 
 			if (value.Length == 0)
 				throw new ArgumentException(String.Format(
-					CultureInfo.CurrentCulture, 
-					Properties.Resources.Arg_NullOrEmpty), 
+					CultureInfo.CurrentCulture,
+					Properties.Resources.Arg_NullOrEmpty),
 					argumentName);
 		}
 	}

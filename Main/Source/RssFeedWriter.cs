@@ -21,13 +21,13 @@ namespace SimpleSharing
 			writer.WriteStartElement("rss");
 			writer.WriteAttributeString("version", "2.0");
 			writer.WriteStartElement("channel");
-			if(!String.IsNullOrEmpty(feed.Title))
+			if (!String.IsNullOrEmpty(feed.Title))
 				writer.WriteElementString("title", feed.Title);
-			
-			if(!String.IsNullOrEmpty(feed.Description))
+
+			if (!String.IsNullOrEmpty(feed.Description))
 				writer.WriteElementString("description", feed.Description);
 
-			if(!String.IsNullOrEmpty(feed.Link))
+			if (!String.IsNullOrEmpty(feed.Link))
 				writer.WriteElementString("link", feed.Link);
 
 			if (feed.Payload != null)
@@ -65,9 +65,9 @@ namespace SimpleSharing
 			else
 			{
 				writer.WriteElementString("title", String.Format(
-					CultureInfo.CurrentCulture, 
-					Properties.Resources.DeletedTitle, 
-					item.Sync.LastUpdate.When.Value.ToShortDateString(), 
+					CultureInfo.CurrentCulture,
+					Properties.Resources.DeletedTitle,
+					item.Sync.LastUpdate.When.Value.ToShortDateString(),
 					item.Sync.LastUpdate.By));
 			}
 

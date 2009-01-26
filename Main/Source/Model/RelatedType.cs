@@ -5,7 +5,7 @@ namespace SimpleSharing
 	[Serializable]
 	public enum RelatedType
 	{
-		Complete, 
+		Complete,
 		Aggregated,
 	}
 }

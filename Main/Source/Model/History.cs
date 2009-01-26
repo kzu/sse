@@ -83,7 +83,7 @@ namespace SimpleSharing
 			if (Object.ReferenceEquals(h1, h2)) return true;
 			if (!Object.Equals(null, h1) && !Object.Equals(null, h2))
 			{
-				return h1.by == h2.by && 
+				return h1.by == h2.by &&
 					h1.when == h2.when &&
 					h1.sequence == h2.sequence;
 			}
