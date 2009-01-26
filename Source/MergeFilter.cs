@@ -12,7 +12,7 @@ namespace SimpleSharing
 	{
 		MergeFilterHandler handler;
 		MergeFilterBehaviors behaviors;
-		
+
 		/// <summary>
 		/// Default constructor
 		/// </summary>

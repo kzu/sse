@@ -43,8 +43,8 @@ namespace SimpleSharing
 		/// <summary>
 		/// Gets the repository for the actual entity data.
 		/// </summary>
-		public IXmlRepository XmlRepository 
-		{ 
+		public IXmlRepository XmlRepository
+		{
 			get { return xmlRepo; }
 			set { xmlRepo = value; RaiseXmlRepositoryChanged(); }
 		}
@@ -52,8 +52,8 @@ namespace SimpleSharing
 		/// <summary>
 		/// Gets the repository for the SSE metadata.
 		/// </summary>
-		public ISyncRepository SyncRepository 
-		{ 
+		public ISyncRepository SyncRepository
+		{
 			get { return syncRepo; }
 			set { syncRepo = value; RaiseSyncRepositoryChanged(); }
 		}
@@ -80,7 +80,7 @@ namespace SimpleSharing
 
 			Sync sync = syncRepo.Get(id);
 			IXmlItem xml = xmlRepo.Get(id);
-			
+
 			if (xml == null && sync == null)
 			{
 				Tracer.TraceData(this, TraceEventType.Verbose, "No item found with ID {0}", id);
@@ -229,7 +229,7 @@ namespace SimpleSharing
 					Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} not found in Xml Repository", syncEnum.Current.Id);
 
 					Sync sync = syncEnum.Current;
-					
+
 					// Item does not exist in the XML repo, but the sync is not marked 
 					// as deleted, so we need to update it now on-the-fly
 					if (!syncEnum.Current.Deleted)
@@ -309,7 +309,7 @@ namespace SimpleSharing
 				Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} added to Xml Repository", item.Sync.Id);
 			}
 
-			item.Sync.Tag = item.XmlItem.Tag; 
+			item.Sync.Tag = item.XmlItem.Tag;
 			syncRepo.Save(item.Sync);
 
 			Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} added to Sync Repository with Hash {1}", item.Sync.Id, item.Sync.Tag);
@@ -327,7 +327,7 @@ namespace SimpleSharing
 			Tracer.TraceData(this, TraceEventType.Verbose, "Deleting item with ID {0}", id);
 
 			xmlRepo.Remove(id);
-			
+
 			Tracer.TraceData(this, TraceEventType.Verbose, "Item with ID {0} deleted from Xml Repository", id);
 
 			Sync sync = syncRepo.Get(id);
@@ -390,7 +390,7 @@ namespace SimpleSharing
 			}
 
 			Update(item);
-            return item;
+			return item;
 		}
 
 		/// <summary>
@@ -462,7 +462,7 @@ namespace SimpleSharing
 
 				return updated;
 			}
-			
+
 			return sync;
 		}
 

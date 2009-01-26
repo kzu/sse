@@ -10,130 +10,131 @@ namespace SimpleSharing.Tests
 {
 	public class MockXmlRepository : IXmlRepository
 	{
-        Dictionary<string, IXmlItem> items = new Dictionary<string, IXmlItem>();
+		Dictionary<string, IXmlItem> items = new Dictionary<string, IXmlItem>();
 
-        private XmlElement GetElement(string xml)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-            return doc.DocumentElement;
-        }
+		private XmlElement GetElement(string xml)
+		{
+			XmlDocument doc = new XmlDocument();
+			doc.LoadXml(xml);
+			return doc.DocumentElement;
+		}
 
-        public MockXmlRepository AddOneItem()
-        {
-            string id = Guid.NewGuid().ToString();
-            items.Add(id, new XmlItem(id,
-                "Foo Title", "Foo Description",
-                GetElement("<Foo Title='Foo'/>"), DateTime.Now));
+		public MockXmlRepository AddOneItem()
+		{
+			string id = Guid.NewGuid().ToString();
+			items.Add(id, new XmlItem(id,
+				 "Foo Title", "Foo Description",
+				 GetElement("<Foo Title='Foo'/>"), DateTime.Now.ToUniversalTime()));
 
-            return this;
-        }
+			return this;
+		}
 
-        public MockXmlRepository AddTwoItems()
-        {
-            string id = Guid.NewGuid().ToString();
-            items.Add(id, new XmlItem(id,
-                "Foo Title", "Foo Description",
-				GetElement("<Foo Title='Foo'/>"), DateTime.Now));
+		public MockXmlRepository AddTwoItems()
+		{
+			string id = Guid.NewGuid().ToString();
+			items.Add(id, new XmlItem(id,
+				 "Foo Title", "Foo Description",
+			GetElement("<Foo Title='Foo'/>"), DateTime.Now.ToUniversalTime()));
 
-            id = Guid.NewGuid().ToString();
-            items.Add(id, new XmlItem(id,
-                "Bar Title", "Bar Description",
-				GetElement("<Foo Title='Foo'/>"), DateTime.Now));
+			id = Guid.NewGuid().ToString();
+			items.Add(id, new XmlItem(id,
+				 "Bar Title", "Bar Description",
+			GetElement("<Foo Title='Foo'/>"), DateTime.Now.ToUniversalTime()));
 
-            return this;
-        }
+			return this;
+		}
 
-        public MockXmlRepository AddThreeItemsByDays()
-        {
-            string id = Guid.NewGuid().ToString();
-            items.Add(id, new XmlItem(id,
-                "Foo Title", "Foo Description",
-				GetElement("<Foo Title='Foo'/>"), DateTime.Now));
+		public MockXmlRepository AddThreeItemsByDays()
+		{
+			string id = Guid.NewGuid().ToString();
+			items.Add(id, new XmlItem(id,
+				 "Foo Title", "Foo Description",
+			GetElement("<Foo Title='Foo'/>"), DateTime.Now));
 
-            id = Guid.NewGuid().ToString();
-            items.Add(id, new XmlItem(id,
-                "Bar Title", "Bar Description",
-				GetElement("<Foo Title='Foo'/>"), DateTime.Now.Subtract(TimeSpan.FromDays(1))));
+			id = Guid.NewGuid().ToString();
+			items.Add(id, new XmlItem(id,
+				 "Bar Title", "Bar Description",
+			GetElement("<Foo Title='Foo'/>"), DateTime.Now.Subtract(TimeSpan.FromDays(1)).ToUniversalTime()));
 
-            id = Guid.NewGuid().ToString();
-            items.Add(id, new XmlItem(id,
-                "Baz Title", "Baz Description",
-				GetElement("<Foo Title='Foo'/>"), DateTime.Now.Subtract(TimeSpan.FromDays(3))));
+			id = Guid.NewGuid().ToString();
+			items.Add(id, new XmlItem(id,
+				 "Baz Title", "Baz Description",
+			GetElement("<Foo Title='Foo'/>"), DateTime.Now.Subtract(TimeSpan.FromDays(3)).ToUniversalTime()));
 
-            return this;
-        }
+			return this;
+		}
 
-        public void Add(IXmlItem item, out object tag)
-        {
-            Guard.ArgumentNotNull(item, "item");
-            Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
+		public void Add(IXmlItem item, out object tag)
+		{
+			Guard.ArgumentNotNull(item, "item");
+			Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
 
-            IXmlItem clone = item.Clone();
+			IXmlItem clone = item.Clone();
 
-			tag = DateTime.Now;
+			tag = DateTime.Now.ToUniversalTime();
 			clone.Tag = tag;
 
-            items.Add(item.Id, clone);
+			items.Add(item.Id, clone);
 
 
-        }
+		}
 
-        public bool Contains(string id)
-        {
-            Guard.ArgumentNotNullOrEmptyString(id, "id");
+		public bool Contains(string id)
+		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
-            return items.ContainsKey(id);
-        }
+			return items.ContainsKey(id);
+		}
 
-        public IXmlItem Get(string id)
-        {
-            Guard.ArgumentNotNullOrEmptyString(id, "id");
+		public IXmlItem Get(string id)
+		{
+			Guard.ArgumentNotNullOrEmptyString(id, "id");
 
-            if (items.ContainsKey(id))
-            {
-                return items[id].Clone();
-            }
+			if (items.ContainsKey(id))
+			{
+				return items[id].Clone();
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        public bool Remove(string id)
-        {
-            return items.Remove(id);
-        }
+		public bool Remove(string id)
+		{
+			return items.Remove(id);
+		}
 
-        public void Update(IXmlItem item, out object tag)
-        {
-            Guard.ArgumentNotNull(item, "item");
-            Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
+		public void Update(IXmlItem item, out object tag)
+		{
+			Guard.ArgumentNotNull(item, "item");
+			Guard.ArgumentNotNullOrEmptyString(item.Id, "item.Id");
 
-            if (!items.ContainsKey(item.Id))
-                throw new KeyNotFoundException();
+			if (!items.ContainsKey(item.Id))
+				throw new KeyNotFoundException();
 
-			tag = DateTime.Now;
+			tag = DateTime.Now.ToUniversalTime();
 			IXmlItem clone = item.Clone();
 			clone.Tag = tag;
 
-            items[item.Id] = clone;
-        }
+			items[item.Id] = clone;
+		}
 
-        public IEnumerable<IXmlItem> GetAll()
-        {
-            foreach (IXmlItem item in items.Values)
-            {
-                yield return item.Clone();
-            }
-        }
+		public IEnumerable<IXmlItem> GetAll()
+		{
+			foreach (IXmlItem item in items.Values)
+			{
+				yield return item.Clone();
+			}
+		}
 
-        public IEnumerable<IXmlItem> GetAllSince(DateTime date)
-        {
-            foreach (IXmlItem item in items.Values)
-            {
-                if (((DateTime)item.Tag) >= date)
-                    yield return item.Clone();
-            }
-        }
+		public IEnumerable<IXmlItem> GetAllSince(DateTime date)
+		{
+			date = date.ToUniversalTime();
+			foreach (IXmlItem item in items.Values)
+			{
+				if (((DateTime)item.Tag) >= date)
+					yield return item.Clone();
+			}
+		}
 
 		public DateTime GetFirstUpdated()
 		{
@@ -152,6 +153,7 @@ namespace SimpleSharing.Tests
 
 		public DateTime GetFirstUpdated(DateTime since)
 		{
+			since = since.ToUniversalTime();
 			if (items.Count == 0) return since;
 
 			DateTime first = DateTime.MaxValue;
@@ -178,6 +180,6 @@ namespace SimpleSharing.Tests
 			}
 
 			return last;
-        }
-    }
+		}
+	}
 }

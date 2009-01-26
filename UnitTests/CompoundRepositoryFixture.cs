@@ -62,7 +62,7 @@ namespace SimpleSharing.Tests
 		[TestMethod]
 		public void ShouldGetExistingItem()
 		{
-			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"), DateTime.Now);
+			XmlItem item = new XmlItem(Guid.NewGuid().ToString(), "foo", "bar", GetElement("<payload />"), DateTime.Now.ToUniversalTime());
 			Sync sync = Behaviors.Create(item.Id, "kzu", DateTime.Now, false);
 			
 			object tag = null;

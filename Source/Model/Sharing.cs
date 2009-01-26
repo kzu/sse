@@ -15,7 +15,7 @@ namespace SimpleSharing
 		public DateTime? Expires
 		{
 			get { return expires; }
-			set 
+			set
 			{
 				if (value != null)
 				{

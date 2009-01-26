@@ -101,10 +101,10 @@ namespace SimpleSharing
 			{
 				item = Behaviors.ResolveConflicts(item, DeviceAuthor.Current, DateTime.Now, item.Sync.Deleted);
 			}
-			
+
 			Update(item);
 
-            return item;
+			return item;
 		}
 
 		/// <summary>

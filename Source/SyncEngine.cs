@@ -166,7 +166,7 @@ namespace SimpleSharing
 				{
 					incomingToMerge = mergeFilter.Handler(source, incomingToMerge);
 				}
-				
+
 				return Import(incomingToMerge, source);
 			}
 			else
@@ -216,7 +216,7 @@ namespace SimpleSharing
 					case MergeOperation.Added:
 						// Clean history before adding
 						repository.Add(
-							new Item(result.Proposed.XmlItem, 
+							new Item(result.Proposed.XmlItem,
 							Behaviors.SparsePurge(result.Proposed.Sync)));
 						break;
 					case MergeOperation.Updated:
